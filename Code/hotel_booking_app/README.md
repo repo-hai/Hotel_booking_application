@@ -1,6 +1,6 @@
-# code
+# hotel_booking_app
 
-A new Flutter project for hotel booking app
+A new Flutter project.
 
 ## Getting Started
 
