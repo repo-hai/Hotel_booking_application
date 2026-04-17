@@ -2,66 +2,110 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../firebase');
+const { sendNotificationToOwner } = require('../utils/notifications');
 
-// API: Tạo đơn đặt phòng mới
+// API: Kiểm tra Voucher xem có dùng được không (Dành cho App Guest)
+router.post('/verify-voucher', async (req, res) => {
+    try {
+        const { code, amount } = req.body;
+        if (!code) return res.status(400).json({ success: false, message: "Thiếu mã voucher!" });
+
+        const snapshot = await db.collection('Vouchers').where('code', '==', code.toUpperCase()).get();
+        if (snapshot.empty) return res.status(404).json({ success: false, message: "Mã voucher không tồn tại!" });
+
+        const v = snapshot.docs[0].data();
+        const now = new Date().toISOString();
+
+        if (v.status !== 'active') return res.status(400).json({ success: false, message: "Voucher này hiện không sử dụng được!" });
+        if (v.endDate && now > v.endDate) return res.status(400).json({ success: false, message: "Voucher đã hết hạn!" });
+        if (v.usageLimit > 0 && v.usedCount >= v.usageLimit) return res.status(400).json({ success: false, message: "Voucher đã hết lượt sử dụng!" });
+        if (v.minSpend > 0 && amount < v.minSpend) return res.status(400).json({ success: false, message: `Voucher này chỉ áp dụng cho đơn từ ${v.minSpend.toLocaleString()}VND` });
+
+        res.status(200).json({ success: true, data: { id: snapshot.docs[0].id, ...v } });
+    } catch (error) { res.status(500).json({ success: false }); }
+});
+
+// API: Tạo đơn đặt phòng mới (CÓ BẢO MẬT GIÁ + VOUCHER)
 router.post('/', async (req, res) => {
 	try {
-		// 1. Nhận toàn bộ dữ liệu từ App Kotlin gửi lên
 		const {
-			hotelId,
-			hotelName, // Lưu thêm tên để dễ hiển thị lịch sử sau này
-			customerInfo, // Object chứa: firstName, lastName, email, phone, country
-			checkIn,
-			checkOut,
-			bookedRooms, // Mảng các phòng khách chọn: [{ roomTypeId, quantity, price }]
-			originalPrice,
-			discount,
-			totalPrice
+			userId, hotelId, hotelName, customerInfo,
+			checkIn, checkOut, bookedRooms, voucherId
 		} = req.body;
 
-		// 2. Kiểm tra dữ liệu cơ bản (Validation)
 		if (!hotelId || !customerInfo || !checkIn || !checkOut || !bookedRooms) {
 			return res.status(400).json({ message: "Thiếu thông tin đặt phòng!" });
 		}
 
-		// 3. Đóng gói dữ liệu để lưu vào Firebase
+		// 1. TÍNH TOÁN LẠI GIÁ TRÊN BACKEND (BẢO MẬT)
+		let originalPrice = 0;
+		for (const item of bookedRooms) {
+			const rtDoc = await db.collection('RoomTypes').doc(item.roomTypeId).get();
+			if (rtDoc.exists) {
+				const pricePerNight = rtDoc.data().price || 0;
+				originalPrice += (pricePerNight * (item.quantity || 1));
+			}
+		}
+
+		// Tính số đêm (giả sử đơn giản qua ngày)
+		const nights = Math.max(1, Math.ceil((new Date(checkOut) - new Date(checkIn)) / (1000 * 60 * 60 * 24)));
+		originalPrice *= nights;
+
+		// 2. ÁP DỤNG VOUCHER (NẾU CÓ)
+		let discount = 0;
+		if (voucherId) {
+			const vDoc = await db.collection('Vouchers').doc(voucherId).get();
+			if (vDoc.exists) {
+				const v = vDoc.data();
+				if (v.discountType === 'percent') {
+					discount = (originalPrice * v.discountValue) / 100;
+					if (v.maxDiscount > 0) discount = Math.min(discount, v.maxDiscount);
+				} else {
+					discount = v.discountValue;
+				}
+				// Cập nhật lượt dùng
+				await db.collection('Vouchers').doc(voucherId).update({ usedCount: (v.usedCount || 0) + 1 });
+			}
+		}
+
+		const totalPrice = Math.max(0, originalPrice - discount);
+
 		const newBooking = {
-			hotelId: hotelId,
-			hotelName: hotelName,
-			// Gộp Họ và Tên lại cho gọn theo UI của em
+			userId,
+			hotelId,
+			hotelName,
 			customerName: `${customerInfo.lastName} ${customerInfo.firstName}`,
 			customerEmail: customerInfo.email,
 			customerPhone: customerInfo.phone,
 			customerCountry: customerInfo.country,
-
-			checkIn: checkIn,
-			checkOut: checkOut,
-
-			bookedRooms: bookedRooms, // Danh sách phòng đã chọn
-
-			// Lưu thông tin thanh toán
-			originalPrice: originalPrice,
-			discount: discount || 0,
-			total: totalPrice,
-
-			status: "Confirmed", // Mặc định là xác nhận thành công
-			createdAt: new Date().toISOString() // Giờ đặt phòng
+			checkIn, checkOut, bookedRooms,
+			originalPrice, discount, total: totalPrice,
+			status: "Pending", // Mặc định là chờ duyệt
+			createdAt: new Date().toISOString()
 		};
 
-		// 4. Lưu vào Collection 'Bookings'
-		// Dùng .add() để Firebase tự động sinh ra một cái ID ngẫu nhiên cho đơn hàng
 		const docRef = await db.collection('Bookings').add(newBooking);
 
-		// 5. Trả về thông báo thành công kèm theo Mã đơn hàng
-		res.status(201).json({
-			message: "Đặt phòng thành công!",
-			bookingId: docRef.id,
-			data: newBooking
-		});
+		// THÔNG BÁO CHO CHỦ SỞ HỮU
+		try {
+			const hotelDoc = await db.collection('Hotels').doc(hotelId).get();
+			if (hotelDoc.exists) {
+				const ownerId = hotelDoc.data().userId;
+				if (ownerId) {
+					await sendNotificationToOwner(ownerId, {
+						title: "Đơn đặt phòng mới! 🏨",
+						body: `Khách hàng ${newBooking.customerName} vừa đặt phòng tại ${hotelName}.`,
+						type: "new_booking",
+						data: { bookingId: docRef.id, hotelId: hotelId }
+					});
+				}
+			}
+		} catch (e) {}
 
+		res.status(201).json({ success: true, bookingId: docRef.id, total: totalPrice });
 	} catch (error) {
-		console.error("Lỗi khi tạo đơn đặt phòng: ", error);
-		res.status(500).json({ message: "Lỗi hệ thống, vui lòng thử lại sau!" });
+		console.error("Lỗi đặt phòng: ", error);
+		res.status(500).json({ success: false });
 	}
 });
 
@@ -161,6 +205,24 @@ router.put('/:id/request-cancel', async (req, res) => {
 			cancellationReason: reason || "Khách hàng thay đổi kế hoạch",
 			cancelRequestedAt: new Date().toISOString() // Lưu lại thời gian xin hủy
 		});
+
+		// THÔNG BÁO CHO CHỦ SỞ HỮU
+		try {
+			const hotelDoc = await db.collection('Hotels').doc(bookingDoc.data().hotelId).get();
+			if (hotelDoc.exists) {
+				const ownerId = hotelDoc.data().userId;
+				if (ownerId) {
+					await sendNotificationToOwner(ownerId, {
+						title: "Yêu cầu hủy phòng! ⚠️",
+						body: `Khách hàng ${bookingDoc.data().customerName} vừa yêu cầu hủy đơn đặt phòng #${bookingId}.`,
+						type: "cancel_request",
+						data: { bookingId: bookingId, hotelId: bookingDoc.data().hotelId }
+					});
+				}
+			}
+		} catch (notifErr) {
+			console.error("Lỗi khi gửi thông báo yêu cầu hủy: ", notifErr);
+		}
 
 		res.status(200).json({ message: "Đã gửi yêu cầu hủy phòng đến chủ khách sạn!" });
 

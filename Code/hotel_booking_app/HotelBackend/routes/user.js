@@ -189,4 +189,65 @@ router.get('/:id/suggestions', async (req, res) => {
 	}
 });
 
+// ==========================================
+// 4. API: LẤY THÔNG TIN CÁ NHÂN
+// ==========================================
+router.get('/:id', async (req, res) => {
+	try {
+		const userId = req.params.id;
+		const userDoc = await db.collection('Users').doc(userId).get();
+
+		if (!userDoc.exists) {
+			return res.status(404).json({ success: false, message: "Không tìm thấy người dùng!" });
+		}
+
+		const data = userDoc.data();
+		res.status(200).json({
+			success: true,
+			data: {
+				id: userDoc.id,
+				...data
+			}
+		});
+
+	} catch (error) {
+		console.error("Lỗi khi lấy profile: ", error);
+		res.status(500).json({ success: false, message: "Lỗi Server!" });
+	}
+});
+
+// ==========================================
+// 5. API: CẬP NHẬT THÔNG TIN CÁ NHÂN
+// ==========================================
+router.put('/:id', async (req, res) => {
+	try {
+		const userId = req.params.id;
+		const updateData = req.body;
+
+		// Ngăn chặn đổi email hoặc ID nếu cần (Tùy logic Business)
+		delete updateData.id;
+
+		const userRef = db.collection('Users').doc(userId);
+		const doc = await userRef.get();
+
+		if (!doc.exists) {
+			return res.status(404).json({ success: false, message: "Không tìm thấy người dùng!" });
+		}
+
+		await userRef.update({
+			...updateData,
+			updatedAt: new Date().toISOString()
+		});
+
+		res.status(200).json({
+			success: true,
+			message: "Cập nhật thông tin cá nhân thành công!"
+		});
+
+	} catch (error) {
+		console.error("Lỗi khi cập nhật profile: ", error);
+		res.status(500).json({ success: false, message: "Lỗi Server!" });
+	}
+});
+
 module.exports = router;
