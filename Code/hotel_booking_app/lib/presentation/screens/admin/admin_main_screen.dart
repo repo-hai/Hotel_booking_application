@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../theme/app_theme.dart';
+import '../../../theme/app_theme.dart';
 import 'dashboard_screen.dart';
 import 'users_screen.dart';
 import 'hotels_screen.dart';

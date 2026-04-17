@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../theme/app_theme.dart';
-import '../../models/booking_model.dart';
+import '../../../theme/app_theme.dart';
+import '../../../models/booking_model.dart';
 
 class BookingDetailScreen extends StatelessWidget {
   final BookingModel booking;

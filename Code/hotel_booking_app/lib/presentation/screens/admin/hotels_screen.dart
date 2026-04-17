@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../services/admin_api_service.dart';
-import '../../theme/app_theme.dart';
-import '../../models/hotel_model.dart';
+import '../../../services/admin_api_service.dart';
+import '../../../theme/app_theme.dart';
+import '../../../models/hotel_model.dart';
 import 'hotel_detail_screen.dart';
 
 class HotelsScreen extends StatefulWidget {

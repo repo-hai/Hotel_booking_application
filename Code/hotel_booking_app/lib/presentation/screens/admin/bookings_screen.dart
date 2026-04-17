@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import '../../services/admin_api_service.dart';
-import '../../theme/app_theme.dart';
-import '../../models/booking_model.dart';
+import '../../../services/admin_api_service.dart';
+import '../../../theme/app_theme.dart';
+import '../../../models/booking_model.dart';
 import 'booking_detail_screen.dart';
 
 class BookingsScreen extends StatefulWidget {
