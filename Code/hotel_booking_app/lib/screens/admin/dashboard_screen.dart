@@ -1,8 +1,38 @@
 import 'package:flutter/material.dart';
+import '../../services/admin_api_service.dart';
 import '../../theme/app_theme.dart';
 
-class DashboardScreen extends StatelessWidget {
+class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
+
+  @override
+  State<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State<DashboardScreen> {
+  late Future<_DashboardData> _future;
+
+  @override
+  void initState() {
+    super.initState();
+    _future = _load();
+  }
+
+  Future<_DashboardData> _load() async {
+    final results = await Future.wait([
+      AdminApiService.fetchDashboardStats(),
+      AdminApiService.fetchRecentBookings(),
+    ]);
+    return _DashboardData(
+      stats: results[0] as DashboardStats,
+      recent: results[1] as List<RecentBooking>,
+    );
+  }
+
+  Future<void> _refresh() async {
+    setState(() => _future = _load());
+    await _future;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -12,15 +42,12 @@ class DashboardScreen extends StatelessWidget {
         backgroundColor: AppColors.primaryDark,
         title: const Text(
           'Tổng quan Admin',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.chat_bubble_outline),
-            onPressed: () {},
+            icon: const Icon(Icons.refresh),
+            onPressed: _refresh,
           ),
           IconButton(
             icon: const Icon(Icons.notifications_outlined),
@@ -28,19 +55,60 @@ class DashboardScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildGreetingCard(),
-            const SizedBox(height: 20),
-            _buildStatsGrid(),
-            const SizedBox(height: 24),
-            _buildPendingApprovalSection(),
-          ],
+      body: RefreshIndicator(
+        onRefresh: _refresh,
+        child: FutureBuilder<_DashboardData>(
+          future: _future,
+          builder: (context, snap) {
+            if (snap.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (snap.hasError) {
+              return _buildError(snap.error.toString());
+            }
+            final data = snap.data!;
+            return SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildGreetingCard(),
+                  const SizedBox(height: 20),
+                  _buildStatsGrid(data.stats),
+                  const SizedBox(height: 24),
+                  _buildRecentSection(data.recent),
+                ],
+              ),
+            );
+          },
         ),
       ),
+    );
+  }
+
+  Widget _buildError(String message) {
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.all(32),
+      children: [
+        const SizedBox(height: 80),
+        const Icon(Icons.cloud_off, size: 64, color: AppColors.textSecondary),
+        const SizedBox(height: 16),
+        Text(
+          message,
+          textAlign: TextAlign.center,
+          style: const TextStyle(color: AppColors.textSecondary),
+        ),
+        const SizedBox(height: 16),
+        Center(
+          child: OutlinedButton.icon(
+            onPressed: _refresh,
+            icon: const Icon(Icons.refresh),
+            label: const Text('Thử lại'),
+          ),
+        ),
+      ],
     );
   }
 
@@ -64,10 +132,7 @@ class DashboardScreen extends StatelessWidget {
         children: [
           Text(
             'Xin chào,',
-            style: TextStyle(
-              fontSize: 14,
-              color: AppColors.textSecondary,
-            ),
+            style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
           ),
           SizedBox(height: 4),
           Text(
@@ -83,7 +148,7 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStatsGrid() {
+  Widget _buildStatsGrid(DashboardStats stats) {
     return GridView.count(
       crossAxisCount: 2,
       shrinkWrap: true,
@@ -95,33 +160,43 @@ class DashboardScreen extends StatelessWidget {
         _buildStatCard(
           icon: Icons.people_outline,
           label: 'Tổng User',
-          value: '24.5K',
+          value: _formatCount(stats.totalUsers),
           iconBgColor: AppColors.statBlue,
           iconColor: AppColors.statIconBlue,
         ),
         _buildStatCard(
           icon: Icons.hotel_outlined,
           label: 'Khách sạn',
-          value: '1,840',
+          value: _formatCount(stats.totalHotels),
           iconBgColor: AppColors.statGreen,
           iconColor: AppColors.statIconGreen,
         ),
         _buildStatCard(
           icon: Icons.bookmark_border,
           label: 'Đơn đặt phòng',
-          value: '3,256',
+          value: _formatCount(stats.totalBookings),
           iconBgColor: AppColors.statOrange,
           iconColor: AppColors.statIconOrange,
         ),
         _buildStatCard(
           icon: Icons.local_offer_outlined,
           label: 'Voucher',
-          value: '156',
+          value: _formatCount(stats.totalVouchers),
           iconBgColor: AppColors.statPurple,
           iconColor: AppColors.statIconPurple,
         ),
       ],
     );
+  }
+
+  String _formatCount(int n) {
+    final str = n.toString();
+    final buf = StringBuffer();
+    for (int i = 0; i < str.length; i++) {
+      if (i > 0 && (str.length - i) % 3 == 0) buf.write(',');
+      buf.write(str[i]);
+    }
+    return buf.toString();
   }
 
   Widget _buildStatCard({
@@ -159,10 +234,7 @@ class DashboardScreen extends StatelessWidget {
           const SizedBox(height: 10),
           Text(
             label,
-            style: const TextStyle(
-              fontSize: 12,
-              color: AppColors.textSecondary,
-            ),
+            style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
           ),
           const SizedBox(height: 2),
           Text(
@@ -178,13 +250,14 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPendingApprovalSection() {
+  Widget _buildRecentSection(List<RecentBooking> items) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
+        const Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
+            Text(
               'Đơn đặt phòng gần đây',
               style: TextStyle(
                 fontSize: 16,
@@ -192,53 +265,35 @@ class DashboardScreen extends StatelessWidget {
                 color: AppColors.textPrimary,
               ),
             ),
-            TextButton(
-              onPressed: () {},
-              child: const Text(
-                'Xem tất cả',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: AppColors.primary,
-                ),
-              ),
-            ),
           ],
         ),
         const SizedBox(height: 8),
-        _buildBookingItem(
-          hotelName: 'Homestay Cát Bà Sea',
-          guestName: 'Nguyễn Văn A',
-          date: '07/04/2026',
-          status: 'Chờ xác nhận',
-          statusColor: AppColors.warning,
-        ),
-        const SizedBox(height: 10),
-        _buildBookingItem(
-          hotelName: 'Villa Lạng Sơn 123',
-          guestName: 'Trần Thị B',
-          date: '06/04/2026',
-          status: 'Đã xác nhận',
-          statusColor: AppColors.success,
-        ),
-        const SizedBox(height: 10),
-        _buildBookingItem(
-          hotelName: 'Khách sạn Hà Nội Grand',
-          guestName: 'Lê Văn C',
-          date: '05/04/2026',
-          status: 'Đã hủy',
-          statusColor: AppColors.danger,
-        ),
+        if (items.isEmpty)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(28),
+            decoration: BoxDecoration(
+              color: AppColors.white,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: const Center(
+              child: Text(
+                'Chưa có đơn đặt phòng nào',
+                style: TextStyle(color: AppColors.textSecondary),
+              ),
+            ),
+          )
+        else
+          ...items.map((b) => Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: _buildBookingItem(b),
+              )),
       ],
     );
   }
 
-  Widget _buildBookingItem({
-    required String hotelName,
-    required String guestName,
-    required String date,
-    required String status,
-    required Color statusColor,
-  }) {
+  Widget _buildBookingItem(RecentBooking booking) {
+    final info = _statusInfo(booking.status);
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -261,11 +316,8 @@ class DashboardScreen extends StatelessWidget {
               color: AppColors.statBlue,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(
-              Icons.hotel,
-              color: AppColors.statIconBlue,
-              size: 24,
-            ),
+            child: const Icon(Icons.hotel,
+                color: AppColors.statIconBlue, size: 24),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -273,7 +325,7 @@ class DashboardScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  hotelName,
+                  booking.hotelName,
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -282,7 +334,7 @@ class DashboardScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  '$guestName • $date',
+                  '${booking.guestName} • ${booking.date}',
                   style: const TextStyle(
                     fontSize: 12,
                     color: AppColors.textSecondary,
@@ -292,17 +344,18 @@ class DashboardScreen extends StatelessWidget {
             ),
           ),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: statusColor.withOpacity(0.1),
+              color: info.color.withOpacity(0.1),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
-              status,
+              info.label,
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: statusColor,
+                color: info.color,
               ),
             ),
           ),
@@ -310,4 +363,32 @@ class DashboardScreen extends StatelessWidget {
       ),
     );
   }
+
+  _StatusInfo _statusInfo(String raw) {
+    switch (raw.toLowerCase()) {
+      case 'confirmed':
+        return const _StatusInfo('Đã xác nhận', AppColors.primary);
+      case 'cancelled':
+        return const _StatusInfo('Đã hủy', AppColors.danger);
+      case 'cancel_requested':
+        return const _StatusInfo('Yêu cầu hủy', Color(0xFFFF7043));
+      case 'completed':
+        return const _StatusInfo('Hoàn thành', AppColors.success);
+      case 'pending':
+      default:
+        return const _StatusInfo('Chờ xác nhận', AppColors.warning);
+    }
+  }
+}
+
+class _DashboardData {
+  final DashboardStats stats;
+  final List<RecentBooking> recent;
+  _DashboardData({required this.stats, required this.recent});
+}
+
+class _StatusInfo {
+  final String label;
+  final Color color;
+  const _StatusInfo(this.label, this.color);
 }

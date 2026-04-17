@@ -1,0 +1,1356 @@
+[
+  {
+    "ID": 1,
+    "hotelID": 1,
+    "name": "Phòng Standard",
+    "area": 20.0,
+    "price": 500000,
+    "description": "Phòng tiêu chuẩn tiện nghi cơ bản.",
+    "bedType": "Single bed",
+    "capacity": 2,
+    "bedNum": 1,
+    "images": [
+      {
+        "ID": 1,
+        "url": "https://studiochupanhdep.com/Upload/Newsimages/phong-khach-san-tt-studio.jpg"
+      }
+    ],
+    "policies": [{ "ID": 1, "name": "Không thể hoàn trả" }],
+    "amenities": [
+      { "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 3, "name": "Điều hòa", "icon": "fa-snowflake" }
+    ],
+    "rooms": [{ "ID": 101, "roomNumber": "101", "status": "Available" }]
+  },
+  {
+    "ID": 2,
+    "hotelID": 1,
+    "name": "Phòng Deluxe",
+    "area": 35.0,
+    "price": 1200000,
+    "description": "Phòng cao cấp nội thất sang trọng.",
+    "bedType": "King size",
+    "capacity": 2,
+    "bedNum": 1,
+    "images": [
+      {
+        "ID": 2,
+        "url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSiKP0L19lTUTFtsL9ZZgu4pVIJZwGGKSQYBg&s"
+      }
+    ],
+    "policies": [{ "ID": 2, "name": "Hoàn 50% trước 24h" }],
+    "amenities": [
+      { "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 2, "name": "Phòng tắm riêng", "icon": "fa-bath" },
+      { "ID": 4, "name": "Bữa sáng miễn phí", "icon": "fa-bread-slice" },
+      { "ID": 1, "name": "Chống âm", "icon": "fa-volume-mute" }
+    ],
+    "rooms": [{ "ID": 201, "roomNumber": "201", "status": "Occupied" }]
+  },
+  {
+    "ID": 3,
+    "hotelID": 2,
+    "name": "Phòng Superior",
+    "area": 25.0,
+    "price": 700000,
+    "description": "Tầm nhìn thoáng đãng, không gian yên tĩnh.",
+    "bedType": "Twin bed",
+    "capacity": 2,
+    "bedNum": 2,
+    "images": [
+      {
+        "ID": 3,
+        "url": "https://kksapahotel.com/uploads/images/VQK_2153%20(1).jpg"
+      }
+    ],
+    "policies": [{ "ID": 3, "name": "Hoàn 100% trước 24h" }],
+    "amenities": [
+      { "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 2, "name": "Phòng tắm riêng", "icon": "fa-bath" }
+    ],
+    "rooms": [{ "ID": 301, "roomNumber": "301", "status": "Available" }]
+  },
+  {
+    "ID": 4,
+    "hotelID": 2,
+    "name": "Phòng Suite Gia Đình",
+    "area": 55.0,
+    "price": 2500000,
+    "description": "Rộng rãi, phù hợp cho gia đình có trẻ em.",
+    "bedType": "Queen size",
+    "capacity": 4,
+    "bedNum": 2,
+    "images": [
+      {
+        "ID": 4,
+        "url": "https://picart.vn/wp-content/uploads/2025/04/chup-anh-noi-that-khach-san-irest-model-01.jpg"
+      }
+    ],
+    "policies": [{ "ID": 4, "name": "Hoàn 100% trước 48h" }],
+    "amenities": [
+      { "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 3, "name": "Điều hòa", "icon": "fa-snowflake" },
+      { "ID": 6, "name": "Bữa tối miễn phí", "icon": "fa-utensils" }
+    ],
+    "rooms": [{ "ID": 401, "roomNumber": "401", "status": "Available" }]
+  },
+  {
+    "ID": 5,
+    "hotelID": 3,
+    "name": "Phòng Standard",
+    "area": 22.0,
+    "price": 600000,
+    "description": "Thiết kế tối giản, tiết kiệm chi phí.",
+    "bedType": "Single bed",
+    "capacity": 2,
+    "bedNum": 1,
+    "images": [
+      {
+        "ID": 5,
+        "url": "https://asiky.com/files/images/Article/tin-tuc/chup-anh-khach-san.jpg"
+      }
+    ],
+    "policies": [{ "ID": 1, "name": "Không thể hoàn trả" }],
+    "amenities": [
+      { "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 3, "name": "Điều hòa", "icon": "fa-snowflake" }
+    ],
+    "rooms": [{ "ID": 501, "roomNumber": "501", "status": "Available" }]
+  },
+  {
+    "ID": 6,
+    "hotelID": 3,
+    "name": "Villa Nguyên Căn",
+    "area": 120.0,
+    "price": 4500000,
+    "description": "Riêng tư tuyệt đối với hồ bơi cá nhân.",
+    "bedType": "King size",
+    "capacity": 6,
+    "bedNum": 3,
+    "images": [
+      {
+        "ID": 1,
+        "url": "https://studiochupanhdep.com/Upload/Newsimages/phong-khach-san-tt-studio.jpg"
+      }
+    ],
+    "policies": [{ "ID": 2, "name": "Hoàn 50% trước 24h" }],
+    "amenities": [
+      { "ID": 2, "name": "Phòng tắm riêng", "icon": "fa-bath" },
+      { "ID": 4, "name": "Bữa sáng miễn phí", "icon": "fa-bread-slice" },
+      { "ID": 5, "name": "Bữa trưa miễn phí", "icon": "fa-hamburger" }
+    ],
+    "rooms": [{ "ID": 601, "roomNumber": "VILLA-1", "status": "Occupied" }]
+  },
+  {
+    "ID": 7,
+    "hotelID": 4,
+    "name": "Phòng Twin Tiêu Chuẩn",
+    "area": 24.0,
+    "price": 650000,
+    "description": "Hai giường đơn êm ái.",
+    "bedType": "Twin bed",
+    "capacity": 2,
+    "bedNum": 2,
+    "images": [
+      {
+        "ID": 2,
+        "url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSiKP0L19lTUTFtsL9ZZgu4pVIJZwGGKSQYBg&s"
+      }
+    ],
+    "policies": [{ "ID": 3, "name": "Hoàn 100% trước 24h" }],
+    "amenities": [
+      { "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 3, "name": "Điều hòa", "icon": "fa-snowflake" }
+    ],
+    "rooms": [{ "ID": 701, "roomNumber": "701", "status": "Available" }]
+  },
+  {
+    "ID": 8,
+    "hotelID": 4,
+    "name": "Phòng Executive",
+    "area": 45.0,
+    "price": 1800000,
+    "description": "Dành cho khách đi công tác, có bàn làm việc.",
+    "bedType": "King size",
+    "capacity": 2,
+    "bedNum": 1,
+    "images": [
+      {
+        "ID": 3,
+        "url": "https://kksapahotel.com/uploads/images/VQK_2153%20(1).jpg"
+      }
+    ],
+    "policies": [{ "ID": 4, "name": "Hoàn 100% trước 48h" }],
+    "amenities": [
+      { "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 2, "name": "Phòng tắm riêng", "icon": "fa-bath" },
+      { "ID": 4, "name": "Bữa sáng miễn phí", "icon": "fa-bread-slice" }
+    ],
+    "rooms": [{ "ID": 801, "roomNumber": "801", "status": "Available" }]
+  },
+  {
+    "ID": 9,
+    "hotelID": 5,
+    "name": "Phòng Standard",
+    "area": 18.0,
+    "price": 450000,
+    "description": "Giá rẻ, đầy đủ tiện ích cơ bản.",
+    "bedType": "Single bed",
+    "capacity": 1,
+    "bedNum": 1,
+    "images": [
+      {
+        "ID": 4,
+        "url": "https://picart.vn/wp-content/uploads/2025/04/chup-anh-noi-that-khach-san-irest-model-01.jpg"
+      }
+    ],
+    "policies": [{ "ID": 1, "name": "Không thể hoàn trả" }],
+    "amenities": [{ "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" }],
+    "rooms": [{ "ID": 901, "roomNumber": "901", "status": "Cleaning" }]
+  },
+  {
+    "ID": 10,
+    "hotelID": 5,
+    "name": "Phòng Deluxe View Biển",
+    "area": 38.0,
+    "price": 1400000,
+    "description": "Ban công nhìn thẳng ra biển tuyệt đẹp.",
+    "bedType": "King size",
+    "capacity": 2,
+    "bedNum": 1,
+    "images": [
+      {
+        "ID": 5,
+        "url": "https://asiky.com/files/images/Article/tin-tuc/chup-anh-khach-san.jpg"
+      }
+    ],
+    "policies": [{ "ID": 2, "name": "Hoàn 50% trước 24h" }],
+    "amenities": [
+      { "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 3, "name": "Điều hòa", "icon": "fa-snowflake" },
+      { "ID": 4, "name": "Bữa sáng miễn phí", "icon": "fa-bread-slice" }
+    ],
+    "rooms": [{ "ID": 1001, "roomNumber": "1001", "status": "Available" }]
+  },
+  {
+    "ID": 11,
+    "hotelID": 6,
+    "name": "Căn Hộ Studio",
+    "area": 30.0,
+    "price": 900000,
+    "description": "Tích hợp bếp nhỏ tiện lợi.",
+    "bedType": "Queen size",
+    "capacity": 2,
+    "bedNum": 1,
+    "images": [
+      {
+        "ID": 1,
+        "url": "https://studiochupanhdep.com/Upload/Newsimages/phong-khach-san-tt-studio.jpg"
+      }
+    ],
+    "policies": [{ "ID": 3, "name": "Hoàn 100% trước 24h" }],
+    "amenities": [
+      { "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 3, "name": "Điều hòa", "icon": "fa-snowflake" }
+    ],
+    "rooms": [{ "ID": 1101, "roomNumber": "1101", "status": "Available" }]
+  },
+  {
+    "ID": 12,
+    "hotelID": 6,
+    "name": "Phòng Premium",
+    "area": 42.0,
+    "price": 1600000,
+    "description": "Trang bị bồn tắm nằm cao cấp.",
+    "bedType": "King size",
+    "capacity": 2,
+    "bedNum": 1,
+    "images": [
+      {
+        "ID": 2,
+        "url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSiKP0L19lTUTFtsL9ZZgu4pVIJZwGGKSQYBg&s"
+      }
+    ],
+    "policies": [{ "ID": 4, "name": "Hoàn 100% trước 48h" }],
+    "amenities": [
+      { "ID": 2, "name": "Phòng tắm riêng", "icon": "fa-bath" },
+      { "ID": 4, "name": "Bữa sáng miễn phí", "icon": "fa-bread-slice" }
+    ],
+    "rooms": [{ "ID": 1201, "roomNumber": "1201", "status": "Occupied" }]
+  },
+  {
+    "ID": 13,
+    "hotelID": 7,
+    "name": "Phòng Dorm 6 Giường",
+    "area": 40.0,
+    "price": 200000,
+    "description": "Phù hợp cho khách du lịch bụi.",
+    "bedType": "Bunk bed",
+    "capacity": 6,
+    "bedNum": 6,
+    "images": [
+      {
+        "ID": 3,
+        "url": "https://kksapahotel.com/uploads/images/VQK_2153%20(1).jpg"
+      }
+    ],
+    "policies": [{ "ID": 1, "name": "Không thể hoàn trả" }],
+    "amenities": [
+      { "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 3, "name": "Điều hòa", "icon": "fa-snowflake" }
+    ],
+    "rooms": [{ "ID": 1301, "roomNumber": "DORM-01", "status": "Available" }]
+  },
+  {
+    "ID": 14,
+    "hotelID": 7,
+    "name": "Phòng Master Suite",
+    "area": 60.0,
+    "price": 3000000,
+    "description": "Đỉnh cao nghỉ dưỡng với dịch vụ quản gia.",
+    "bedType": "King size",
+    "capacity": 2,
+    "bedNum": 1,
+    "images": [
+      {
+        "ID": 4,
+        "url": "https://picart.vn/wp-content/uploads/2025/04/chup-anh-noi-that-khach-san-irest-model-01.jpg"
+      }
+    ],
+    "policies": [{ "ID": 2, "name": "Hoàn 50% trước 24h" }],
+    "amenities": [
+      { "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 1, "name": "Chống âm", "icon": "fa-volume-mute" },
+      { "ID": 4, "name": "Bữa sáng miễn phí", "icon": "fa-bread-slice" },
+      { "ID": 6, "name": "Bữa tối miễn phí", "icon": "fa-utensils" }
+    ],
+    "rooms": [{ "ID": 1401, "roomNumber": "1401", "status": "Available" }]
+  },
+  {
+    "ID": 15,
+    "hotelID": 8,
+    "name": "Phòng Superior Hướng Núi",
+    "area": 26.0,
+    "price": 750000,
+    "description": "View núi rừng thơ mộng.",
+    "bedType": "Queen size",
+    "capacity": 2,
+    "bedNum": 1,
+    "images": [
+      {
+        "ID": 5,
+        "url": "https://asiky.com/files/images/Article/tin-tuc/chup-anh-khach-san.jpg"
+      }
+    ],
+    "policies": [{ "ID": 3, "name": "Hoàn 100% trước 24h" }],
+    "amenities": [
+      { "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 2, "name": "Phòng tắm riêng", "icon": "fa-bath" }
+    ],
+    "rooms": [{ "ID": 1501, "roomNumber": "1501", "status": "Available" }]
+  },
+  {
+    "ID": 16,
+    "hotelID": 8,
+    "name": "Phòng Deluxe",
+    "area": 36.0,
+    "price": 1250000,
+    "description": "Khu vực tiếp khách riêng biệt.",
+    "bedType": "King size",
+    "capacity": 2,
+    "bedNum": 1,
+    "images": [
+      {
+        "ID": 1,
+        "url": "https://studiochupanhdep.com/Upload/Newsimages/phong-khach-san-tt-studio.jpg"
+      }
+    ],
+    "policies": [{ "ID": 4, "name": "Hoàn 100% trước 48h" }],
+    "amenities": [
+      { "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 3, "name": "Điều hòa", "icon": "fa-snowflake" },
+      { "ID": 4, "name": "Bữa sáng miễn phí", "icon": "fa-bread-slice" }
+    ],
+    "rooms": [{ "ID": 1601, "roomNumber": "1601", "status": "Available" }]
+  },
+  {
+    "ID": 17,
+    "hotelID": 9,
+    "name": "Phòng Standard",
+    "area": 20.0,
+    "price": 550000,
+    "description": "Phòng ốc sạch sẽ, yên tĩnh.",
+    "bedType": "Single bed",
+    "capacity": 2,
+    "bedNum": 1,
+    "images": [
+      {
+        "ID": 2,
+        "url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSiKP0L19lTUTFtsL9ZZgu4pVIJZwGGKSQYBg&s"
+      }
+    ],
+    "policies": [{ "ID": 1, "name": "Không thể hoàn trả" }],
+    "amenities": [{ "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" }],
+    "rooms": [{ "ID": 1701, "roomNumber": "1701", "status": "Occupied" }]
+  },
+  {
+    "ID": 18,
+    "hotelID": 9,
+    "name": "Căn Hộ 2 Phòng Ngủ",
+    "area": 70.0,
+    "price": 2200000,
+    "description": "Như ở nhà với đầy đủ đồ bếp và máy giặt.",
+    "bedType": "Queen & Twin",
+    "capacity": 4,
+    "bedNum": 3,
+    "images": [
+      {
+        "ID": 3,
+        "url": "https://kksapahotel.com/uploads/images/VQK_2153%20(1).jpg"
+      }
+    ],
+    "policies": [{ "ID": 2, "name": "Hoàn 50% trước 24h" }],
+    "amenities": [
+      { "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 2, "name": "Phòng tắm riêng", "icon": "fa-bath" },
+      { "ID": 5, "name": "Bữa trưa miễn phí", "icon": "fa-hamburger" }
+    ],
+    "rooms": [{ "ID": 1801, "roomNumber": "1801", "status": "Available" }]
+  },
+  {
+    "ID": 19,
+    "hotelID": 10,
+    "name": "Phòng Superior Hướng Phố",
+    "area": 24.0,
+    "price": 680000,
+    "description": "Nhìn ngắm thành phố về đêm.",
+    "bedType": "Twin bed",
+    "capacity": 2,
+    "bedNum": 2,
+    "images": [
+      {
+        "ID": 4,
+        "url": "https://picart.vn/wp-content/uploads/2025/04/chup-anh-noi-that-khach-san-irest-model-01.jpg"
+      }
+    ],
+    "policies": [{ "ID": 3, "name": "Hoàn 100% trước 24h" }],
+    "amenities": [
+      { "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 3, "name": "Điều hòa", "icon": "fa-snowflake" }
+    ],
+    "rooms": [{ "ID": 1901, "roomNumber": "1901", "status": "Available" }]
+  },
+  {
+    "ID": 20,
+    "hotelID": 10,
+    "name": "Phòng Suite Tân Cổ Điển",
+    "area": 50.0,
+    "price": 2800000,
+    "description": "Kiến trúc Pháp sang trọng.",
+    "bedType": "King size",
+    "capacity": 2,
+    "bedNum": 1,
+    "images": [
+      {
+        "ID": 5,
+        "url": "https://asiky.com/files/images/Article/tin-tuc/chup-anh-khach-san.jpg"
+      }
+    ],
+    "policies": [{ "ID": 4, "name": "Hoàn 100% trước 48h" }],
+    "amenities": [
+      { "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 4, "name": "Bữa sáng miễn phí", "icon": "fa-bread-slice" },
+      { "ID": 1, "name": "Chống âm", "icon": "fa-volume-mute" }
+    ],
+    "rooms": [{ "ID": 2001, "roomNumber": "2001", "status": "Available" }]
+  },
+  {
+    "ID": 21,
+    "hotelID": 11,
+    "name": "Phòng Standard",
+    "area": 20.0,
+    "price": 500000,
+    "description": "Phòng tiêu chuẩn tiện nghi cơ bản.",
+    "bedType": "Single bed",
+    "capacity": 2,
+    "bedNum": 1,
+    "images": [
+      {
+        "ID": 1,
+        "url": "https://studiochupanhdep.com/Upload/Newsimages/phong-khach-san-tt-studio.jpg"
+      }
+    ],
+    "policies": [{ "ID": 1, "name": "Không thể hoàn trả" }],
+    "amenities": [
+      { "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 3, "name": "Điều hòa", "icon": "fa-snowflake" }
+    ],
+    "rooms": [{ "ID": 2101, "roomNumber": "2101", "status": "Available" }]
+  },
+  {
+    "ID": 22,
+    "hotelID": 11,
+    "name": "Phòng Deluxe",
+    "area": 35.0,
+    "price": 1200000,
+    "description": "Phòng cao cấp nội thất sang trọng.",
+    "bedType": "King size",
+    "capacity": 2,
+    "bedNum": 1,
+    "images": [
+      {
+        "ID": 2,
+        "url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSiKP0L19lTUTFtsL9ZZgu4pVIJZwGGKSQYBg&s"
+      }
+    ],
+    "policies": [{ "ID": 2, "name": "Hoàn 50% trước 24h" }],
+    "amenities": [
+      { "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 2, "name": "Phòng tắm riêng", "icon": "fa-bath" },
+      { "ID": 4, "name": "Bữa sáng miễn phí", "icon": "fa-bread-slice" }
+    ],
+    "rooms": [{ "ID": 2201, "roomNumber": "2201", "status": "Available" }]
+  },
+  {
+    "ID": 23,
+    "hotelID": 12,
+    "name": "Phòng Superior",
+    "area": 25.0,
+    "price": 700000,
+    "description": "Tầm nhìn thoáng đãng.",
+    "bedType": "Twin bed",
+    "capacity": 2,
+    "bedNum": 2,
+    "images": [
+      {
+        "ID": 3,
+        "url": "https://kksapahotel.com/uploads/images/VQK_2153%20(1).jpg"
+      }
+    ],
+    "policies": [{ "ID": 3, "name": "Hoàn 100% trước 24h" }],
+    "amenities": [
+      { "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 3, "name": "Điều hòa", "icon": "fa-snowflake" }
+    ],
+    "rooms": [{ "ID": 2301, "roomNumber": "2301", "status": "Occupied" }]
+  },
+  {
+    "ID": 24,
+    "hotelID": 12,
+    "name": "Phòng Suite Gia Đình",
+    "area": 55.0,
+    "price": 2500000,
+    "description": "Rộng rãi cho cả gia đình.",
+    "bedType": "Queen size",
+    "capacity": 4,
+    "bedNum": 2,
+    "images": [
+      {
+        "ID": 4,
+        "url": "https://picart.vn/wp-content/uploads/2025/04/chup-anh-noi-that-khach-san-irest-model-01.jpg"
+      }
+    ],
+    "policies": [{ "ID": 4, "name": "Hoàn 100% trước 48h" }],
+    "amenities": [
+      { "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 4, "name": "Bữa sáng miễn phí", "icon": "fa-bread-slice" },
+      { "ID": 6, "name": "Bữa tối miễn phí", "icon": "fa-utensils" }
+    ],
+    "rooms": [{ "ID": 2401, "roomNumber": "2401", "status": "Available" }]
+  },
+  {
+    "ID": 25,
+    "hotelID": 13,
+    "name": "Phòng Standard",
+    "area": 22.0,
+    "price": 600000,
+    "description": "Thiết kế tối giản.",
+    "bedType": "Single bed",
+    "capacity": 2,
+    "bedNum": 1,
+    "images": [
+      {
+        "ID": 5,
+        "url": "https://asiky.com/files/images/Article/tin-tuc/chup-anh-khach-san.jpg"
+      }
+    ],
+    "policies": [{ "ID": 1, "name": "Không thể hoàn trả" }],
+    "amenities": [{ "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" }],
+    "rooms": [{ "ID": 2501, "roomNumber": "2501", "status": "Available" }]
+  },
+  {
+    "ID": 26,
+    "hotelID": 13,
+    "name": "Villa Nguyên Căn",
+    "area": 120.0,
+    "price": 4500000,
+    "description": "Hồ bơi cá nhân tiện nghi.",
+    "bedType": "King size",
+    "capacity": 6,
+    "bedNum": 3,
+    "images": [
+      {
+        "ID": 1,
+        "url": "https://studiochupanhdep.com/Upload/Newsimages/phong-khach-san-tt-studio.jpg"
+      }
+    ],
+    "policies": [{ "ID": 2, "name": "Hoàn 50% trước 24h" }],
+    "amenities": [
+      { "ID": 2, "name": "Phòng tắm riêng", "icon": "fa-bath" },
+      { "ID": 4, "name": "Bữa sáng miễn phí", "icon": "fa-bread-slice" },
+      { "ID": 1, "name": "Chống âm", "icon": "fa-volume-mute" }
+    ],
+    "rooms": [{ "ID": 2601, "roomNumber": "VILLA-2", "status": "Available" }]
+  },
+  {
+    "ID": 27,
+    "hotelID": 14,
+    "name": "Phòng Twin Tiêu Chuẩn",
+    "area": 24.0,
+    "price": 650000,
+    "description": "Giường đơn êm ái.",
+    "bedType": "Twin bed",
+    "capacity": 2,
+    "bedNum": 2,
+    "images": [
+      {
+        "ID": 2,
+        "url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSiKP0L19lTUTFtsL9ZZgu4pVIJZwGGKSQYBg&s"
+      }
+    ],
+    "policies": [{ "ID": 3, "name": "Hoàn 100% trước 24h" }],
+    "amenities": [
+      { "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 3, "name": "Điều hòa", "icon": "fa-snowflake" }
+    ],
+    "rooms": [{ "ID": 2701, "roomNumber": "2701", "status": "Cleaning" }]
+  },
+  {
+    "ID": 28,
+    "hotelID": 14,
+    "name": "Phòng Executive",
+    "area": 45.0,
+    "price": 1800000,
+    "description": "Phòng đẳng cấp thương gia.",
+    "bedType": "King size",
+    "capacity": 2,
+    "bedNum": 1,
+    "images": [
+      {
+        "ID": 3,
+        "url": "https://kksapahotel.com/uploads/images/VQK_2153%20(1).jpg"
+      }
+    ],
+    "policies": [{ "ID": 4, "name": "Hoàn 100% trước 48h" }],
+    "amenities": [
+      { "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 4, "name": "Bữa sáng miễn phí", "icon": "fa-bread-slice" }
+    ],
+    "rooms": [{ "ID": 2801, "roomNumber": "2801", "status": "Available" }]
+  },
+  {
+    "ID": 29,
+    "hotelID": 15,
+    "name": "Phòng Standard",
+    "area": 18.0,
+    "price": 450000,
+    "description": "Nhỏ gọn, sạch sẽ.",
+    "bedType": "Single bed",
+    "capacity": 1,
+    "bedNum": 1,
+    "images": [
+      {
+        "ID": 4,
+        "url": "https://picart.vn/wp-content/uploads/2025/04/chup-anh-noi-that-khach-san-irest-model-01.jpg"
+      }
+    ],
+    "policies": [{ "ID": 1, "name": "Không thể hoàn trả" }],
+    "amenities": [{ "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" }],
+    "rooms": [{ "ID": 2901, "roomNumber": "2901", "status": "Available" }]
+  },
+  {
+    "ID": 30,
+    "hotelID": 15,
+    "name": "Phòng Deluxe View Biển",
+    "area": 38.0,
+    "price": 1400000,
+    "description": "Ban công nhìn ra đại dương.",
+    "bedType": "King size",
+    "capacity": 2,
+    "bedNum": 1,
+    "images": [
+      {
+        "ID": 5,
+        "url": "https://asiky.com/files/images/Article/tin-tuc/chup-anh-khach-san.jpg"
+      }
+    ],
+    "policies": [{ "ID": 2, "name": "Hoàn 50% trước 24h" }],
+    "amenities": [
+      { "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 2, "name": "Phòng tắm riêng", "icon": "fa-bath" },
+      { "ID": 3, "name": "Điều hòa", "icon": "fa-snowflake" }
+    ],
+    "rooms": [{ "ID": 3001, "roomNumber": "3001", "status": "Occupied" }]
+  },
+  {
+    "ID": 31,
+    "hotelID": 16,
+    "name": "Căn Hộ Studio",
+    "area": 30.0,
+    "price": 900000,
+    "description": "Khu vực bếp nấu riêng biệt.",
+    "bedType": "Queen size",
+    "capacity": 2,
+    "bedNum": 1,
+    "images": [
+      {
+        "ID": 1,
+        "url": "https://studiochupanhdep.com/Upload/Newsimages/phong-khach-san-tt-studio.jpg"
+      }
+    ],
+    "policies": [{ "ID": 3, "name": "Hoàn 100% trước 24h" }],
+    "amenities": [
+      { "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 3, "name": "Điều hòa", "icon": "fa-snowflake" }
+    ],
+    "rooms": [{ "ID": 3101, "roomNumber": "3101", "status": "Available" }]
+  },
+  {
+    "ID": 32,
+    "hotelID": 16,
+    "name": "Phòng Premium",
+    "area": 42.0,
+    "price": 1600000,
+    "description": "Trang bị smart home.",
+    "bedType": "King size",
+    "capacity": 2,
+    "bedNum": 1,
+    "images": [
+      {
+        "ID": 2,
+        "url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSiKP0L19lTUTFtsL9ZZgu4pVIJZwGGKSQYBg&s"
+      }
+    ],
+    "policies": [{ "ID": 4, "name": "Hoàn 100% trước 48h" }],
+    "amenities": [
+      { "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 4, "name": "Bữa sáng miễn phí", "icon": "fa-bread-slice" }
+    ],
+    "rooms": [{ "ID": 3201, "roomNumber": "3201", "status": "Available" }]
+  },
+  {
+    "ID": 33,
+    "hotelID": 17,
+    "name": "Phòng Dorm 4 Giường",
+    "area": 30.0,
+    "price": 250000,
+    "description": "Tủ khóa riêng an toàn.",
+    "bedType": "Bunk bed",
+    "capacity": 4,
+    "bedNum": 4,
+    "images": [
+      {
+        "ID": 3,
+        "url": "https://kksapahotel.com/uploads/images/VQK_2153%20(1).jpg"
+      }
+    ],
+    "policies": [{ "ID": 1, "name": "Không thể hoàn trả" }],
+    "amenities": [{ "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" }],
+    "rooms": [{ "ID": 3301, "roomNumber": "DORM-17", "status": "Available" }]
+  },
+  {
+    "ID": 34,
+    "hotelID": 17,
+    "name": "Phòng Master Suite",
+    "area": 60.0,
+    "price": 3000000,
+    "description": "Phòng nghỉ tổng thống thu nhỏ.",
+    "bedType": "King size",
+    "capacity": 2,
+    "bedNum": 1,
+    "images": [
+      {
+        "ID": 4,
+        "url": "https://picart.vn/wp-content/uploads/2025/04/chup-anh-noi-that-khach-san-irest-model-01.jpg"
+      }
+    ],
+    "policies": [{ "ID": 2, "name": "Hoàn 50% trước 24h" }],
+    "amenities": [
+      { "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 2, "name": "Phòng tắm riêng", "icon": "fa-bath" },
+      { "ID": 1, "name": "Chống âm", "icon": "fa-volume-mute" }
+    ],
+    "rooms": [{ "ID": 3401, "roomNumber": "3401", "status": "Available" }]
+  },
+  {
+    "ID": 35,
+    "hotelID": 18,
+    "name": "Phòng Superior",
+    "area": 26.0,
+    "price": 750000,
+    "description": "View sân vườn.",
+    "bedType": "Queen size",
+    "capacity": 2,
+    "bedNum": 1,
+    "images": [
+      {
+        "ID": 5,
+        "url": "https://asiky.com/files/images/Article/tin-tuc/chup-anh-khach-san.jpg"
+      }
+    ],
+    "policies": [{ "ID": 3, "name": "Hoàn 100% trước 24h" }],
+    "amenities": [
+      { "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 3, "name": "Điều hòa", "icon": "fa-snowflake" }
+    ],
+    "rooms": [{ "ID": 3501, "roomNumber": "3501", "status": "Available" }]
+  },
+  {
+    "ID": 36,
+    "hotelID": 18,
+    "name": "Phòng Deluxe",
+    "area": 36.0,
+    "price": 1250000,
+    "description": "Nội thất gỗ tự nhiên.",
+    "bedType": "King size",
+    "capacity": 2,
+    "bedNum": 1,
+    "images": [
+      {
+        "ID": 1,
+        "url": "https://studiochupanhdep.com/Upload/Newsimages/phong-khach-san-tt-studio.jpg"
+      }
+    ],
+    "policies": [{ "ID": 4, "name": "Hoàn 100% trước 48h" }],
+    "amenities": [
+      { "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 4, "name": "Bữa sáng miễn phí", "icon": "fa-bread-slice" }
+    ],
+    "rooms": [{ "ID": 3601, "roomNumber": "3601", "status": "Cleaning" }]
+  },
+  {
+    "ID": 37,
+    "hotelID": 19,
+    "name": "Phòng Standard",
+    "area": 20.0,
+    "price": 550000,
+    "description": "Không gian yên tĩnh.",
+    "bedType": "Single bed",
+    "capacity": 2,
+    "bedNum": 1,
+    "images": [
+      {
+        "ID": 2,
+        "url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSiKP0L19lTUTFtsL9ZZgu4pVIJZwGGKSQYBg&s"
+      }
+    ],
+    "policies": [{ "ID": 1, "name": "Không thể hoàn trả" }],
+    "amenities": [
+      { "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 3, "name": "Điều hòa", "icon": "fa-snowflake" }
+    ],
+    "rooms": [{ "ID": 3701, "roomNumber": "3701", "status": "Available" }]
+  },
+  {
+    "ID": 38,
+    "hotelID": 19,
+    "name": "Căn Hộ 2 Phòng Ngủ",
+    "area": 70.0,
+    "price": 2200000,
+    "description": "Sức chứa lớn cho gia đình.",
+    "bedType": "Queen & Twin",
+    "capacity": 4,
+    "bedNum": 3,
+    "images": [
+      {
+        "ID": 3,
+        "url": "https://kksapahotel.com/uploads/images/VQK_2153%20(1).jpg"
+      }
+    ],
+    "policies": [{ "ID": 2, "name": "Hoàn 50% trước 24h" }],
+    "amenities": [
+      { "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 6, "name": "Bữa tối miễn phí", "icon": "fa-utensils" }
+    ],
+    "rooms": [{ "ID": 3801, "roomNumber": "3801", "status": "Available" }]
+  },
+  {
+    "ID": 39,
+    "hotelID": 20,
+    "name": "Phòng Superior",
+    "area": 24.0,
+    "price": 680000,
+    "description": "Đón ánh sáng tự nhiên.",
+    "bedType": "Twin bed",
+    "capacity": 2,
+    "bedNum": 2,
+    "images": [
+      {
+        "ID": 4,
+        "url": "https://picart.vn/wp-content/uploads/2025/04/chup-anh-noi-that-khach-san-irest-model-01.jpg"
+      }
+    ],
+    "policies": [{ "ID": 3, "name": "Hoàn 100% trước 24h" }],
+    "amenities": [{ "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" }],
+    "rooms": [{ "ID": 3901, "roomNumber": "3901", "status": "Available" }]
+  },
+  {
+    "ID": 40,
+    "hotelID": 20,
+    "name": "Phòng Suite Tân Cổ Điển",
+    "area": 50.0,
+    "price": 2800000,
+    "description": "Phong cách Châu Âu.",
+    "bedType": "King size",
+    "capacity": 2,
+    "bedNum": 1,
+    "images": [
+      {
+        "ID": 5,
+        "url": "https://asiky.com/files/images/Article/tin-tuc/chup-anh-khach-san.jpg"
+      }
+    ],
+    "policies": [{ "ID": 4, "name": "Hoàn 100% trước 48h" }],
+    "amenities": [
+      { "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 2, "name": "Phòng tắm riêng", "icon": "fa-bath" },
+      { "ID": 4, "name": "Bữa sáng miễn phí", "icon": "fa-bread-slice" }
+    ],
+    "rooms": [{ "ID": 4001, "roomNumber": "4001", "status": "Available" }]
+  },
+  {
+    "ID": 41,
+    "hotelID": 21,
+    "name": "Phòng Standard",
+    "area": 20.0,
+    "price": 500000,
+    "description": "Phòng tiêu chuẩn tiện nghi cơ bản.",
+    "bedType": "Single bed",
+    "capacity": 2,
+    "bedNum": 1,
+    "images": [
+      {
+        "ID": 1,
+        "url": "https://studiochupanhdep.com/Upload/Newsimages/phong-khach-san-tt-studio.jpg"
+      }
+    ],
+    "policies": [{ "ID": 1, "name": "Không thể hoàn trả" }],
+    "amenities": [{ "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" }],
+    "rooms": [{ "ID": 4101, "roomNumber": "4101", "status": "Occupied" }]
+  },
+  {
+    "ID": 42,
+    "hotelID": 21,
+    "name": "Phòng Deluxe",
+    "area": 35.0,
+    "price": 1200000,
+    "description": "Phòng cao cấp nội thất sang trọng.",
+    "bedType": "King size",
+    "capacity": 2,
+    "bedNum": 1,
+    "images": [
+      {
+        "ID": 2,
+        "url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSiKP0L19lTUTFtsL9ZZgu4pVIJZwGGKSQYBg&s"
+      }
+    ],
+    "policies": [{ "ID": 2, "name": "Hoàn 50% trước 24h" }],
+    "amenities": [
+      { "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 3, "name": "Điều hòa", "icon": "fa-snowflake" }
+    ],
+    "rooms": [{ "ID": 4201, "roomNumber": "4201", "status": "Available" }]
+  },
+  {
+    "ID": 43,
+    "hotelID": 22,
+    "name": "Phòng Superior",
+    "area": 25.0,
+    "price": 700000,
+    "description": "Tầm nhìn thành phố.",
+    "bedType": "Twin bed",
+    "capacity": 2,
+    "bedNum": 2,
+    "images": [
+      {
+        "ID": 3,
+        "url": "https://kksapahotel.com/uploads/images/VQK_2153%20(1).jpg"
+      }
+    ],
+    "policies": [{ "ID": 3, "name": "Hoàn 100% trước 24h" }],
+    "amenities": [{ "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" }],
+    "rooms": [{ "ID": 4301, "roomNumber": "4301", "status": "Available" }]
+  },
+  {
+    "ID": 44,
+    "hotelID": 22,
+    "name": "Phòng Suite Gia Đình",
+    "area": 55.0,
+    "price": 2500000,
+    "description": "Thiết kế không gian mở.",
+    "bedType": "Queen size",
+    "capacity": 4,
+    "bedNum": 2,
+    "images": [
+      {
+        "ID": 4,
+        "url": "https://picart.vn/wp-content/uploads/2025/04/chup-anh-noi-that-khach-san-irest-model-01.jpg"
+      }
+    ],
+    "policies": [{ "ID": 4, "name": "Hoàn 100% trước 48h" }],
+    "amenities": [
+      { "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 2, "name": "Phòng tắm riêng", "icon": "fa-bath" },
+      { "ID": 4, "name": "Bữa sáng miễn phí", "icon": "fa-bread-slice" }
+    ],
+    "rooms": [{ "ID": 4401, "roomNumber": "4401", "status": "Available" }]
+  },
+  {
+    "ID": 45,
+    "hotelID": 23,
+    "name": "Phòng Standard",
+    "area": 22.0,
+    "price": 600000,
+    "description": "Nhỏ gọn, đủ tiện nghi.",
+    "bedType": "Single bed",
+    "capacity": 2,
+    "bedNum": 1,
+    "images": [
+      {
+        "ID": 5,
+        "url": "https://asiky.com/files/images/Article/tin-tuc/chup-anh-khach-san.jpg"
+      }
+    ],
+    "policies": [{ "ID": 1, "name": "Không thể hoàn trả" }],
+    "amenities": [{ "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" }],
+    "rooms": [{ "ID": 4501, "roomNumber": "4501", "status": "Cleaning" }]
+  },
+  {
+    "ID": 46,
+    "hotelID": 23,
+    "name": "Villa Nguyên Căn",
+    "area": 120.0,
+    "price": 4500000,
+    "description": "Nghỉ dưỡng thượng lưu.",
+    "bedType": "King size",
+    "capacity": 6,
+    "bedNum": 3,
+    "images": [
+      {
+        "ID": 1,
+        "url": "https://studiochupanhdep.com/Upload/Newsimages/phong-khach-san-tt-studio.jpg"
+      }
+    ],
+    "policies": [{ "ID": 2, "name": "Hoàn 50% trước 24h" }],
+    "amenities": [
+      { "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 4, "name": "Bữa sáng miễn phí", "icon": "fa-bread-slice" },
+      { "ID": 1, "name": "Chống âm", "icon": "fa-volume-mute" }
+    ],
+    "rooms": [{ "ID": 4601, "roomNumber": "VILLA-23", "status": "Available" }]
+  },
+  {
+    "ID": 47,
+    "hotelID": 24,
+    "name": "Phòng Twin",
+    "area": 24.0,
+    "price": 650000,
+    "description": "Hai giường đơn tiêu chuẩn.",
+    "bedType": "Twin bed",
+    "capacity": 2,
+    "bedNum": 2,
+    "images": [
+      {
+        "ID": 2,
+        "url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSiKP0L19lTUTFtsL9ZZgu4pVIJZwGGKSQYBg&s"
+      }
+    ],
+    "policies": [{ "ID": 3, "name": "Hoàn 100% trước 24h" }],
+    "amenities": [{ "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" }],
+    "rooms": [{ "ID": 4701, "roomNumber": "4701", "status": "Available" }]
+  },
+  {
+    "ID": 48,
+    "hotelID": 24,
+    "name": "Phòng Executive",
+    "area": 45.0,
+    "price": 1800000,
+    "description": "Không gian làm việc tĩnh lặng.",
+    "bedType": "King size",
+    "capacity": 2,
+    "bedNum": 1,
+    "images": [
+      {
+        "ID": 3,
+        "url": "https://kksapahotel.com/uploads/images/VQK_2153%20(1).jpg"
+      }
+    ],
+    "policies": [{ "ID": 4, "name": "Hoàn 100% trước 48h" }],
+    "amenities": [
+      { "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 3, "name": "Điều hòa", "icon": "fa-snowflake" }
+    ],
+    "rooms": [{ "ID": 4801, "roomNumber": "4801", "status": "Available" }]
+  },
+  {
+    "ID": 49,
+    "hotelID": 25,
+    "name": "Phòng Standard",
+    "area": 18.0,
+    "price": 450000,
+    "description": "Sạch sẽ, giá sinh viên.",
+    "bedType": "Single bed",
+    "capacity": 1,
+    "bedNum": 1,
+    "images": [
+      {
+        "ID": 4,
+        "url": "https://picart.vn/wp-content/uploads/2025/04/chup-anh-noi-that-khach-san-irest-model-01.jpg"
+      }
+    ],
+    "policies": [{ "ID": 1, "name": "Không thể hoàn trả" }],
+    "amenities": [{ "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" }],
+    "rooms": [{ "ID": 4901, "roomNumber": "4901", "status": "Occupied" }]
+  },
+  {
+    "ID": 50,
+    "hotelID": 25,
+    "name": "Phòng Deluxe",
+    "area": 38.0,
+    "price": 1400000,
+    "description": "Giường nệm cao su non cao cấp.",
+    "bedType": "King size",
+    "capacity": 2,
+    "bedNum": 1,
+    "images": [
+      {
+        "ID": 5,
+        "url": "https://asiky.com/files/images/Article/tin-tuc/chup-anh-khach-san.jpg"
+      }
+    ],
+    "policies": [{ "ID": 2, "name": "Hoàn 50% trước 24h" }],
+    "amenities": [
+      { "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 2, "name": "Phòng tắm riêng", "icon": "fa-bath" },
+      { "ID": 4, "name": "Bữa sáng miễn phí", "icon": "fa-bread-slice" }
+    ],
+    "rooms": [{ "ID": 5001, "roomNumber": "5001", "status": "Available" }]
+  },
+  {
+    "ID": 51,
+    "hotelID": 26,
+    "name": "Căn Hộ Studio",
+    "area": 30.0,
+    "price": 900000,
+    "description": "Phù hợp khách dài hạn.",
+    "bedType": "Queen size",
+    "capacity": 2,
+    "bedNum": 1,
+    "images": [
+      {
+        "ID": 1,
+        "url": "https://studiochupanhdep.com/Upload/Newsimages/phong-khach-san-tt-studio.jpg"
+      }
+    ],
+    "policies": [{ "ID": 3, "name": "Hoàn 100% trước 24h" }],
+    "amenities": [{ "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" }],
+    "rooms": [{ "ID": 5101, "roomNumber": "5101", "status": "Available" }]
+  },
+  {
+    "ID": 52,
+    "hotelID": 26,
+    "name": "Phòng Premium",
+    "area": 42.0,
+    "price": 1600000,
+    "description": "Máy pha cafe trong phòng.",
+    "bedType": "King size",
+    "capacity": 2,
+    "bedNum": 1,
+    "images": [
+      {
+        "ID": 2,
+        "url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSiKP0L19lTUTFtsL9ZZgu4pVIJZwGGKSQYBg&s"
+      }
+    ],
+    "policies": [{ "ID": 4, "name": "Hoàn 100% trước 48h" }],
+    "amenities": [
+      { "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 3, "name": "Điều hòa", "icon": "fa-snowflake" }
+    ],
+    "rooms": [{ "ID": 5201, "roomNumber": "5201", "status": "Available" }]
+  },
+  {
+    "ID": 53,
+    "hotelID": 27,
+    "name": "Phòng Dorm 8 Giường",
+    "area": 45.0,
+    "price": 180000,
+    "description": "Rộng rãi, giường tầng chắc chắn.",
+    "bedType": "Bunk bed",
+    "capacity": 8,
+    "bedNum": 8,
+    "images": [
+      {
+        "ID": 3,
+        "url": "https://kksapahotel.com/uploads/images/VQK_2153%20(1).jpg"
+      }
+    ],
+    "policies": [{ "ID": 1, "name": "Không thể hoàn trả" }],
+    "amenities": [{ "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" }],
+    "rooms": [{ "ID": 5301, "roomNumber": "DORM-27", "status": "Cleaning" }]
+  },
+  {
+    "ID": 54,
+    "hotelID": 27,
+    "name": "Phòng Master Suite",
+    "area": 60.0,
+    "price": 3000000,
+    "description": "Thiết kế hoàng gia.",
+    "bedType": "King size",
+    "capacity": 2,
+    "bedNum": 1,
+    "images": [
+      {
+        "ID": 4,
+        "url": "https://picart.vn/wp-content/uploads/2025/04/chup-anh-noi-that-khach-san-irest-model-01.jpg"
+      }
+    ],
+    "policies": [{ "ID": 2, "name": "Hoàn 50% trước 24h" }],
+    "amenities": [
+      { "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 2, "name": "Phòng tắm riêng", "icon": "fa-bath" },
+      { "ID": 5, "name": "Bữa trưa miễn phí", "icon": "fa-hamburger" }
+    ],
+    "rooms": [{ "ID": 5401, "roomNumber": "5401", "status": "Available" }]
+  },
+  {
+    "ID": 55,
+    "hotelID": 28,
+    "name": "Phòng Superior",
+    "area": 26.0,
+    "price": 750000,
+    "description": "View hồ sinh thái.",
+    "bedType": "Queen size",
+    "capacity": 2,
+    "bedNum": 1,
+    "images": [
+      {
+        "ID": 5,
+        "url": "https://asiky.com/files/images/Article/tin-tuc/chup-anh-khach-san.jpg"
+      }
+    ],
+    "policies": [{ "ID": 3, "name": "Hoàn 100% trước 24h" }],
+    "amenities": [{ "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" }],
+    "rooms": [{ "ID": 5501, "roomNumber": "5501", "status": "Available" }]
+  },
+  {
+    "ID": 56,
+    "hotelID": 28,
+    "name": "Phòng Deluxe",
+    "area": 36.0,
+    "price": 1250000,
+    "description": "Lát sàn gỗ ấm cúng.",
+    "bedType": "King size",
+    "capacity": 2,
+    "bedNum": 1,
+    "images": [
+      {
+        "ID": 1,
+        "url": "https://studiochupanhdep.com/Upload/Newsimages/phong-khach-san-tt-studio.jpg"
+      }
+    ],
+    "policies": [{ "ID": 4, "name": "Hoàn 100% trước 48h" }],
+    "amenities": [
+      { "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 3, "name": "Điều hòa", "icon": "fa-snowflake" }
+    ],
+    "rooms": [{ "ID": 5601, "roomNumber": "5601", "status": "Available" }]
+  },
+  {
+    "ID": 57,
+    "hotelID": 29,
+    "name": "Phòng Standard",
+    "area": 20.0,
+    "price": 550000,
+    "description": "Tiện lợi đi lại tham quan.",
+    "bedType": "Single bed",
+    "capacity": 2,
+    "bedNum": 1,
+    "images": [
+      {
+        "ID": 2,
+        "url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSiKP0L19lTUTFtsL9ZZgu4pVIJZwGGKSQYBg&s"
+      }
+    ],
+    "policies": [{ "ID": 1, "name": "Không thể hoàn trả" }],
+    "amenities": [{ "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" }],
+    "rooms": [{ "ID": 5701, "roomNumber": "5701", "status": "Available" }]
+  },
+  {
+    "ID": 58,
+    "hotelID": 29,
+    "name": "Căn Hộ 2 Phòng Ngủ",
+    "area": 70.0,
+    "price": 2200000,
+    "description": "Phòng sinh hoạt chung rộng rãi.",
+    "bedType": "Queen & Twin",
+    "capacity": 4,
+    "bedNum": 3,
+    "images": [
+      {
+        "ID": 3,
+        "url": "https://kksapahotel.com/uploads/images/VQK_2153%20(1).jpg"
+      }
+    ],
+    "policies": [{ "ID": 2, "name": "Hoàn 50% trước 24h" }],
+    "amenities": [
+      { "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 2, "name": "Phòng tắm riêng", "icon": "fa-bath" },
+      { "ID": 4, "name": "Bữa sáng miễn phí", "icon": "fa-bread-slice" }
+    ],
+    "rooms": [{ "ID": 5801, "roomNumber": "5801", "status": "Occupied" }]
+  },
+  {
+    "ID": 59,
+    "hotelID": 30,
+    "name": "Phòng Superior",
+    "area": 24.0,
+    "price": 680000,
+    "description": "Cửa sổ sát trần thoáng đãng.",
+    "bedType": "Twin bed",
+    "capacity": 2,
+    "bedNum": 2,
+    "images": [
+      {
+        "ID": 4,
+        "url": "https://picart.vn/wp-content/uploads/2025/04/chup-anh-noi-that-khach-san-irest-model-01.jpg"
+      }
+    ],
+    "policies": [{ "ID": 3, "name": "Hoàn 100% trước 24h" }],
+    "amenities": [{ "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" }],
+    "rooms": [{ "ID": 5901, "roomNumber": "5901", "status": "Available" }]
+  },
+  {
+    "ID": 60,
+    "hotelID": 30,
+    "name": "Phòng Suite Tân Cổ Điển",
+    "area": 50.0,
+    "price": 2800000,
+    "description": "Chi tiết dát vàng vương giả.",
+    "bedType": "King size",
+    "capacity": 2,
+    "bedNum": 1,
+    "images": [
+      {
+        "ID": 5,
+        "url": "https://asiky.com/files/images/Article/tin-tuc/chup-anh-khach-san.jpg"
+      }
+    ],
+    "policies": [{ "ID": 4, "name": "Hoàn 100% trước 48h" }],
+    "amenities": [
+      { "ID": 7, "name": "Wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 3, "name": "Điều hòa", "icon": "fa-snowflake" }
+    ],
+    "rooms": [{ "ID": 6001, "roomNumber": "6001", "status": "Available" }]
+  }
+]

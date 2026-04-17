@@ -1,143 +1,208 @@
 import 'package:flutter/material.dart';
 
-enum HotelStatus { pending, approved, rejected }
+class HotelImage {
+  final int id;
+  final String url;
+  HotelImage({required this.id, required this.url});
 
-class HotelModel {
+  factory HotelImage.fromJson(Map<String, dynamic> j) => HotelImage(
+        id: (j['ID'] ?? 0) is int ? j['ID'] as int : int.tryParse('${j['ID']}') ?? 0,
+        url: (j['url'] ?? '') as String,
+      );
+}
+
+class HotelAmenity {
   final int id;
   final String name;
+  final String icon;
+  HotelAmenity({required this.id, required this.name, required this.icon});
+
+  factory HotelAmenity.fromJson(Map<String, dynamic> j) => HotelAmenity(
+        id: (j['ID'] ?? 0) is int ? j['ID'] as int : int.tryParse('${j['ID']}') ?? 0,
+        name: (j['name'] ?? '') as String,
+        icon: (j['icon'] ?? '') as String,
+      );
+}
+
+class RoomPolicy {
+  final int id;
+  final String name;
+  RoomPolicy({required this.id, required this.name});
+
+  factory RoomPolicy.fromJson(Map<String, dynamic> j) => RoomPolicy(
+        id: (j['ID'] ?? 0) is int ? j['ID'] as int : 0,
+        name: (j['name'] ?? '') as String,
+      );
+}
+
+class PhysicalRoom {
+  final int id;
+  final String roomNumber;
+  final String status;
+  PhysicalRoom({required this.id, required this.roomNumber, required this.status});
+
+  factory PhysicalRoom.fromJson(Map<String, dynamic> j) => PhysicalRoom(
+        id: (j['ID'] ?? 0) is int ? j['ID'] as int : 0,
+        roomNumber: (j['roomNumber'] ?? '') as String,
+        status: (j['status'] ?? '') as String,
+      );
+}
+
+class HotelRoomType {
+  final String id;
+  final int hotelID;
+  final String name;
+  final double area;
+  final int price;
+  final String description;
+  final String bedType;
+  final int capacity;
+  final int bedNum;
+  final List<HotelImage> images;
+  final List<RoomPolicy> policies;
+  final List<HotelAmenity> amenities;
+  final List<PhysicalRoom> rooms;
+
+  HotelRoomType({
+    required this.id,
+    required this.hotelID,
+    required this.name,
+    required this.area,
+    required this.price,
+    required this.description,
+    required this.bedType,
+    required this.capacity,
+    required this.bedNum,
+    required this.images,
+    required this.policies,
+    required this.amenities,
+    required this.rooms,
+  });
+
+  factory HotelRoomType.fromJson(Map<String, dynamic> j) => HotelRoomType(
+        id: (j['id'] ?? j['ID'] ?? '').toString(),
+        hotelID: _toInt(j['hotelID']),
+        name: (j['name'] ?? '') as String,
+        area: _toDouble(j['area']),
+        price: _toInt(j['price']),
+        description: (j['description'] ?? '') as String,
+        bedType: (j['bedType'] ?? '') as String,
+        capacity: _toInt(j['capacity']),
+        bedNum: _toInt(j['bedNum']),
+        images: _parseList(j['images'], (e) => HotelImage.fromJson(Map<String, dynamic>.from(e))),
+        policies: _parseList(j['policies'], (e) => RoomPolicy.fromJson(Map<String, dynamic>.from(e))),
+        amenities: _parseList(j['amenities'], (e) => HotelAmenity.fromJson(Map<String, dynamic>.from(e))),
+        rooms: _parseList(j['rooms'], (e) => PhysicalRoom.fromJson(Map<String, dynamic>.from(e))),
+      );
+
+  int get availableRoomCount => rooms.where((r) => r.status == 'Available').length;
+
+  static int _toInt(dynamic v) {
+    if (v is int) return v;
+    if (v is num) return v.toInt();
+    return int.tryParse('$v') ?? 0;
+  }
+
+  static double _toDouble(dynamic v) {
+    if (v is num) return v.toDouble();
+    return double.tryParse('$v') ?? 0.0;
+  }
+
+  static List<T> _parseList<T>(dynamic raw, T Function(Map) mapper) {
+    if (raw is! List) return [];
+    return raw.whereType<Map>().map(mapper).toList();
+  }
+}
+
+class HotelModel {
+  final String id;
+  final int hotelNumericId;
   final String type;
-  final String address;
-  final String city;
-  final String ownerName;
-  final String ownerPhone;
-  final Color ownerAvatarColor;
-  final DateTime requestDate;
-  final bool hasIdDocument;
-  final bool hasBusinessLicense;
-  final int pricePerNight;
-  final int roomCount;
-  final int imageCount;
-  final List<String> amenities;
-  HotelStatus status;
+  final String name;
+  final String description;
+  final String telephone;
+  final String location;
+  final String email;
+  final int star;
+  final List<HotelImage> images;
+  final List<HotelAmenity> amenities;
+  final List<HotelRoomType> rooms;
 
   HotelModel({
     required this.id,
-    required this.name,
+    required this.hotelNumericId,
     required this.type,
-    required this.address,
-    required this.city,
-    required this.ownerName,
-    required this.ownerPhone,
-    required this.ownerAvatarColor,
-    required this.requestDate,
-    required this.hasIdDocument,
-    required this.hasBusinessLicense,
-    required this.pricePerNight,
-    required this.roomCount,
-    required this.imageCount,
+    required this.name,
+    required this.description,
+    required this.telephone,
+    required this.location,
+    required this.email,
+    required this.star,
+    required this.images,
     required this.amenities,
-    this.status = HotelStatus.pending,
+    required this.rooms,
   });
 
-  String get ownerInitials {
-    final parts = ownerName.split(' ');
-    if (parts.length >= 2) {
-      return '${parts.first[0]}${parts.last[0]}'.toUpperCase();
-    }
-    return ownerName.substring(0, 2).toUpperCase();
+  factory HotelModel.fromJson(Map<String, dynamic> j) {
+    return HotelModel(
+      id: (j['id'] ?? j['ID'] ?? '').toString(),
+      hotelNumericId: _toInt(j['ID']),
+      type: (j['type'] ?? '') as String,
+      name: (j['name'] ?? '') as String,
+      description: (j['description'] ?? '') as String,
+      telephone: (j['telephone'] ?? '') as String,
+      location: (j['location'] ?? '') as String,
+      email: (j['email'] ?? '') as String,
+      star: _toInt(j['star']),
+      images: _parseList(j['images'], (e) => HotelImage.fromJson(Map<String, dynamic>.from(e))),
+      amenities: _parseList(j['amenities'], (e) => HotelAmenity.fromJson(Map<String, dynamic>.from(e))),
+      rooms: _parseList(j['rooms'], (e) => HotelRoomType.fromJson(Map<String, dynamic>.from(e))),
+    );
   }
 
-  String get statusLabel {
-    switch (status) {
-      case HotelStatus.pending:
-        return 'CHỜ DUYỆT';
-      case HotelStatus.approved:
-        return 'ĐÃ DUYỆT';
-      case HotelStatus.rejected:
-        return 'ĐÃ TỪ CHỐI';
-    }
+  static int _toInt(dynamic v) {
+    if (v is int) return v;
+    if (v is num) return v.toInt();
+    return int.tryParse('$v') ?? 0;
   }
 
-  Color get statusColor {
-    switch (status) {
-      case HotelStatus.pending:
-        return const Color(0xFFFFA726);
-      case HotelStatus.approved:
-        return const Color(0xFF43A047);
-      case HotelStatus.rejected:
-        return const Color(0xFFE53935);
-    }
+  static List<T> _parseList<T>(dynamic raw, T Function(Map) mapper) {
+    if (raw is! List) return [];
+    return raw.whereType<Map>().map(mapper).toList();
   }
 
-  String get formattedPrice {
-    final str = pricePerNight.toString();
+  String? get firstImageUrl => images.isNotEmpty ? images.first.url : null;
+
+  int? get minRoomPrice {
+    if (rooms.isEmpty) return null;
+    return rooms.map((r) => r.price).reduce((a, b) => a < b ? a : b);
+  }
+
+  String get formattedMinPrice {
+    final p = minRoomPrice;
+    if (p == null) return 'Chưa có giá';
+    return '${_formatNumber(p)}đ / đêm';
+  }
+
+  Color get accentColor {
+    const palette = [
+      Color(0xFF00838F),
+      Color(0xFFC62828),
+      Color(0xFF4527A0),
+      Color(0xFF1565C0),
+      Color(0xFFE65100),
+    ];
+    if (id.isEmpty) return palette.first;
+    return palette[id.hashCode.abs() % palette.length];
+  }
+
+  static String _formatNumber(int number) {
+    final str = number.toString();
     final buffer = StringBuffer();
     for (int i = 0; i < str.length; i++) {
       if (i > 0 && (str.length - i) % 3 == 0) buffer.write('.');
       buffer.write(str[i]);
     }
-    return '${buffer}đ / đêm';
+    return buffer.toString();
   }
-
-  String get formattedRequestDate {
-    return '${requestDate.day.toString().padLeft(2, '0')}/${requestDate.month.toString().padLeft(2, '0')}/${requestDate.year}';
-  }
-}
-
-class MockHotels {
-  static final List<HotelModel> pending = [
-    HotelModel(
-      id: 1,
-      name: 'Homestay Cát Bà Sea',
-      type: 'Homestay',
-      address: 'Đường 1/4, Thị trấn Cát Bà, Huyện Cát Hải, Hải Phòng, Việt Nam',
-      city: 'Hải Phòng, Việt Nam',
-      ownerName: 'Nguyễn Văn A',
-      ownerPhone: '0988 123 456',
-      ownerAvatarColor: const Color(0xFF00838F),
-      requestDate: DateTime(2026, 2, 23),
-      hasIdDocument: true,
-      hasBusinessLicense: true,
-      pricePerNight: 500000,
-      roomCount: 5,
-      imageCount: 8,
-      amenities: ['Wifi miễn phí', 'Chỗ đỗ xe', 'Lễ tân 24/7'],
-    ),
-    HotelModel(
-      id: 2,
-      name: 'Villa Lạng Sơn 123',
-      type: 'Villa',
-      address: 'Số 123, Đường Trần Đăng Ninh, TP Lạng Sơn, Việt Nam',
-      city: 'Lạng Sơn, Việt Nam',
-      ownerName: 'Trần Thị B',
-      ownerPhone: '0977 444 555',
-      ownerAvatarColor: const Color(0xFFC62828),
-      requestDate: DateTime(2026, 2, 22),
-      hasIdDocument: true,
-      hasBusinessLicense: false,
-      pricePerNight: 1200000,
-      roomCount: 8,
-      imageCount: 12,
-      amenities: ['Wifi miễn phí', 'Hồ bơi', 'Bãi đỗ xe', 'Bếp chung'],
-    ),
-    HotelModel(
-      id: 3,
-      name: 'Khách sạn Sapa View',
-      type: 'Khách sạn',
-      address: 'Số 45, Đường Fansipan, TT Sa Pa, Lào Cai, Việt Nam',
-      city: 'Lào Cai, Việt Nam',
-      ownerName: 'Lê Minh C',
-      ownerPhone: '0912 888 999',
-      ownerAvatarColor: const Color(0xFF4527A0),
-      requestDate: DateTime(2026, 2, 20),
-      hasIdDocument: true,
-      hasBusinessLicense: true,
-      pricePerNight: 800000,
-      roomCount: 20,
-      imageCount: 15,
-      amenities: ['Wifi miễn phí', 'Nhà hàng', 'Spa', 'Lễ tân 24/7', 'Phòng gym'],
-    ),
-  ];
-
-  static final List<HotelModel> processed = [];
 }

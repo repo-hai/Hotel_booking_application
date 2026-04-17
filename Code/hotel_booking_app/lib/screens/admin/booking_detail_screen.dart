@@ -18,7 +18,7 @@ class BookingDetailScreen extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Đơn #${booking.id}',
+          'Đơn #${_shortId(booking.id)}',
           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
         ),
       ),
@@ -35,11 +35,21 @@ class BookingDetailScreen extends StatelessWidget {
             _buildBookingDetailsCard(),
             const SizedBox(height: 14),
             _buildPaymentCard(),
+            if (booking.cancellationReason != null ||
+                booking.adminNote != null) ...[
+              const SizedBox(height: 14),
+              _buildNotesCard(),
+            ],
             const SizedBox(height: 24),
           ],
         ),
       ),
     );
+  }
+
+  String _shortId(String id) {
+    if (id.length <= 6) return id;
+    return id.substring(0, 6).toUpperCase();
   }
 
   Widget _buildStatusHeader() {
@@ -49,9 +59,7 @@ class BookingDetailScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: booking.statusColor.withOpacity(0.08),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: booking.statusColor.withOpacity(0.2),
-        ),
+        border: Border.all(color: booking.statusColor.withOpacity(0.2)),
       ),
       child: Row(
         children: [
@@ -79,17 +87,15 @@ class BookingDetailScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'Đặt lúc: ${BookingModel.formatDate(booking.bookedAt)}',
+                  'Đặt lúc: ${BookingModel.formatDate(booking.createdAt)}',
                   style: const TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textSecondary,
-                  ),
+                      fontSize: 12, color: AppColors.textSecondary),
                 ),
               ],
             ),
           ),
           Text(
-            '#${booking.id}',
+            '#${_shortId(booking.id)}',
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w700,
@@ -107,9 +113,15 @@ class BookingDetailScreen extends StatelessWidget {
       icon: Icons.hotel_outlined,
       child: Column(
         children: [
-          _buildDetailRow('Khách sạn', booking.hotelName),
-          _buildDetailRow('Loại phòng', booking.roomType),
-          _buildDetailRow('Số phòng', '${booking.roomCount} phòng'),
+          _buildDetailRow('Khách sạn',
+              booking.hotelName.isEmpty ? '—' : booking.hotelName),
+          _buildDetailRow('Mã khách sạn',
+              booking.hotelId.isEmpty ? '—' : booking.hotelId),
+          if (booking.bookedRooms.isNotEmpty)
+            ...booking.bookedRooms.map((r) => _buildDetailRow(
+                  'Phòng',
+                  '${r.quantity} x ${r.roomName ?? r.roomTypeId} (${_formatNumber(r.price)}đ)',
+                )),
         ],
       ),
     );
@@ -121,10 +133,20 @@ class BookingDetailScreen extends StatelessWidget {
       icon: Icons.person_outline,
       child: Column(
         children: [
-          _buildDetailRow('Họ và tên', booking.guestName),
-          _buildDetailRow('Số điện thoại', booking.guestPhone),
-          _buildDetailRow('Email', booking.guestEmail),
-          _buildDetailRow('Số khách', '${booking.guestCount} người'),
+          _buildDetailRow(
+              'Họ và tên',
+              booking.customerName.isEmpty
+                  ? 'Khách ẩn danh'
+                  : booking.customerName),
+          _buildDetailRow(
+              'Số điện thoại',
+              booking.customerPhone.isEmpty
+                  ? 'Chưa cập nhật'
+                  : booking.customerPhone),
+          _buildDetailRow('Email',
+              booking.customerEmail.isEmpty ? '—' : booking.customerEmail),
+          if (booking.customerCountry.isNotEmpty)
+            _buildDetailRow('Quốc gia', booking.customerCountry),
         ],
       ),
     );
@@ -136,9 +158,12 @@ class BookingDetailScreen extends StatelessWidget {
       icon: Icons.calendar_month_outlined,
       child: Column(
         children: [
-          _buildDetailRow('Nhận phòng', BookingModel.formatDate(booking.checkin)),
-          _buildDetailRow('Trả phòng', BookingModel.formatDate(booking.checkout)),
+          _buildDetailRow(
+              'Nhận phòng', BookingModel.formatDate(booking.checkIn)),
+          _buildDetailRow(
+              'Trả phòng', BookingModel.formatDate(booking.checkOut)),
           _buildDetailRow('Số đêm', '${booking.nights} đêm'),
+          _buildDetailRow('Tổng số phòng', '${booking.roomCount} phòng'),
         ],
       ),
     );
@@ -150,13 +175,10 @@ class BookingDetailScreen extends StatelessWidget {
       icon: Icons.payment_outlined,
       child: Column(
         children: [
-          _buildDetailRow('Phương thức', booking.paymentMethod),
-          _buildDetailRow('Trạng thái', booking.paymentStatus,
-              valueColor: booking.paymentStatus == 'Đã thanh toán'
-                  ? AppColors.success
-                  : booking.paymentStatus == 'Đã hoàn tiền'
-                      ? AppColors.danger
-                      : AppColors.warning),
+          _buildDetailRow('Giá gốc', booking.formattedOriginal),
+          if (booking.discount > 0)
+            _buildDetailRow('Giảm giá', '-${booking.formattedDiscount}',
+                valueColor: AppColors.success),
           Padding(
             padding: const EdgeInsets.only(top: 8),
             child: Divider(
@@ -176,7 +198,7 @@ class BookingDetailScreen extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  booking.formattedPrice,
+                  booking.formattedTotal,
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -186,6 +208,23 @@ class BookingDetailScreen extends StatelessWidget {
               ],
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNotesCard() {
+    return _buildCard(
+      title: 'Ghi chú hủy đơn',
+      icon: Icons.note_alt_outlined,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (booking.cancellationReason != null &&
+              booking.cancellationReason!.isNotEmpty)
+            _buildDetailRow('Lý do khách', booking.cancellationReason!),
+          if (booking.adminNote != null && booking.adminNote!.isNotEmpty)
+            _buildDetailRow('Ghi chú admin', booking.adminNote!),
         ],
       ),
     );
@@ -245,9 +284,7 @@ class BookingDetailScreen extends StatelessWidget {
             child: Text(
               label,
               style: const TextStyle(
-                fontSize: 13,
-                color: AppColors.textSecondary,
-              ),
+                  fontSize: 13, color: AppColors.textSecondary),
             ),
           ),
           Expanded(
@@ -263,5 +300,15 @@ class BookingDetailScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String _formatNumber(int number) {
+    final str = number.toString();
+    final buffer = StringBuffer();
+    for (int i = 0; i < str.length; i++) {
+      if (i > 0 && (str.length - i) % 3 == 0) buffer.write('.');
+      buffer.write(str[i]);
+    }
+    return buffer.toString();
   }
 }

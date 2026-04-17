@@ -1,36 +1,30 @@
 // File: routes/hotel.js
 const express = require('express');
 const router = express.Router();
-const db = require('../firebase'); // Gọi biến db từ file cấu hình ở thư mục gốc
+const db = require('../firebase');
 
 // ==========================================
 // 1. API: Lấy danh sách tất cả khách sạn (CÓ PHÂN TRANG)
+// Fields: ID, type, name, description, telephone, location, email, star, images[{ID,url}], amenities[{ID,name,icon}]
 // ==========================================
 router.get('/', async (req, res) => {
 	try {
-		// 1. Lấy tham số phân trang từ URL
 		const page = parseInt(req.query.page) || 1;
 		const limit = parseInt(req.query.limit) || 10;
 		const offset = (page - 1) * limit;
 
-		// 2. Đếm tổng số khách sạn
 		const totalSnapshot = await db.collection('Hotels').count().get();
 		const totalItems = totalSnapshot.data().count;
 		const totalPages = Math.ceil(totalItems / limit);
 
-		// 3. Lấy dữ liệu theo trang
 		const snapshot = await db.collection('Hotels')
 			.offset(offset)
 			.limit(limit)
 			.get();
 
 		const hotelsList = [];
-
 		snapshot.forEach(doc => {
-			hotelsList.push({
-				id: doc.id,
-				...doc.data()
-			});
+			hotelsList.push({ id: doc.id, ...doc.data() });
 		});
 
 		res.status(200).json({
@@ -43,7 +37,6 @@ router.get('/', async (req, res) => {
 				totalItems: totalItems
 			}
 		});
-
 	} catch (error) {
 		console.error("Lỗi khi lấy danh sách khách sạn: ", error);
 		res.status(500).json({ message: "Bị lỗi Server rồi!" });
@@ -62,20 +55,21 @@ router.get('/search', async (req, res) => {
 		}
 
 		const minCapacity = Math.ceil(parseInt(guests) / parseInt(rooms));
-		const hotelSnapshot = await db.collection('Hotels').where('city', '==', city).get();
+		// Tìm theo field 'location' thay vì 'city'
+		const hotelSnapshot = await db.collection('Hotels').where('location', '==', city).get();
 
 		if (hotelSnapshot.empty) {
 			return res.status(200).json({ message: `Không tìm thấy khách sạn nào tại ${city}`, data: [] });
 		}
 
 		const results = [];
-
 		for (const hotelDoc of hotelSnapshot.docs) {
 			const hotelData = hotelDoc.data();
 			hotelData.id = hotelDoc.id;
 
+			// RoomType dùng field 'hotelID' thay vì 'hotelId'
 			const roomSnapshot = await db.collection('RoomTypes')
-				.where('hotelId', '==', hotelData.id)
+				.where('hotelID', '==', hotelData.ID || parseInt(hotelDoc.id))
 				.where('capacity', '>=', minCapacity)
 				.get();
 
@@ -84,39 +78,30 @@ router.get('/search', async (req, res) => {
 				roomSnapshot.forEach(roomDoc => {
 					suitableRooms.push({ id: roomDoc.id, ...roomDoc.data() });
 				});
-
-				results.push({
-					...hotelData,
-					availableRoomTypes: suitableRooms
-				});
+				results.push({ ...hotelData, availableRoomTypes: suitableRooms });
 			}
 		}
 
-		// Bắt đầu phân trang in-memory
-		const page = parseInt(req.query.page) || 1;
-		const limit = parseInt(req.query.limit) || 10;
-
+		const pageCurrent = parseInt(req.query.page) || 1;
+		const limitCurrent = parseInt(req.query.limit) || 10;
 		const totalItems = results.length;
-		const totalPages = Math.ceil(totalItems / limit);
-
-		const startIndex = (page - 1) * limit;
-		const endIndex = page * limit;
-		const paginatedResults = results.slice(startIndex, endIndex);
+		const totalPages = Math.ceil(totalItems / limitCurrent);
+		const startIndex = (pageCurrent - 1) * limitCurrent;
+		const paginatedResults = results.slice(startIndex, startIndex + limitCurrent);
 
 		res.status(200).json({
 			message: `Tìm thấy ${totalItems} khách sạn phù hợp tại ${city}`,
 			data: paginatedResults,
 			pagination: {
-				currentPage: page,
-				limit: limit,
+				currentPage: pageCurrent,
+				limit: limitCurrent,
 				totalPages: totalPages,
 				totalItems: totalItems
 			}
 		});
-
 	} catch (error) {
 		console.error("Lỗi tìm kiếm: ", error);
-		res.status(500).json({ message: "Máy chủ đang bận, Hải vui lòng thử lại sau nhé!" });
+		res.status(500).json({ message: "Máy chủ đang bận, vui lòng thử lại sau!" });
 	}
 });
 
@@ -128,23 +113,24 @@ router.post('/filter', async (req, res) => {
 		const { city, minPrice, maxPrice, minStar, requiredAmenities, sortBy } = req.body;
 
 		let query = db.collection('Hotels');
+		// Tìm theo field 'location'
 		if (city) {
-			query = query.where('city', '==', city);
+			query = query.where('location', '==', city);
 		}
 		const hotelSnapshot = await query.get();
 
 		let filteredHotels = [];
-
 		for (const doc of hotelSnapshot.docs) {
 			let hotel = { id: doc.id, ...doc.data() };
 
-			const roomSnap = await db.collection('RoomTypes').where('hotelId', '==', hotel.id).get();
+			const roomSnap = await db.collection('RoomTypes')
+				.where('hotelID', '==', hotel.ID || parseInt(doc.id))
+				.get();
 			let rooms = [];
 			roomSnap.forEach(r => rooms.push({ id: r.id, ...r.data() }));
 
 			hotel.rooms = rooms;
 			hotel.minRoomPrice = rooms.length > 0 ? Math.min(...rooms.map(r => r.price)) : 0;
-
 			filteredHotels.push(hotel);
 		}
 
@@ -153,7 +139,7 @@ router.post('/filter', async (req, res) => {
 		}
 		if (requiredAmenities && requiredAmenities.length > 0) {
 			filteredHotels = filteredHotels.filter(h => {
-				const icons = h.amenities.map(a => a.icon);
+				const icons = (h.amenities || []).map(a => a.icon);
 				return requiredAmenities.every(req => icons.includes(req));
 			});
 		}
@@ -181,28 +167,23 @@ router.post('/filter', async (req, res) => {
 			}
 		}
 
-		// Bắt đầu phân trang in-memory
-		const page = parseInt(req.query.page) || 1;
-		const limit = parseInt(req.query.limit) || 10;
-
+		const pageCurrent = parseInt(req.query.page) || 1;
+		const limitCurrent = parseInt(req.query.limit) || 10;
 		const totalItems = filteredHotels.length;
-		const totalPages = Math.ceil(totalItems / limit);
-
-		const startIndex = (page - 1) * limit;
-		const endIndex = page * limit;
-		const paginatedHotels = filteredHotels.slice(startIndex, endIndex);
+		const totalPages = Math.ceil(totalItems / limitCurrent);
+		const startIndex = (pageCurrent - 1) * limitCurrent;
+		const paginatedHotels = filteredHotels.slice(startIndex, startIndex + limitCurrent);
 
 		res.status(200).json({
 			message: `Tìm thấy ${totalItems} khách sạn phù hợp`,
 			data: paginatedHotels,
 			pagination: {
-				currentPage: page,
-				limit: limit,
+				currentPage: pageCurrent,
+				limit: limitCurrent,
 				totalPages: totalPages,
 				totalItems: totalItems
 			}
 		});
-
 	} catch (error) {
 		console.error("Lỗi khi lọc/sắp xếp: ", error);
 		res.status(500).json({ message: "Lỗi Server!" });
@@ -210,7 +191,7 @@ router.post('/filter', async (req, res) => {
 });
 
 // ==========================================
-// 4. API: Xem chi tiết 1 Khách sạn (Không cần phân trang)
+// 4. API: Xem chi tiết 1 Khách sạn (kèm RoomTypes)
 // ==========================================
 router.get('/:id', async (req, res) => {
 	try {
@@ -222,24 +203,22 @@ router.get('/:id', async (req, res) => {
 			return res.status(404).json({ message: "Khách sạn không tồn tại hoặc đã bị xóa!" });
 		}
 
-		const hotelData = {
-			id: hotelDoc.id,
-			...hotelDoc.data()
-		};
+		const hotelData = { id: hotelDoc.id, ...hotelDoc.data() };
 
-		const roomSnapshot = await db.collection('RoomTypes').where('hotelId', '==', hotelId).get();
+		// RoomType dùng field 'hotelID'
+		const roomSnapshot = await db.collection('RoomTypes')
+			.where('hotelID', '==', hotelData.ID || parseInt(hotelId))
+			.get();
 		const rooms = [];
 		roomSnapshot.forEach(doc => {
 			rooms.push({ id: doc.id, ...doc.data() });
 		});
-
 		hotelData.rooms = rooms;
 
 		res.status(200).json({
 			message: "Lấy thông tin chi tiết khách sạn thành công!",
 			data: hotelData
 		});
-
 	} catch (error) {
 		console.error("Lỗi khi lấy chi tiết khách sạn: ", error);
 		res.status(500).json({ message: "Máy chủ đang bận!" });

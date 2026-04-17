@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import '../../services/admin_api_service.dart';
 import '../../theme/app_theme.dart';
 import '../../models/voucher_model.dart';
 import 'voucher_form_screen.dart';
@@ -11,37 +13,72 @@ class VouchersScreen extends StatefulWidget {
 }
 
 class _VouchersScreenState extends State<VouchersScreen> {
-  int _selectedFilter = -1; // -1 = Tất cả
+  final List<_FilterOption> _filters = const [
+    _FilterOption('Tất cả', null),
+    _FilterOption('Đang hoạt động', 'active'),
+    _FilterOption('Hết hạn', 'expired'),
+    _FilterOption('Đã tắt', 'disabled'),
+  ];
+
+  int _selectedFilter = 0;
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
+  Timer? _debounce;
 
-  List<VoucherModel> get _filteredVouchers {
-    var list = MockVouchers.all;
-    if (_selectedFilter == 0) {
-      list = list.where((v) => v.status == VoucherStatus.active).toList();
-    } else if (_selectedFilter == 1) {
-      list = list.where((v) => v.status == VoucherStatus.expired).toList();
-    } else if (_selectedFilter == 2) {
-      list = list.where((v) => v.status == VoucherStatus.disabled).toList();
-    }
-    if (_searchQuery.isNotEmpty) {
-      list = list
-          .where((v) =>
-              v.code.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-              v.name.toLowerCase().contains(_searchQuery.toLowerCase()))
-          .toList();
-    }
-    return list;
+  bool _loading = false;
+  String? _error;
+  List<VoucherModel> _vouchers = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
   }
 
   @override
   void dispose() {
+    _debounce?.cancel();
     _searchController.dispose();
     super.dispose();
   }
 
+  Future<void> _load() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      final page = await AdminApiService.fetchVouchers(
+        status: _filters[_selectedFilter].apiValue,
+        search: _searchQuery,
+        limit: 50,
+      );
+      if (!mounted) return;
+      setState(() {
+        _vouchers = page.vouchers;
+        _loading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loading = false;
+      });
+    }
+  }
+
+  void _onSearchChanged(String value) {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 400), () {
+      setState(() => _searchQuery = value);
+      _load();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    final activeCount =
+        _vouchers.where((v) => v.status == VoucherStatus.active).length;
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -52,6 +89,10 @@ class _VouchersScreenState extends State<VouchersScreen> {
         ),
         actions: [
           IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: _load,
+          ),
+          IconButton(
             icon: const Icon(Icons.add_circle_outline),
             onPressed: () => _navigateToForm(null),
           ),
@@ -61,12 +102,8 @@ class _VouchersScreenState extends State<VouchersScreen> {
         children: [
           _buildSearchBar(),
           _buildFilterChips(),
-          _buildSummaryBar(),
-          Expanded(
-            child: _filteredVouchers.isEmpty
-                ? _buildEmptyState()
-                : _buildVoucherList(),
-          ),
+          _buildSummaryBar(activeCount),
+          Expanded(child: _buildBody()),
         ],
       ),
       floatingActionButton: FloatingActionButton(
@@ -77,24 +114,56 @@ class _VouchersScreenState extends State<VouchersScreen> {
     );
   }
 
+  Widget _buildBody() {
+    if (_loading) return const Center(child: CircularProgressIndicator());
+    if (_error != null) {
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(32),
+        children: [
+          const SizedBox(height: 60),
+          const Icon(Icons.cloud_off,
+              size: 60, color: AppColors.textSecondary),
+          const SizedBox(height: 16),
+          Text(_error!,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: AppColors.textSecondary)),
+          const SizedBox(height: 16),
+          Center(
+            child: OutlinedButton.icon(
+              onPressed: _load,
+              icon: const Icon(Icons.refresh),
+              label: const Text('Thử lại'),
+            ),
+          ),
+        ],
+      );
+    }
+    if (_vouchers.isEmpty) return _buildEmptyState();
+    return RefreshIndicator(onRefresh: _load, child: _buildVoucherList());
+  }
+
   Widget _buildSearchBar() {
     return Container(
       color: AppColors.white,
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
       child: TextField(
         controller: _searchController,
-        onChanged: (value) => setState(() => _searchQuery = value),
+        onChanged: _onSearchChanged,
         decoration: InputDecoration(
           hintText: 'Tìm theo mã hoặc tên voucher...',
           hintStyle:
               const TextStyle(color: AppColors.textSecondary, fontSize: 14),
-          prefixIcon: const Icon(Icons.search, color: AppColors.textSecondary),
-          suffixIcon: _searchQuery.isNotEmpty
+          prefixIcon:
+              const Icon(Icons.search, color: AppColors.textSecondary),
+          suffixIcon: _searchController.text.isNotEmpty
               ? IconButton(
-                  icon: const Icon(Icons.close, color: AppColors.textSecondary),
+                  icon: const Icon(Icons.close,
+                      color: AppColors.textSecondary),
                   onPressed: () {
                     _searchController.clear();
                     setState(() => _searchQuery = '');
+                    _load();
                   },
                 )
               : null,
@@ -112,7 +181,6 @@ class _VouchersScreenState extends State<VouchersScreen> {
   }
 
   Widget _buildFilterChips() {
-    final filters = ['Tất cả', 'Đang hoạt động', 'Hết hạn', 'Đã tắt'];
     return Container(
       color: AppColors.white,
       height: 50,
@@ -120,28 +188,34 @@ class _VouchersScreenState extends State<VouchersScreen> {
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: filters.length,
+        itemCount: _filters.length,
         separatorBuilder: (_, __) => const SizedBox(width: 8),
         itemBuilder: (context, index) {
-          final filterIndex = index - 1;
-          final isSelected = _selectedFilter == filterIndex;
+          final isSelected = _selectedFilter == index;
           return GestureDetector(
-            onTap: () => setState(() => _selectedFilter = filterIndex),
+            onTap: () {
+              if (_selectedFilter == index) return;
+              setState(() => _selectedFilter = index);
+              _load();
+            },
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
                 color: isSelected
                     ? AppColors.primary.withOpacity(0.1)
                     : AppColors.background,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: isSelected ? AppColors.primary : Colors.transparent,
+                  color: isSelected
+                      ? AppColors.primary
+                      : Colors.transparent,
                   width: 1.5,
                 ),
               ),
               child: Center(
                 child: Text(
-                  filters[index],
+                  _filters[index].label,
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
@@ -158,16 +232,14 @@ class _VouchersScreenState extends State<VouchersScreen> {
     );
   }
 
-  Widget _buildSummaryBar() {
-    final activeCount =
-        MockVouchers.all.where((v) => v.status == VoucherStatus.active).length;
+  Widget _buildSummaryBar(int activeCount) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            '${_filteredVouchers.length} voucher • $activeCount đang hoạt động',
+            '${_vouchers.length} voucher • $activeCount đang hoạt động',
             style: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
@@ -181,12 +253,11 @@ class _VouchersScreenState extends State<VouchersScreen> {
 
   Widget _buildVoucherList() {
     return ListView.separated(
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
-      itemCount: _filteredVouchers.length,
+      itemCount: _vouchers.length,
       separatorBuilder: (_, __) => const SizedBox(height: 12),
-      itemBuilder: (context, index) {
-        return _buildVoucherCard(_filteredVouchers[index]);
-      },
+      itemBuilder: (context, index) => _buildVoucherCard(_vouchers[index]),
     );
   }
 
@@ -208,7 +279,6 @@ class _VouchersScreenState extends State<VouchersScreen> {
         child: IntrinsicHeight(
           child: Row(
             children: [
-              // Left accent strip with discount
               Container(
                 width: 80,
                 decoration: BoxDecoration(
@@ -230,7 +300,7 @@ class _VouchersScreenState extends State<VouchersScreen> {
                       ),
                     ),
                     const SizedBox(height: 2),
-                    if (voucher.discountType == DiscountType.percent)
+                    if (voucher.discountType == DiscountType.percentage)
                       Text(
                         'Tối đa\n${voucher.formattedMaxDiscount}',
                         style: const TextStyle(
@@ -242,16 +312,15 @@ class _VouchersScreenState extends State<VouchersScreen> {
                   ],
                 ),
               ),
-              // Dashed separator
               Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Container(
                     width: 16,
                     height: 16,
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       color: AppColors.background,
-                      borderRadius: const BorderRadius.only(
+                      borderRadius: BorderRadius.only(
                         bottomLeft: Radius.circular(16),
                         bottomRight: Radius.circular(16),
                       ),
@@ -260,9 +329,9 @@ class _VouchersScreenState extends State<VouchersScreen> {
                   Container(
                     width: 16,
                     height: 16,
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       color: AppColors.background,
-                      borderRadius: const BorderRadius.only(
+                      borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(16),
                         topRight: Radius.circular(16),
                       ),
@@ -270,14 +339,12 @@ class _VouchersScreenState extends State<VouchersScreen> {
                   ),
                 ],
               ),
-              // Right content
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.all(14),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Code + status
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -317,9 +384,8 @@ class _VouchersScreenState extends State<VouchersScreen> {
                         ],
                       ),
                       const SizedBox(height: 8),
-                      // Name
                       Text(
-                        voucher.name,
+                        voucher.targetType,
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
@@ -327,67 +393,61 @@ class _VouchersScreenState extends State<VouchersScreen> {
                         ),
                       ),
                       const SizedBox(height: 6),
-                      // Date range
                       Row(
                         children: [
                           Icon(Icons.calendar_today_outlined,
                               size: 12,
-                              color: AppColors.textSecondary.withOpacity(0.7)),
+                              color: AppColors.textSecondary
+                                  .withOpacity(0.7)),
                           const SizedBox(width: 4),
                           Text(
                             '${VoucherModel.formatDate(voucher.startDate)} - ${VoucherModel.formatDate(voucher.endDate)}',
                             style: TextStyle(
                               fontSize: 11,
-                              color: AppColors.textSecondary.withOpacity(0.7),
+                              color: AppColors.textSecondary
+                                  .withOpacity(0.7),
                             ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 8),
-                      // Usage progress
-                      Row(
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      'Đã dùng: ${voucher.usageText}',
-                                      style: const TextStyle(
-                                        fontSize: 11,
-                                        color: AppColors.textSecondary,
-                                      ),
-                                    ),
-                                    Text(
-                                      '${(voucher.usagePercent * 100).toInt()}%',
-                                      style: const TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w600,
-                                        color: AppColors.textSecondary,
-                                      ),
-                                    ),
-                                  ],
+                          Row(
+                            mainAxisAlignment:
+                                MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Đã dùng: ${voucher.usageText}',
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: AppColors.textSecondary,
                                 ),
-                                const SizedBox(height: 4),
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(4),
-                                  child: LinearProgressIndicator(
-                                    value: voucher.usagePercent,
-                                    backgroundColor:
-                                        AppColors.textSecondary.withOpacity(0.1),
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      voucher.usagePercent >= 0.8
-                                          ? AppColors.danger
-                                          : AppColors.success,
-                                    ),
-                                    minHeight: 5,
-                                  ),
+                              ),
+                              Text(
+                                '${(voucher.usagePercent * 100).toInt()}%',
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.textSecondary,
                                 ),
-                              ],
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(4),
+                            child: LinearProgressIndicator(
+                              value: voucher.usagePercent,
+                              backgroundColor: AppColors.textSecondary
+                                  .withOpacity(0.1),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                voucher.usagePercent >= 0.8
+                                    ? AppColors.danger
+                                    : AppColors.success,
+                              ),
+                              minHeight: 5,
                             ),
                           ),
                         ],
@@ -410,11 +470,9 @@ class _VouchersScreenState extends State<VouchersScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.local_offer_outlined,
-              size: 70,
-              color: AppColors.textSecondary.withOpacity(0.3),
-            ),
+            Icon(Icons.local_offer_outlined,
+                size: 70,
+                color: AppColors.textSecondary.withOpacity(0.3)),
             const SizedBox(height: 16),
             const Text(
               'Không tìm thấy voucher nào',
@@ -440,8 +498,8 @@ class _VouchersScreenState extends State<VouchersScreen> {
                 backgroundColor: AppColors.primary,
                 foregroundColor: AppColors.white,
                 elevation: 0,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 24, vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -456,12 +514,16 @@ class _VouchersScreenState extends State<VouchersScreen> {
   void _navigateToForm(VoucherModel? voucher) async {
     final result = await Navigator.push<String>(
       context,
-      MaterialPageRoute(
-        builder: (_) => VoucherFormScreen(voucher: voucher),
-      ),
+      MaterialPageRoute(builder: (_) => VoucherFormScreen(voucher: voucher)),
     );
     if (result == 'saved' || result == 'deleted') {
-      setState(() {});
+      _load();
     }
   }
+}
+
+class _FilterOption {
+  final String label;
+  final String? apiValue;
+  const _FilterOption(this.label, this.apiValue);
 }

@@ -2,15 +2,14 @@ import 'package:flutter/material.dart';
 
 enum VoucherStatus { active, expired, disabled }
 
-enum DiscountType { percent, fixed }
+enum DiscountType { percentage, fixed }
 
 class VoucherModel {
-  final int id;
+  final String id;
   String code;
-  String name;
   DiscountType discountType;
-  double discountValue;
-  int maxDiscount;
+  double value; // decimal: 0.05 = 5%, 0.25 = 25%
+  int maxDiscountValue;
   int minSpend;
   int usageLimit;
   int usedCount;
@@ -22,10 +21,9 @@ class VoucherModel {
   VoucherModel({
     required this.id,
     required this.code,
-    required this.name,
     required this.discountType,
-    required this.discountValue,
-    required this.maxDiscount,
+    required this.value,
+    required this.maxDiscountValue,
     required this.minSpend,
     required this.usageLimit,
     required this.usedCount,
@@ -34,6 +32,89 @@ class VoucherModel {
     required this.targetType,
     this.status = VoucherStatus.active,
   });
+
+  factory VoucherModel.fromJson(Map<String, dynamic> j) {
+    return VoucherModel(
+      id: (j['id'] ?? '').toString(),
+      code: (j['code'] ?? '') as String,
+      discountType: _parseDiscountType(j['discountType']),
+      value: _toDouble(j['value']),
+      maxDiscountValue: _toInt(j['maxDiscountValue']),
+      minSpend: _toInt(j['minSpend']),
+      usageLimit: _toInt(j['usageLimit']),
+      usedCount: _toInt(j['usedCount']),
+      startDate: _parseDate(j['startDate']) ?? DateTime.now(),
+      endDate: _parseDate(j['endDate']) ?? DateTime.now().add(const Duration(days: 30)),
+      targetType: (j['targetType'] ?? 'all') as String,
+      status: _parseStatus(j['status']),
+    );
+  }
+
+  Map<String, dynamic> toRequestBody() {
+    return {
+      'code': code,
+      'discountType': discountType == DiscountType.percentage ? 'Percentage' : 'Fixed',
+      'value': value,
+      'maxDiscountValue': maxDiscountValue,
+      'minSpend': minSpend,
+      'usageLimit': usageLimit,
+      'startDate': startDate.toIso8601String(),
+      'endDate': endDate.toIso8601String(),
+      'targetType': targetType,
+      'status': _statusToString(status),
+    };
+  }
+
+  static String _statusToString(VoucherStatus s) {
+    switch (s) {
+      case VoucherStatus.active:
+        return 'Active';
+      case VoucherStatus.expired:
+        return 'Expired';
+      case VoucherStatus.disabled:
+        return 'Disabled';
+    }
+  }
+
+  static DiscountType _parseDiscountType(dynamic v) {
+    final s = (v ?? 'Percentage').toString().toLowerCase();
+    return s == 'fixed' ? DiscountType.fixed : DiscountType.percentage;
+  }
+
+  static VoucherStatus _parseStatus(dynamic v) {
+    final s = (v ?? 'Active').toString().toLowerCase();
+    switch (s) {
+      case 'expired':
+        return VoucherStatus.expired;
+      case 'disabled':
+        return VoucherStatus.disabled;
+      default:
+        return VoucherStatus.active;
+    }
+  }
+
+  static DateTime? _parseDate(dynamic v) {
+    if (v == null) return null;
+    try {
+      return DateTime.parse(v.toString()).toLocal();
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static int _toInt(dynamic v) {
+    if (v is int) return v;
+    if (v is num) return v.toInt();
+    return int.tryParse('$v') ?? 0;
+  }
+
+  static double _toDouble(dynamic v) {
+    if (v is num) return v.toDouble();
+    return double.tryParse('$v') ?? 0.0;
+  }
+
+  // value is decimal (0.05 = 5%), display as percent int
+  int get displayPercent => (value * 100).round();
 
   String get statusLabel {
     switch (status) {
@@ -58,19 +139,18 @@ class VoucherModel {
   }
 
   String get discountLabel {
-    if (discountType == DiscountType.percent) {
-      return '-${discountValue.toInt()}%';
+    if (discountType == DiscountType.percentage) {
+      return '-$displayPercent%';
     }
-    return '-${_formatNumber(discountValue.toInt())}đ';
+    return '-${_formatNumber(value.toInt())}đ';
   }
 
-  String get formattedMaxDiscount => '${_formatNumber(maxDiscount)}đ';
+  String get formattedMaxDiscount => '${_formatNumber(maxDiscountValue)}đ';
   String get formattedMinSpend => '${_formatNumber(minSpend)}đ';
 
   String get usageText => '$usedCount/$usageLimit';
 
-  double get usagePercent =>
-      usageLimit > 0 ? usedCount / usageLimit : 0;
+  double get usagePercent => usageLimit > 0 ? usedCount / usageLimit : 0;
 
   bool get isActive => status == VoucherStatus.active;
 
@@ -87,84 +167,4 @@ class VoucherModel {
     }
     return buffer.toString();
   }
-}
-
-class MockVouchers {
-  static final List<VoucherModel> all = [
-    VoucherModel(
-      id: 1,
-      code: 'SUMMER2026',
-      name: 'Khuyến mãi Hè 2026',
-      discountType: DiscountType.percent,
-      discountValue: 20,
-      maxDiscount: 500000,
-      minSpend: 1000000,
-      usageLimit: 500,
-      usedCount: 324,
-      startDate: DateTime(2026, 5, 1),
-      endDate: DateTime(2026, 8, 31),
-      targetType: 'Tất cả',
-      status: VoucherStatus.active,
-    ),
-    VoucherModel(
-      id: 2,
-      code: 'NEWUSER50K',
-      name: 'Ưu đãi người dùng mới',
-      discountType: DiscountType.fixed,
-      discountValue: 50000,
-      maxDiscount: 50000,
-      minSpend: 300000,
-      usageLimit: 1000,
-      usedCount: 756,
-      startDate: DateTime(2026, 1, 1),
-      endDate: DateTime(2026, 12, 31),
-      targetType: 'Người dùng mới',
-      status: VoucherStatus.active,
-    ),
-    VoucherModel(
-      id: 3,
-      code: 'TET2026',
-      name: 'Mừng Tết Nguyên Đán',
-      discountType: DiscountType.percent,
-      discountValue: 30,
-      maxDiscount: 800000,
-      minSpend: 2000000,
-      usageLimit: 200,
-      usedCount: 200,
-      startDate: DateTime(2026, 1, 20),
-      endDate: DateTime(2026, 2, 15),
-      targetType: 'Tất cả',
-      status: VoucherStatus.expired,
-    ),
-    VoucherModel(
-      id: 4,
-      code: 'WEEKEND15',
-      name: 'Cuối tuần vui vẻ',
-      discountType: DiscountType.percent,
-      discountValue: 15,
-      maxDiscount: 300000,
-      minSpend: 500000,
-      usageLimit: 300,
-      usedCount: 89,
-      startDate: DateTime(2026, 3, 1),
-      endDate: DateTime(2026, 6, 30),
-      targetType: 'Tất cả',
-      status: VoucherStatus.disabled,
-    ),
-    VoucherModel(
-      id: 5,
-      code: 'VIP100K',
-      name: 'Ưu đãi VIP Member',
-      discountType: DiscountType.fixed,
-      discountValue: 100000,
-      maxDiscount: 100000,
-      minSpend: 800000,
-      usageLimit: 150,
-      usedCount: 42,
-      startDate: DateTime(2026, 4, 1),
-      endDate: DateTime(2026, 9, 30),
-      targetType: 'VIP',
-      status: VoucherStatus.active,
-    ),
-  ];
 }

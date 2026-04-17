@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import '../../services/admin_api_service.dart';
 import '../../theme/app_theme.dart';
 import '../../models/user_model.dart';
 import 'user_detail_screen.dart';
@@ -11,25 +13,65 @@ class UsersScreen extends StatefulWidget {
 }
 
 class _UsersScreenState extends State<UsersScreen> {
-  int _selectedTab = 0; // 0 = Khách hàng, 1 = Chủ nhà
+  int _selectedTab = 0; // 0 = customer, 1 = owner
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
+  Timer? _debounce;
 
-  List<UserModel> get _currentUsers {
-    final users =
-        _selectedTab == 0 ? MockUsers.customers : MockUsers.owners;
-    if (_searchQuery.isEmpty) return users;
-    return users
-        .where((u) =>
-            u.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-            u.phone.replaceAll(' ', '').contains(_searchQuery.replaceAll(' ', '')))
-        .toList();
+  bool _loading = false;
+  String? _error;
+  List<UserModel> _users = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
   }
 
   @override
   void dispose() {
+    _debounce?.cancel();
     _searchController.dispose();
     super.dispose();
+  }
+
+  Future<void> _load() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      final page = await AdminApiService.fetchUsers(
+        type: _selectedTab == 0 ? 'user' : 'owner',
+        search: _searchQuery,
+        limit: 50,
+      );
+      if (!mounted) return;
+      setState(() {
+        _users = page.users;
+        _loading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loading = false;
+      });
+    }
+  }
+
+  void _onSearchChanged(String value) {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 400), () {
+      setState(() => _searchQuery = value);
+      _load();
+    });
+  }
+
+  void _switchTab(int index) {
+    if (_selectedTab == index) return;
+    setState(() => _selectedTab = index);
+    _load();
   }
 
   @override
@@ -44,8 +86,8 @@ class _UsersScreenState extends State<UsersScreen> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.more_vert),
-            onPressed: () {},
+            icon: const Icon(Icons.refresh),
+            onPressed: _load,
           ),
         ],
       ),
@@ -53,13 +95,50 @@ class _UsersScreenState extends State<UsersScreen> {
         children: [
           _buildSearchBar(),
           _buildTabFilter(),
-          Expanded(
-            child: _currentUsers.isEmpty
-                ? _buildEmptyState()
-                : _buildUserList(),
-          ),
+          Expanded(child: _buildBody()),
         ],
       ),
+    );
+  }
+
+  Widget _buildBody() {
+    if (_loading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (_error != null) {
+      return _buildErrorState(_error!);
+    }
+    if (_users.isEmpty) {
+      return _buildEmptyState();
+    }
+    return RefreshIndicator(
+      onRefresh: _load,
+      child: _buildUserList(),
+    );
+  }
+
+  Widget _buildErrorState(String message) {
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.all(32),
+      children: [
+        const SizedBox(height: 80),
+        const Icon(Icons.cloud_off, size: 60, color: AppColors.textSecondary),
+        const SizedBox(height: 16),
+        Text(
+          message,
+          textAlign: TextAlign.center,
+          style: const TextStyle(color: AppColors.textSecondary),
+        ),
+        const SizedBox(height: 16),
+        Center(
+          child: OutlinedButton.icon(
+            onPressed: _load,
+            icon: const Icon(Icons.refresh),
+            label: const Text('Thử lại'),
+          ),
+        ),
+      ],
     );
   }
 
@@ -69,20 +148,21 @@ class _UsersScreenState extends State<UsersScreen> {
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
       child: TextField(
         controller: _searchController,
-        onChanged: (value) => setState(() => _searchQuery = value),
+        onChanged: _onSearchChanged,
         decoration: InputDecoration(
           hintText: 'Tìm kiếm tên, số điện thoại...',
-          hintStyle: const TextStyle(
-            color: AppColors.textSecondary,
-            fontSize: 14,
-          ),
-          prefixIcon: const Icon(Icons.search, color: AppColors.textSecondary),
-          suffixIcon: _searchQuery.isNotEmpty
+          hintStyle:
+              const TextStyle(color: AppColors.textSecondary, fontSize: 14),
+          prefixIcon:
+              const Icon(Icons.search, color: AppColors.textSecondary),
+          suffixIcon: _searchController.text.isNotEmpty
               ? IconButton(
-                  icon: const Icon(Icons.close, color: AppColors.textSecondary),
+                  icon: const Icon(Icons.close,
+                      color: AppColors.textSecondary),
                   onPressed: () {
                     _searchController.clear();
                     setState(() => _searchQuery = '');
+                    _load();
                   },
                 )
               : null,
@@ -107,7 +187,7 @@ class _UsersScreenState extends State<UsersScreen> {
         children: [
           _buildTabButton('Khách hàng', 0),
           const SizedBox(width: 12),
-          _buildTabButton('Chủ nhà', 1),
+          _buildTabButton('Chủ khách sạn', 1),
         ],
       ),
     );
@@ -116,11 +196,13 @@ class _UsersScreenState extends State<UsersScreen> {
   Widget _buildTabButton(String label, int index) {
     final isSelected = _selectedTab == index;
     return GestureDetector(
-      onTap: () => setState(() => _selectedTab = index),
+      onTap: () => _switchTab(index),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary.withOpacity(0.1) : AppColors.background,
+          color: isSelected
+              ? AppColors.primary.withOpacity(0.1)
+              : AppColors.background,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isSelected ? AppColors.primary : Colors.transparent,
@@ -141,13 +223,11 @@ class _UsersScreenState extends State<UsersScreen> {
 
   Widget _buildUserList() {
     return ListView.separated(
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.all(16),
-      itemCount: _currentUsers.length,
+      itemCount: _users.length,
       separatorBuilder: (_, __) => const SizedBox(height: 10),
-      itemBuilder: (context, index) {
-        final user = _currentUsers[index];
-        return _buildUserCard(user);
-      },
+      itemBuilder: (context, index) => _buildUserCard(_users[index]),
     );
   }
 
@@ -169,31 +249,8 @@ class _UsersScreenState extends State<UsersScreen> {
         ),
         child: Row(
           children: [
-            // Avatar
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: user.avatarColor.withOpacity(0.1),
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: user.avatarColor.withOpacity(0.3),
-                  width: 2,
-                ),
-              ),
-              child: Center(
-                child: Text(
-                  user.initials,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: user.avatarColor,
-                  ),
-                ),
-              ),
-            ),
+            _buildAvatar(user, size: 48, fontSize: 16),
             const SizedBox(width: 12),
-            // Info
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -208,43 +265,57 @@ class _UsersScreenState extends State<UsersScreen> {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    user.phone,
+                    user.phone.isEmpty ? user.email : user.phone,
                     style: const TextStyle(
-                      fontSize: 13,
-                      color: AppColors.textSecondary,
-                    ),
+                        fontSize: 13, color: AppColors.textSecondary),
                   ),
-                  const SizedBox(height: 4),
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: user.isActive
-                          ? AppColors.success.withOpacity(0.1)
-                          : AppColors.danger.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(10),
+                  if (user.location.isNotEmpty) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      user.location,
+                      style: const TextStyle(
+                          fontSize: 12, color: AppColors.textSecondary),
                     ),
-                    child: Text(
-                      user.statusLabel,
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: user.isActive
-                            ? AppColors.success
-                            : AppColors.danger,
-                      ),
-                    ),
-                  ),
+                  ],
                 ],
               ),
             ),
-            // Action icon
-            Icon(
-              user.isActive ? Icons.edit_outlined : Icons.lock_outline,
+            const Icon(
+              Icons.chevron_right,
               color: AppColors.textSecondary,
               size: 20,
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAvatar(UserModel user,
+      {required double size, required double fontSize}) {
+    return _initialsAvatar(user, size, fontSize);
+  }
+
+  Widget _initialsAvatar(UserModel user, double size, double fontSize) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: user.avatarColor.withOpacity(0.1),
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: user.avatarColor.withOpacity(0.3),
+          width: 2,
+        ),
+      ),
+      child: Center(
+        child: Text(
+          user.initials,
+          style: TextStyle(
+            fontSize: fontSize,
+            fontWeight: FontWeight.bold,
+            color: user.avatarColor,
+          ),
         ),
       ),
     );
@@ -274,11 +345,8 @@ class _UsersScreenState extends State<UsersScreen> {
             ),
             const SizedBox(height: 8),
             const Text(
-              'Rất tiếc, chúng tôi không tìm thấy kết quả nào cho từ khóa bạn vừa nhập. Vui lòng kiểm tra lại chính tả hoặc thử tìm bằng số điện thoại.',
-              style: TextStyle(
-                fontSize: 13,
-                color: AppColors.textSecondary,
-              ),
+              'Hãy thử đổi từ khóa hoặc tab để xem danh sách khác.',
+              style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
               textAlign: TextAlign.center,
             ),
           ],
@@ -290,20 +358,10 @@ class _UsersScreenState extends State<UsersScreen> {
   void _navigateToDetail(UserModel user) async {
     final result = await Navigator.push<String>(
       context,
-      MaterialPageRoute(
-        builder: (_) => UserDetailScreen(user: user),
-      ),
+      MaterialPageRoute(builder: (_) => UserDetailScreen(user: user)),
     );
-    if (result == 'deleted') {
-      setState(() {
-        if (user.type == UserType.customer) {
-          MockUsers.customers.removeWhere((u) => u.id == user.id);
-        } else {
-          MockUsers.owners.removeWhere((u) => u.id == user.id);
-        }
-      });
-    } else if (result == 'saved') {
-      setState(() {});
+    if (result == 'deleted' || result == 'saved') {
+      _load();
     }
   }
 }

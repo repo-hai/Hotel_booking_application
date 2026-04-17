@@ -1,41 +1,130 @@
 import 'package:flutter/material.dart';
 
-enum BookingStatus { confirmed, pending, cancelled, completed }
+enum BookingStatus { confirmed, pending, cancelRequested, cancelled, completed }
+
+class BookedRoom {
+  final String roomTypeId;
+  final int quantity;
+  final int price;
+  final String? roomName;
+
+  BookedRoom({
+    required this.roomTypeId,
+    required this.quantity,
+    required this.price,
+    this.roomName,
+  });
+
+  factory BookedRoom.fromJson(Map<String, dynamic> j) => BookedRoom(
+        roomTypeId: (j['roomTypeId'] ?? '').toString(),
+        quantity: _toInt(j['quantity']),
+        price: _toInt(j['price']),
+        roomName: j['roomName'] as String?,
+      );
+
+  static int _toInt(dynamic v) {
+    if (v is int) return v;
+    if (v is num) return v.toInt();
+    return int.tryParse('$v') ?? 0;
+  }
+}
 
 class BookingModel {
-  final int id;
+  final String id;
+  final String hotelId;
   final String hotelName;
-  final String roomType;
-  final String guestName;
-  final String guestPhone;
-  final String guestEmail;
-  final DateTime checkin;
-  final DateTime checkout;
-  final int totalPrice;
-  final int roomCount;
-  final int guestCount;
-  final DateTime bookedAt;
-  final String paymentMethod;
-  final String paymentStatus;
+  final String customerName;
+  final String customerPhone;
+  final String customerEmail;
+  final String customerCountry;
+  final DateTime? checkIn;
+  final DateTime? checkOut;
+  final List<BookedRoom> bookedRooms;
+  final int originalPrice;
+  final int discount;
+  final int total;
   BookingStatus status;
+  final DateTime? createdAt;
+  final String? cancellationReason;
+  final String? adminNote;
 
   BookingModel({
     required this.id,
+    required this.hotelId,
     required this.hotelName,
-    required this.roomType,
-    required this.guestName,
-    required this.guestPhone,
-    required this.guestEmail,
-    required this.checkin,
-    required this.checkout,
-    required this.totalPrice,
-    required this.roomCount,
-    required this.guestCount,
-    required this.bookedAt,
-    required this.paymentMethod,
-    required this.paymentStatus,
-    this.status = BookingStatus.pending,
+    required this.customerName,
+    required this.customerPhone,
+    required this.customerEmail,
+    required this.customerCountry,
+    required this.checkIn,
+    required this.checkOut,
+    required this.bookedRooms,
+    required this.originalPrice,
+    required this.discount,
+    required this.total,
+    required this.status,
+    required this.createdAt,
+    this.cancellationReason,
+    this.adminNote,
   });
+
+  factory BookingModel.fromJson(Map<String, dynamic> j) {
+    final rawRooms = (j['bookedRooms'] as List?) ?? const [];
+    return BookingModel(
+      id: (j['id'] ?? '').toString(),
+      hotelId: (j['hotelId'] ?? '').toString(),
+      hotelName: (j['hotelName'] ?? '') as String,
+      customerName: (j['customerName'] ?? '') as String,
+      customerPhone: (j['customerPhone'] ?? '') as String,
+      customerEmail: (j['customerEmail'] ?? '') as String,
+      customerCountry: (j['customerCountry'] ?? '') as String,
+      checkIn: _parseDate(j['checkIn']),
+      checkOut: _parseDate(j['checkOut']),
+      bookedRooms: rawRooms
+          .whereType<Map>()
+          .map((e) => BookedRoom.fromJson(Map<String, dynamic>.from(e)))
+          .toList(),
+      originalPrice: _toInt(j['originalPrice']),
+      discount: _toInt(j['discount']),
+      total: _toInt(j['total']),
+      status: _parseStatus(j['status']),
+      createdAt: _parseDate(j['createdAt']),
+      cancellationReason: j['cancellationReason'] as String?,
+      adminNote: j['adminNote'] as String?,
+    );
+  }
+
+  static BookingStatus _parseStatus(dynamic v) {
+    final s = (v ?? '').toString().toLowerCase();
+    switch (s) {
+      case 'confirmed':
+        return BookingStatus.confirmed;
+      case 'cancel_requested':
+        return BookingStatus.cancelRequested;
+      case 'cancelled':
+        return BookingStatus.cancelled;
+      case 'completed':
+        return BookingStatus.completed;
+      case 'pending':
+      default:
+        return BookingStatus.pending;
+    }
+  }
+
+  static DateTime? _parseDate(dynamic v) {
+    if (v == null) return null;
+    try {
+      return DateTime.parse(v.toString()).toLocal();
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static int _toInt(dynamic v) {
+    if (v is int) return v;
+    if (v is num) return v.toInt();
+    return int.tryParse('$v') ?? 0;
+  }
 
   String get statusLabel {
     switch (status) {
@@ -43,6 +132,8 @@ class BookingModel {
         return 'Đã xác nhận';
       case BookingStatus.pending:
         return 'Chờ xác nhận';
+      case BookingStatus.cancelRequested:
+        return 'Yêu cầu hủy';
       case BookingStatus.cancelled:
         return 'Đã hủy';
       case BookingStatus.completed:
@@ -56,6 +147,8 @@ class BookingModel {
         return const Color(0xFF1565C0);
       case BookingStatus.pending:
         return const Color(0xFFFFA726);
+      case BookingStatus.cancelRequested:
+        return const Color(0xFFFF7043);
       case BookingStatus.cancelled:
         return const Color(0xFFE53935);
       case BookingStatus.completed:
@@ -69,6 +162,8 @@ class BookingModel {
         return Icons.check_circle_outline;
       case BookingStatus.pending:
         return Icons.access_time;
+      case BookingStatus.cancelRequested:
+        return Icons.help_outline;
       case BookingStatus.cancelled:
         return Icons.cancel_outlined;
       case BookingStatus.completed:
@@ -77,110 +172,37 @@ class BookingModel {
   }
 
   int get nights {
-    return checkout.difference(checkin).inDays;
+    if (checkIn == null || checkOut == null) return 0;
+    return checkOut!.difference(checkIn!).inDays;
   }
 
-  String get formattedPrice {
-    final str = totalPrice.toString();
+  int get roomCount =>
+      bookedRooms.fold<int>(0, (sum, r) => sum + r.quantity);
+
+  String get roomSummary {
+    if (bookedRooms.isEmpty) return '—';
+    return bookedRooms
+        .map((r) =>
+            '${r.quantity} x ${r.roomName ?? r.roomTypeId} (${_formatNumber(r.price)}đ)')
+        .join(', ');
+  }
+
+  String get formattedTotal => '${_formatNumber(total)}đ';
+  String get formattedOriginal => '${_formatNumber(originalPrice)}đ';
+  String get formattedDiscount => '${_formatNumber(discount)}đ';
+
+  static String formatDate(DateTime? date) {
+    if (date == null) return '—';
+    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+  }
+
+  static String _formatNumber(int number) {
+    final str = number.toString();
     final buffer = StringBuffer();
     for (int i = 0; i < str.length; i++) {
       if (i > 0 && (str.length - i) % 3 == 0) buffer.write('.');
       buffer.write(str[i]);
     }
-    return '${buffer}đ';
+    return buffer.toString();
   }
-
-  static String formatDate(DateTime date) {
-    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
-  }
-}
-
-class MockBookings {
-  static final List<BookingModel> all = [
-    BookingModel(
-      id: 1001,
-      hotelName: 'Homestay Cát Bà Sea',
-      roomType: 'Phòng Deluxe Đôi',
-      guestName: 'Trần Anh Tuấn',
-      guestPhone: '0904 123 456',
-      guestEmail: 'tuan.tran@example.com',
-      checkin: DateTime(2026, 4, 10),
-      checkout: DateTime(2026, 4, 13),
-      totalPrice: 1500000,
-      roomCount: 1,
-      guestCount: 2,
-      bookedAt: DateTime(2026, 4, 7),
-      paymentMethod: 'Thẻ tín dụng',
-      paymentStatus: 'Đã thanh toán',
-      status: BookingStatus.pending,
-    ),
-    BookingModel(
-      id: 1002,
-      hotelName: 'Villa Lạng Sơn 123',
-      roomType: 'Villa nguyên căn',
-      guestName: 'Lê Thanh Hoa',
-      guestPhone: '0988 765 432',
-      guestEmail: 'hoa.le@example.com',
-      checkin: DateTime(2026, 4, 15),
-      checkout: DateTime(2026, 4, 17),
-      totalPrice: 2400000,
-      roomCount: 1,
-      guestCount: 4,
-      bookedAt: DateTime(2026, 4, 6),
-      paymentMethod: 'Chuyển khoản',
-      paymentStatus: 'Đã thanh toán',
-      status: BookingStatus.confirmed,
-    ),
-    BookingModel(
-      id: 1003,
-      hotelName: 'Khách sạn Sapa View',
-      roomType: 'Phòng Standard',
-      guestName: 'Phạm Văn Hùng',
-      guestPhone: '0912 345 678',
-      guestEmail: 'hung.pham@example.com',
-      checkin: DateTime(2026, 3, 20),
-      checkout: DateTime(2026, 3, 22),
-      totalPrice: 1600000,
-      roomCount: 2,
-      guestCount: 3,
-      bookedAt: DateTime(2026, 3, 15),
-      paymentMethod: 'Ví MoMo',
-      paymentStatus: 'Đã hoàn tiền',
-      status: BookingStatus.cancelled,
-    ),
-    BookingModel(
-      id: 1004,
-      hotelName: 'Homestay Cát Bà Sea',
-      roomType: 'Phòng Superior',
-      guestName: 'Đỗ Minh Trang',
-      guestPhone: '0933 111 222',
-      guestEmail: 'trang.do@example.com',
-      checkin: DateTime(2026, 3, 1),
-      checkout: DateTime(2026, 3, 4),
-      totalPrice: 2100000,
-      roomCount: 1,
-      guestCount: 2,
-      bookedAt: DateTime(2026, 2, 25),
-      paymentMethod: 'Thẻ tín dụng',
-      paymentStatus: 'Đã thanh toán',
-      status: BookingStatus.completed,
-    ),
-    BookingModel(
-      id: 1005,
-      hotelName: 'Khách sạn Hà Nội Grand',
-      roomType: 'Phòng Suite',
-      guestName: 'Nguyễn Thị Mai',
-      guestPhone: '0945 678 901',
-      guestEmail: 'mai.nguyen@example.com',
-      checkin: DateTime(2026, 4, 20),
-      checkout: DateTime(2026, 4, 23),
-      totalPrice: 4500000,
-      roomCount: 1,
-      guestCount: 2,
-      bookedAt: DateTime(2026, 4, 5),
-      paymentMethod: 'Thẻ tín dụng',
-      paymentStatus: 'Chờ thanh toán',
-      status: BookingStatus.pending,
-    ),
-  ];
 }
