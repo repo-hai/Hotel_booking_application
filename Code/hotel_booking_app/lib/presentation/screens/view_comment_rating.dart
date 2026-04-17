@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rating_summary/rating_summary.dart';
-import 'package:hotel_booking_app/widgets/comment_rating.dart';
+import 'package:hotel_booking_app/presentation/screens/comment_rating.dart';
 
 class ViewCommentRating extends StatelessWidget{
   const ViewCommentRating({super.key});

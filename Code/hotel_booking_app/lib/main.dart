@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hotel_booking_app/widgets/login.dart';
+import 'package:hotel_booking_app/presentation/screens/login.dart';
 
 void main() {
   runApp(const MyApp());

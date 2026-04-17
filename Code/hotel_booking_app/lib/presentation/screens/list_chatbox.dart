@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hotel_booking_app/models/chatUsersModel.dart';
-import 'package:hotel_booking_app/widgets/chat_detail_page.dart';
+import 'package:hotel_booking_app/presentation/screens/chat_detail_page.dart';
 
 class ListChatboxView extends StatefulWidget {
   @override

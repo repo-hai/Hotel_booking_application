@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hotel_booking_app/widgets/login.dart';
+import 'package:hotel_booking_app/presentation/screens/login.dart';
 import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 
 double containerHeight = 600;

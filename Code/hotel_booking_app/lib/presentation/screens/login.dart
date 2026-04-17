@@ -1,41 +1,47 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:hotel_booking_app/widgets/login.dart';
-import 'package:hotel_booking_app/widgets/privacy_view.dart';
-import 'package:flutter/services.dart';
-import 'package:hotel_booking_app/widgets/authenticate_email.dart';
+import 'package:hotel_booking_app/presentation/screens/privacy_view.dart';
+import 'package:hotel_booking_app/presentation/screens/register.dart';
+import 'package:hotel_booking_app/presentation/screens/forgot_password.dart';
+import 'package:hotel_booking_app/presentation/screens/profile_view.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
-class RegisterView extends StatelessWidget {
-  const RegisterView({super.key});
+class Login extends StatelessWidget {
+  const Login({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: const MyRegisterPage(),
+      theme: ThemeData(
+        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
+      ),
+      home: const MyLoginPage(title: 'Đăng nhập'),
     );
   }
 }
 
-class MyRegisterPage extends StatefulWidget {
-  const MyRegisterPage({super.key});
-
-  // Fields in a Widget subclass are
-  // always marked "final".
+class MyLoginPage extends StatefulWidget {
+  const MyLoginPage({super.key, required this.title});
+  final String title;
 
   @override
-  State<MyRegisterPage> createState() => _MyRegisterPage();
+  State<MyLoginPage> createState() => _MyLoginPageState();
 }
 
-class _MyRegisterPage extends State<MyRegisterPage> {
-  final String registerState = "not register";
+class _MyLoginPageState extends State<MyLoginPage> {
+  final String loginState = "not login";
+  String username = "";
+  String password = "";
   bool passwordVisible = false;
-  bool confirmPasswordVisible = false;
+  bool isLoading = false;
 
   @override
   void initState(){
     super.initState();
     passwordVisible=false;
-    confirmPasswordVisible = false;
+    username = "";
+    password = "";
+    isLoading = false;
   }
 
   void _onFaceBookLogin(){}
@@ -63,7 +69,7 @@ class _MyRegisterPage extends State<MyRegisterPage> {
                 Padding(
                   padding: EdgeInsetsGeometry.fromLTRB(25, 40, 10, 30),
                   child: Text(
-                    "Đăng kí",
+                    "Đăng nhập",
                     selectionColor: Colors.white,
                     style: TextStyle(
                       color: Colors.white,
@@ -81,134 +87,48 @@ class _MyRegisterPage extends State<MyRegisterPage> {
                   width: 450,
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.all(Radius.circular(40)),
+                    borderRadius: BorderRadius.all(Radius.circular(80)),
                   ),
-                  padding: EdgeInsetsGeometry.fromLTRB(30, 30, 30, 0),
+                  padding: EdgeInsetsGeometry.fromLTRB(30, 50, 30, 0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       ListTile(
-                        leading: Icon(
-                          Icons.person_outlined,
-                          color: Colors.blue,
-                        ),
-                        title: Text("Tên đầy đủ"),
-                        dense: true,
-                      ),
-                      Align(
-                        alignment: AlignmentGeometry.center,
-                        child: SizedBox(
-                          width: 360,
-                          height: 30,
-                          child: TextField(
-                            decoration: InputDecoration(
-                              contentPadding: EdgeInsetsGeometry.fromLTRB(0, 0, 0, 12),
-                            ),
-                          ),
-                        ),
-                      ),
-                      ListTile(
-                        leading: Icon(
-                          Icons.email_outlined,
-                          color: Colors.blue,
-                        ),
+                        leading: Icon(Icons.email_outlined, color: Colors.blue,),
                         title: Text("Email"),
-                        dense: true,
                       ),
                       Align(
                         alignment: AlignmentGeometry.center,
                         child: SizedBox(
                           width: 360,
-                          height: 30,
                           child: TextField(
-                            decoration: InputDecoration(
-                              contentPadding: EdgeInsetsGeometry.fromLTRB(0, 0, 0, 12),
-                            ),
+                            onChanged: (String s){
+                              username = s;
+                            },
                           ),
                         ),
                       ),
                       ListTile(
-                        leading: Icon(
-                          Icons.phone,
-                          color: Colors.blue,
-                        ),
-                        title: Text("Số điện thoại"),
-                        dense: true,
-                      ),
-                      Align(
-                        alignment: AlignmentGeometry.center,
-                        child: SizedBox(
-                          width: 360,
-                          height: 30,
-                          child: TextField(
-                            keyboardType: TextInputType.number,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly,
-                            ],
-                            decoration: InputDecoration(
-                              contentPadding: EdgeInsetsGeometry.fromLTRB(0, 0, 0, 12),
-                            ),
-                          ),
-                        ),
-                      ),
-                      ListTile(
-                        dense: true,
-                        leading: Icon(
-                          Icons.lock,
-                          color: Colors.blue,
-                        ),
+                        leading: Icon(Icons.lock, color: Colors.blue,),
                         title: Text("Mật khẩu"),
                       ),
                       Align(
                         alignment: AlignmentGeometry.center,
                         child: SizedBox(
                           width: 360,
-                          height: 30,
                           child: TextField(
                             obscureText: !passwordVisible,
+                            onChanged: (String s){
+                              password = s;
+                            },
                             decoration: InputDecoration(
-                              contentPadding: EdgeInsetsGeometry.all(0),
+                              border: UnderlineInputBorder(),
+                              helperStyle:TextStyle(color:Colors.green),
                               suffixIcon: IconButton(
-                                icon: Icon(
-                                  passwordVisible ? Icons.visibility : Icons.visibility_off,
-                                  size: 19,
-                                ),
+                                icon: Icon(passwordVisible ? Icons.visibility : Icons.visibility_off),
                                 onPressed: () {
                                   setState(() {
                                     passwordVisible = !passwordVisible;
-                                  },
-                                  );
-                                },
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      ListTile(
-                        dense: true,
-                        leading: Icon(
-                          Icons.lock,
-                          color: Colors.blue,
-                        ),
-                        title: Text("Nhập lại mật khẩu"),
-                      ),
-                      Align(
-                        alignment: AlignmentGeometry.center,
-                        child: SizedBox(
-                          width: 360,
-                          height: 30,
-                          child: TextField(
-                            obscureText: !confirmPasswordVisible,
-                            decoration: InputDecoration(
-                              contentPadding: EdgeInsetsGeometry.all(0),
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  confirmPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                                  size: 19,
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    confirmPasswordVisible = !confirmPasswordVisible;
                                   },
                                   );
                                 },
@@ -221,7 +141,23 @@ class _MyRegisterPage extends State<MyRegisterPage> {
                         child: Column(
                           children: [
                             Padding(
-                              padding: EdgeInsetsGeometry.fromLTRB(0, 10, 0, 0),
+                              padding: EdgeInsetsGeometry.fromLTRB(0, 15, 0, 8),
+                              child: TextButton(
+                                  onPressed: (){
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(builder: (context) => MyForgotPasswordPage()),
+                                    );
+                                  },
+                                  child: Text(
+                                    "Quên mật khẩu?",
+                                    style: TextStyle(
+                                      color: Color.fromRGBO(255, 73, 0, 1),
+                                    ),
+                                  )
+                              ),
+                            ),
+                            Padding(
+                              padding: EdgeInsetsGeometry.fromLTRB(0, 0, 0, 0),
                               child: Container(
                                 decoration: BoxDecoration(
                                     borderRadius: BorderRadius.all(Radius.circular(20)),
@@ -236,19 +172,46 @@ class _MyRegisterPage extends State<MyRegisterPage> {
                                 ),
                                 child: ElevatedButton(
                                   onPressed: () {
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (context) => AuthenticateEmail(),
-                                      ),
+                                    print("username: " + username);
+                                    print("password: " + password);
+                                    setState(() {
+                                      isLoading = true;
+                                    });
+                                    showDialog(
+                                      context: context,
+                                      builder: (ctx) =>
+                                        AlertDialog(
+                                          title: Text("Test dialog"),
+                                          backgroundColor: Colors.white,
+                                          actions: [
+                                            TextButton(
+                                              onPressed: (){
+                                                Navigator.of(ctx).pop();
+                                                Navigator.of(context).push(
+                                                  MaterialPageRoute(
+                                                    builder: (context) => ProfileView(),
+                                                  ),
+                                                );
+                                              },
+                                              child: Text(
+                                                "OK",
+                                                style: TextStyle(color: Colors.black),
+                                              )
+                                            )
+                                          ],
+                                        )
+                                      // isLoading ? SpinKitPouringHourGlass(
+                                      //   color: Colors.white,
+                                      // ) : Text(""),
                                     );
                                   },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.transparent,
                                     shadowColor: Colors.transparent,
-                                    padding: EdgeInsetsGeometry.fromLTRB(50, 17, 50, 17),
+                                    padding: EdgeInsetsGeometry.fromLTRB(60, 17, 60, 17),
                                   ),
                                   child: Text(
-                                    "Đăng kí",
+                                    "Đăng nhập",
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 17,
@@ -258,7 +221,7 @@ class _MyRegisterPage extends State<MyRegisterPage> {
                               ),
                             ),
                             Padding(
-                              padding: EdgeInsetsGeometry.fromLTRB(0, 20, 0, 5),
+                              padding: EdgeInsetsGeometry.fromLTRB(0, 40, 0, 10),
                               child: Text("hoặc đăng nhập sử dụng"),
                             ),
                           ],
@@ -329,12 +292,12 @@ class _MyRegisterPage extends State<MyRegisterPage> {
                               ],
                             ),
                             Padding(
-                              padding: EdgeInsetsGeometry.fromLTRB(0, 10, 0, 0),
+                              padding: EdgeInsetsGeometry.fromLTRB(0, 70, 0, 10),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
-                                    "Bạn đã có tài khoản?",
+                                    "Bạn chưa có tài khoản?",
                                     style: TextStyle(
                                       fontSize: 16,
                                     ),
@@ -343,15 +306,15 @@ class _MyRegisterPage extends State<MyRegisterPage> {
                                       onPressed: () {
                                         Navigator.of(context).push(
                                           MaterialPageRoute(
-                                            builder: (context) => Login(),
+                                            builder: (context) => RegisterView(),
                                           ),
                                         );
                                       },
                                       style: ButtonStyle(
-                                          padding: WidgetStatePropertyAll<EdgeInsetsGeometry>(EdgeInsetsGeometry.zero)
+                                        padding: WidgetStatePropertyAll<EdgeInsetsGeometry>(EdgeInsetsGeometry.zero),
                                       ),
                                       child: Text(
-                                        " Đăng nhập",
+                                        " Đăng kí",
                                         style: TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.w700,

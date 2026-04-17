@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:hotel_booking_app/widgets/edit_profile.dart';
-import 'package:hotel_booking_app/widgets/change_password.dart';
-import 'package:hotel_booking_app/widgets/list_chatbox.dart';
-import 'package:hotel_booking_app/widgets/view_comment_rating.dart';
+import 'package:hotel_booking_app/presentation/screens/edit_profile.dart';
+import 'package:hotel_booking_app/presentation/screens/change_password.dart';
+import 'package:hotel_booking_app/presentation/screens/list_chatbox.dart';
+import 'package:hotel_booking_app/presentation/screens/view_comment_rating.dart';
 
 class ProfileView extends StatefulWidget {
   @override
