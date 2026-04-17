@@ -1,0 +1,269 @@
+[
+  {
+    "ID": 1,
+    "Email": "admin@booking.com",
+    "Password": "hashed_admin_password_xyz",
+    "Phone": "0901234567",
+    "Name": "Hệ Thống Quản Trị",
+    "Location": "Hà Nội",
+    "Gender": "Nam",
+    "DateOfBirth": "1985-05-15",
+    "MembershipLevel": null,
+    "Point": null,
+    "TotalSpent": null,
+    "Role": "admin"
+  },
+  {
+    "ID": 2,
+    "Email": "owner.muongthanh@gmail.com",
+    "Password": "hashed_owner_password_1",
+    "Phone": "0912345678",
+    "Name": "Trần Văn Chủ",
+    "Location": "Đà Nẵng",
+    "Gender": "Nam",
+    "DateOfBirth": "1978-10-20",
+    "MembershipLevel": null,
+    "Point": null,
+    "TotalSpent": null,
+    "Role": "owner"
+  },
+  {
+    "ID": 3,
+    "Email": "owner.vinpearl@gmail.com",
+    "Password": "hashed_owner_password_2",
+    "Phone": "0987654321",
+    "Name": "Lê Thị Lộc",
+    "Location": "Hồ Chí Minh",
+    "Gender": "Nữ",
+    "DateOfBirth": "1982-03-08",
+    "MembershipLevel": null,
+    "Point": null,
+    "TotalSpent": null,
+    "Role": "owner"
+  },
+  {
+    "ID": 4,
+    "Email": "owner.flc@yahoo.com",
+    "Password": "hashed_owner_password_3",
+    "Phone": "0933445566",
+    "Name": "Phạm Quang Sáng",
+    "Location": "Nha Trang",
+    "Gender": "Nam",
+    "DateOfBirth": "1990-12-01",
+    "MembershipLevel": null,
+    "Point": null,
+    "TotalSpent": null,
+    "Role": "owner"
+  },
+  {
+    "ID": 5,
+    "Email": "khachhang1@gmail.com",
+    "Password": "hashed_user_password_1",
+    "Phone": "0977112233",
+    "Name": "Nguyễn Hữu Tài",
+    "Location": "Hải Phòng",
+    "Gender": "Nam",
+    "DateOfBirth": "1995-07-22",
+    "MembershipLevel": "Gold",
+    "Point": 1500,
+    "TotalSpent": 15000000,
+    "Role": "user",
+    "SearchingHistory": [
+      {
+        "ID": 1,
+        "Location": "Đà Lạt",
+        "Checkin": "2026-05-10",
+        "Checkout": "2026-05-12",
+        "RoomNum": 1,
+        "Capacity": 2
+      },
+      {
+        "ID": 2,
+        "Location": "Nha Trang",
+        "Checkin": "2026-07-01",
+        "Checkout": "2026-07-05",
+        "RoomNum": 2,
+        "Capacity": 4
+      }
+    ],
+    "CustomerBookingInfo": [
+      {
+        "ID": 1,
+        "Name": "Nguyễn Hữu Tài",
+        "Email": "khachhang1@gmail.com",
+        "Phone": "0977112233",
+        "Country": "Việt Nam",
+        "IsDefault": true
+      }
+    ]
+  },
+  {
+    "ID": 6,
+    "Email": "maianh.do@gmail.com",
+    "Password": "hashed_user_password_2",
+    "Phone": "0866998877",
+    "Name": "Đỗ Mai Anh",
+    "Location": "Cần Thơ",
+    "Gender": "Nữ",
+    "DateOfBirth": "1998-11-11",
+    "MembershipLevel": "Silver",
+    "Point": 500,
+    "TotalSpent": 5000000,
+    "Role": "user",
+    "SearchingHistory": [
+      {
+        "ID": 3,
+        "Location": "Phú Quốc",
+        "Checkin": "2026-06-15",
+        "Checkout": "2026-06-18",
+        "RoomNum": 1,
+        "Capacity": 2
+      }
+    ],
+    "CustomerBookingInfo": [
+      {
+        "ID": 2,
+        "Name": "Đỗ Mai Anh",
+        "Email": "maianh.do@gmail.com",
+        "Phone": "0866998877",
+        "Country": "Việt Nam",
+        "IsDefault": true
+      },
+      {
+        "ID": 3,
+        "Name": "Đỗ Văn Cường (Bố)",
+        "Email": "cuong.do@gmail.com",
+        "Phone": "0912223344",
+        "Country": "Việt Nam",
+        "IsDefault": false
+      }
+    ]
+  },
+  {
+    "ID": 7,
+    "Email": "hoanghai.vu@yahoo.com",
+    "Password": "hashed_user_password_3",
+    "Phone": "0899776655",
+    "Name": "Vũ Hoàng Hải",
+    "Location": "Bà Rịa - Vũng Tàu",
+    "Gender": "Nam",
+    "DateOfBirth": "2000-02-14",
+    "MembershipLevel": "Bronze",
+    "Point": 100,
+    "TotalSpent": 1000000,
+    "Role": "user",
+    "SearchingHistory": [
+      {
+        "ID": 4,
+        "Location": "Hà Nội",
+        "Checkin": "2026-08-01",
+        "Checkout": "2026-08-03",
+        "RoomNum": 1,
+        "Capacity": 1
+      }
+    ],
+    "CustomerBookingInfo": [
+      {
+        "ID": 4,
+        "Name": "Vũ Hoàng Hải",
+        "Email": "hoanghai.vu@yahoo.com",
+        "Phone": "0899776655",
+        "Country": "Việt Nam",
+        "IsDefault": true
+      }
+    ]
+  },
+  {
+    "ID": 8,
+    "Email": "tuyet.bui@outlook.com",
+    "Password": "hashed_user_password_4",
+    "Phone": "0922334455",
+    "Name": "Bùi Thị Tuyết",
+    "Location": "Đà Lạt",
+    "Gender": "Nữ",
+    "DateOfBirth": "1992-09-05",
+    "MembershipLevel": "Platinum",
+    "Point": 5000,
+    "TotalSpent": 50000000,
+    "Role": "user",
+    "SearchingHistory": [
+      {
+        "ID": 5,
+        "Location": "Hội An",
+        "Checkin": "2026-09-10",
+        "Checkout": "2026-09-15",
+        "RoomNum": 2,
+        "Capacity": 4
+      }
+    ],
+    "CustomerBookingInfo": [
+      {
+        "ID": 5,
+        "Name": "Bùi Thị Tuyết",
+        "Email": "tuyet.bui@outlook.com",
+        "Phone": "0922334455",
+        "Country": "Việt Nam",
+        "IsDefault": true
+      }
+    ]
+  },
+  {
+    "ID": 9,
+    "Email": "vanthai88@gmail.com",
+    "Password": "hashed_user_password_5",
+    "Phone": "0944556677",
+    "Name": "Hoàng Văn Thái",
+    "Location": "Hà Nội",
+    "Gender": "Nam",
+    "DateOfBirth": "1988-04-30",
+    "MembershipLevel": "Member",
+    "Point": 0,
+    "TotalSpent": 0,
+    "Role": "user",
+    "SearchingHistory": [],
+    "CustomerBookingInfo": [
+      {
+        "ID": 6,
+        "Name": "Hoàng Văn Thái",
+        "Email": "vanthai88@gmail.com",
+        "Phone": "0944556677",
+        "Country": "Việt Nam",
+        "IsDefault": true
+      }
+    ]
+  },
+  {
+    "ID": 10,
+    "Email": "thanhvan.ngo@gmail.com",
+    "Password": "hashed_user_password_6",
+    "Phone": "0911223344",
+    "Name": "Ngô Thanh Vân",
+    "Location": "Hồ Chí Minh",
+    "Gender": "Nữ",
+    "DateOfBirth": "1996-08-19",
+    "MembershipLevel": "Silver",
+    "Point": 800,
+    "TotalSpent": 8000000,
+    "Role": "user",
+    "SearchingHistory": [
+      {
+        "ID": 6,
+        "Location": "Sapa",
+        "Checkin": "2026-12-20",
+        "Checkout": "2026-12-25",
+        "RoomNum": 1,
+        "Capacity": 2
+      }
+    ],
+    "CustomerBookingInfo": [
+      {
+        "ID": 7,
+        "Name": "Ngô Thanh Vân",
+        "Email": "thanhvan.ngo@gmail.com",
+        "Phone": "0911223344",
+        "Country": "Việt Nam",
+        "IsDefault": true
+      }
+    ]
+  }
+]
