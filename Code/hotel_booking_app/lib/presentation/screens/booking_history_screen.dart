@@ -218,7 +218,7 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen>
   }
 
   Widget _buildBookingCard(BookingHistoryModel booking, String type) {
-    final isPending = booking.status == 'Cancel_Requested';
+    final isPending = booking.status == 'Cancel_Requested' || booking.status == 'Pending';
     final isConfirmed = booking.status == 'Confirmed';
     final isCancelled = booking.status == 'Cancelled';
     final isPast = booking.status == 'Completed';

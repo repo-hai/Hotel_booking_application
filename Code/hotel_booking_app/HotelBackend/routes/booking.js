@@ -44,7 +44,7 @@ router.post('/', async (req, res) => {
 			discount: discount || 0,
 			total: totalPrice,
 
-			status: "Confirmed", // Mặc định là xác nhận thành công
+			status: "Pending", // Đang chờ chủ khách sạn xác nhận
 			createdAt: new Date().toISOString() // Giờ đặt phòng
 		};
 
@@ -150,9 +150,9 @@ router.put('/:id/request-cancel', async (req, res) => {
 			return res.status(404).json({ message: "Không tìm thấy đơn hàng!" });
 		}
 
-		// Chỉ đơn hàng đang "Confirmed" mới được phép xin hủy
-		if (bookingDoc.data().status !== 'Confirmed') {
-			return res.status(400).json({ message: "Chỉ đơn hàng đã xác nhận mới có thể gửi yêu cầu hủy!" });
+		// Chỉ đơn hàng đang "Confirmed" hoặc "Pending" mới được phép xin hủy
+		if (!['Confirmed', 'Pending'].includes(bookingDoc.data().status)) {
+			return res.status(400).json({ message: "Chỉ đơn hàng đang hoạt động mới có thể gửi yêu cầu hủy!" });
 		}
 
 		// Đổi trạng thái sang "Cancel_Requested"

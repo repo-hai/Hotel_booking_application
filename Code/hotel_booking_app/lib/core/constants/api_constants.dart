@@ -9,6 +9,7 @@ class ApiConstants {
   static const String hotelsSearch = '/api/hotels/search';
   static const String hotelsFilter = '/api/hotels/filter';
   static String hotelDetail(String id) => '/api/hotels/$id';
+  static String hotelReviews(String id) => '/api/hotels/$id/reviews';
 
   // Bookings
   static const String bookings = '/api/bookings';
@@ -16,6 +17,8 @@ class ApiConstants {
   // Users
   static String userSearchHistory(String userId) => '/api/users/$userId/search-history';
   static String userSuggestions(String userId) => '/api/users/$userId/suggestions';
+  static String vouchersAvailable({double? orderTotal}) =>
+      '/api/users/vouchers/available${orderTotal != null ? "?orderTotal=${orderTotal.toStringAsFixed(0)}" : ""}';
 
   // Admin
   static const String adminStats = '/api/admin/dashboard/stats';

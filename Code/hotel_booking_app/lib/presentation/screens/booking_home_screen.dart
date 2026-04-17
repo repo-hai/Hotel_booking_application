@@ -31,8 +31,9 @@ class _BookingHomeScreenState extends State<BookingHomeScreen> {
   bool _isLoadingHistory = false;
   bool _isLoadingSuggestions = false;
 
-  // User ID tạm thời (sau này lấy từ Auth)
-  static const String _userId = 'user_1';
+  // User ID — khớp với document ID trong Firebase (dùng số "1", "2"...)
+  // TODO: Sau khi có Auth, lấy từ Firebase Auth UID
+  static const String _userId = '1';
 
   int _currentNavIndex = 0;
 
@@ -366,7 +367,7 @@ class _BookingHomeScreenState extends State<BookingHomeScreen> {
       child: SizedBox(
         width: double.infinity,
         child: ElevatedButton(
-          onPressed: () {
+          onPressed: () async {
             if (_selectedDestination.isEmpty) {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
@@ -378,8 +379,8 @@ class _BookingHomeScreenState extends State<BookingHomeScreen> {
               return;
             }
 
-            // Lưu lịch sử tìm kiếm
-            HotelService.saveSearchHistory(
+            // Lưu lịch sử tìm kiếm (await để đảm bảo lưu xong)
+            await HotelService.saveSearchHistory(
               _userId,
               SearchHistoryModel(
                 city: _selectedDestination,
@@ -390,8 +391,10 @@ class _BookingHomeScreenState extends State<BookingHomeScreen> {
               ),
             );
 
-            // Điều hướng sang màn hình kết quả
-            Navigator.push(
+            if (!mounted) return;
+
+            // Điều hướng sang màn hình kết quả, reload lịch sử khi quay lại
+            await Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (_) => SearchResultsScreen(
@@ -403,6 +406,9 @@ class _BookingHomeScreenState extends State<BookingHomeScreen> {
                 ),
               ),
             );
+
+            // Reload lịch sử tìm kiếm sau khi quay lại
+            if (mounted) _loadSearchHistory();
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primaryLight,
@@ -643,6 +649,14 @@ class _BookingHomeScreenState extends State<BookingHomeScreen> {
                     width: 100,
                     height: 90,
                     fit: BoxFit.cover,
+                    headers: const {
+                      'User-Agent':
+                          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                    },
+                    loadingBuilder: (_, child, progress) {
+                      if (progress == null) return child;
+                      return _buildImagePlaceholder();
+                    },
                     errorBuilder: (_, __, ___) => _buildImagePlaceholder(),
                   )
                 : _buildImagePlaceholder(),

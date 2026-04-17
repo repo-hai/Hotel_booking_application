@@ -20,26 +20,33 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
 
-  // Danh sách thành phố gợi ý khi gõ
+  // Danh sách địa điểm khớp 100% với field 'location' trong Firebase
   final List<String> _allCities = [
     'Hà Nội',
     'Hồ Chí Minh',
     'Đà Nẵng',
-    'Nha Trang',
-    'Đà Lạt',
-    'Phú Quốc',
-    'Vũng Tàu',
-    'Hội An',
-    'Huế',
-    'Hạ Long',
-    'Sapa',
-    'Mũi Né',
+    'Khánh Hòa (Nha Trang)',
+    'Lâm Đồng (Đà Lạt)',
+    'Kiên Giang (Phú Quốc)',
+    'Bà Rịa - Vũng Tàu',
+    'Quảng Nam (Hội An)',
+    'Thừa Thiên Huế',
+    'Quảng Ninh (Hạ Long)',
+    'Lào Cai (Sapa)',
     'Cần Thơ',
     'Lạng Sơn',
-    'Hải Phòng',
     'Ninh Bình',
-    'Quy Nhơn',
-    'Phan Thiết',
+    'Bình Định (Quy Nhơn)',
+    'Thanh Hóa',
+    'Ninh Thuận',
+    'Sơn La (Mộc Châu)',
+    'Vĩnh Phúc',
+    'Hòa Bình',
+    'Phú Thọ',
+    'Nam Định',
+    'Bắc Ninh',
+    'Tiền Giang',
+    'Quảng Trị',
   ];
 
   List<String> _filteredCities = [];

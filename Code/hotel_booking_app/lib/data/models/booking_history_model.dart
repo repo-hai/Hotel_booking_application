@@ -69,7 +69,7 @@ class BookingHistoryModel {
 
   /// Phân loại tab
   bool get isActive =>
-      status == 'Confirmed' || status == 'Cancel_Requested';
+      status == 'Confirmed' || status == 'Pending' || status == 'Cancel_Requested';
   bool get isPast =>
       status == 'Completed';
   bool get isCancelled =>
@@ -77,10 +77,12 @@ class BookingHistoryModel {
 
   String get statusLabel {
     switch (status) {
+      case 'Pending':
+        return 'Đang chờ xác nhận từ chỗ nghỉ';
       case 'Confirmed':
         return 'Đã xác nhận';
       case 'Cancel_Requested':
-        return 'Đang chờ xác nhận từ chỗ nghỉ';
+        return 'Đang chờ duyệt hủy';
       case 'Cancelled':
         return 'Đã hủy';
       case 'Completed':

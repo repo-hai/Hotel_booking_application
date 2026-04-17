@@ -108,7 +108,8 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
           minPrice: _filter.minPrice,
           maxPrice: _filter.maxPrice,
           minStar: _filter.minStar,
-          requiredAmenities: _filter.requiredAmenities,
+          requiredAmenityIcons: _filter.requiredAmenityIcons,
+          propertyTypes: _filter.propertyTypes,
           sortBy: _filter.sortBy,
           page: page,
           limit: _pageSize,
@@ -184,14 +185,11 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
 
   String get _activeSortLabel {
     switch (_filter.sortBy) {
-      case 'price_asc':
-        return AppStrings.giaThapDenCao;
-      case 'price_desc':
-        return AppStrings.giaCaoDenThap;
-      case 'star_desc':
-        return AppStrings.saoNhieuNhat;
-      default:
-        return AppStrings.locVaSapXep;
+      case 'price_asc': return 'Giá thấp đến cao';
+      case 'price_desc': return 'Giá cao đến thấp';
+      case 'star_desc': return 'Sao nhiều nhất';
+      case 'star_asc': return 'Sao ít nhất';
+      default: return AppStrings.locVaSapXep;
     }
   }
 
@@ -477,13 +475,14 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
   // ── HOTEL CARD ─────────────────────────────────────────────────────────────
 
   Widget _buildHotelCard(HotelModel hotel) {
-    // Tính giá thấp nhất từ danh sách phòng
     double? lowestPrice = hotel.minRoomPrice;
     if (lowestPrice == null && hotel.rooms.isNotEmpty) {
       lowestPrice = hotel.rooms
           .map((r) => r.price)
           .reduce((a, b) => a < b ? a : b);
     }
+    final originalPrice =
+        lowestPrice != null ? lowestPrice * 1.15 : null;
 
     return GestureDetector(
       onTap: () {
@@ -515,29 +514,43 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Ảnh khách sạn
+            // ── Ảnh ──────────────────────────────────────────────
             _buildHotelImage(hotel),
 
-            // Thông tin
             Padding(
               padding: const EdgeInsets.all(12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Tên + sao
+                  // ── Tên + sao + loại ─────────────────────────
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
-                        child: Text(
-                          hotel.name,
-                          style: const TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              hotel.name,
+                              style: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.textPrimary,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            if (hotel.type.isNotEmpty) ...[
+                              const SizedBox(height: 2),
+                              Text(
+                                hotel.type,
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ],
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -547,7 +560,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
 
                   const SizedBox(height: 6),
 
-                  // Địa chỉ
+                  // ── Địa chỉ ──────────────────────────────────
                   Row(
                     children: [
                       const Icon(Icons.location_on,
@@ -567,84 +580,97 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                     ],
                   ),
 
+                  // ── Mô tả ngắn ───────────────────────────────
+                  if (hotel.description.isNotEmpty) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      hotel.description,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textSecondary,
+                        height: 1.4,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+
                   const SizedBox(height: 8),
 
-                  // Tiện nghi
+                  // ── Tiện nghi ─────────────────────────────────
                   if (hotel.amenities.isNotEmpty)
                     _buildAmenitiesRow(hotel.amenities),
 
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 8),
 
-                  // Giá + nút đặt
+                  // ── Badge không cần thanh toán trước ─────────
                   Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Expanded(
-                        child: lowestPrice != null
-                            ? Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    AppStrings.demTu,
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      color: AppColors.textSecondary,
-                                    ),
-                                  ),
-                                  Text(
-                                    '${_formatPrice(lowestPrice)} ${AppStrings.vnd}',
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.primaryLight,
-                                    ),
-                                  ),
-                                  const Text(
-                                    '/đêm',
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      color: AppColors.textSecondary,
-                                    ),
-                                  ),
-                                ],
-                              )
-                            : const SizedBox(),
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => HotelDetailScreen(
-                                hotel: hotel,
-                                checkIn: widget.checkIn,
-                                checkOut: widget.checkOut,
-                                guests: widget.guests,
-                                rooms: widget.rooms,
-                              ),
-                            ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.accent,
-                          foregroundColor: AppColors.textPrimary,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 8),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          elevation: 0,
-                        ),
-                        child: const Text(
-                          'Xem phòng',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.bold,
-                          ),
+                      const Icon(Icons.check_circle_outline,
+                          size: 13, color: Colors.green),
+                      const SizedBox(width: 4),
+                      const Text(
+                        'Không cần thanh toán trước',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Colors.green,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ],
                   ),
+
+                  const SizedBox(height: 8),
+                  const Divider(height: 1, color: AppColors.divider),
+                  const SizedBox(height: 8),
+
+                  // ── Giá ──────────────────────────────────────
+                  if (lowestPrice != null)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Giá cho 1 đêm, 2 người lớn',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.baseline,
+                          textBaseline: TextBaseline.alphabetic,
+                          children: [
+                            if (originalPrice != null) ...[
+                              Text(
+                                '${_formatPrice(originalPrice)} VND',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.textSecondary,
+                                  decoration: TextDecoration.lineThrough,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                            ],
+                            Text(
+                              '${_formatPrice(lowestPrice)} VND',
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFFCC0000),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const Text(
+                          'Đã bao gồm thuế và phí',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
                 ],
               ),
             ),
@@ -663,6 +689,14 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
               width: double.infinity,
               height: 180,
               fit: BoxFit.cover,
+              headers: const {
+                'User-Agent':
+                    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+              },
+              loadingBuilder: (_, child, progress) {
+                if (progress == null) return child;
+                return _buildImagePlaceholder();
+              },
               errorBuilder: (_, __, ___) => _buildImagePlaceholder(),
             )
           : _buildImagePlaceholder(),
@@ -709,28 +743,40 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
   }
 
   Widget _buildAmenitiesRow(List<AmenityModel> amenities) {
+    // Map cả icon cũ (wifi) lẫn icon mới từ Firebase (fa-wifi)
     final iconMap = <String, IconData>{
       'wifi': Icons.wifi,
+      'fa-wifi': Icons.wifi,
       'pool': Icons.pool,
+      'fa-swimming-pool': Icons.pool,
       'parking': Icons.local_parking,
+      'fa-parking': Icons.local_parking,
       'gym': Icons.fitness_center,
+      'fa-dumbbell': Icons.fitness_center,
       'restaurant': Icons.restaurant,
+      'fa-utensils': Icons.restaurant,
       'spa': Icons.spa,
+      'fa-spa': Icons.spa,
       'ac': Icons.ac_unit,
+      'fa-snowflake': Icons.ac_unit,
       'breakfast': Icons.free_breakfast,
+      'fa-bread-slice': Icons.free_breakfast,
+      'fa-glass-martini-alt': Icons.local_bar,
+      'elevator': Icons.elevator,
+      'fa-elevator': Icons.elevator,
     };
 
     final toShow = amenities.take(4).toList();
 
     return Wrap(
-      spacing: 6,
+      spacing: 8,
       runSpacing: 4,
       children: toShow.map((a) {
         final iconData = iconMap[a.icon] ?? Icons.check_circle_outline;
         return Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(iconData, size: 13, color: AppColors.textSecondary),
+            Icon(iconData, size: 13, color: AppColors.primaryLight),
             const SizedBox(width: 3),
             Text(
               a.name,

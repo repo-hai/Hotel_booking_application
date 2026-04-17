@@ -17,11 +17,12 @@ class SearchHistoryModel {
 
   factory SearchHistoryModel.fromJson(Map<String, dynamic> json) {
     return SearchHistoryModel(
+      // Backend đã normalize về 'city'
       city: json['city'] ?? '',
       checkIn: json['checkIn'],
       checkOut: json['checkOut'],
-      guests: json['guests'] ?? 1,
-      rooms: json['rooms'] ?? 1,
+      guests: (json['guests'] ?? 1) as int,
+      rooms: (json['rooms'] ?? 1) as int,
       searchedAt: json['searchedAt'],
     );
   }

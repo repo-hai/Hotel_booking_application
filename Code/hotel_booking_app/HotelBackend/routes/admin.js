@@ -110,18 +110,20 @@ router.get('/users', async (req, res) => {
 		const snapshot = await query.get();
 		let usersList = [];
 
-		// 3. Đổ dữ liệu ra mảng và định dạng lại cho đúng thiết kế JSON của em
+		// 3. Đổ dữ liệu ra mảng và định dạng lại
 		snapshot.forEach(doc => {
 			const data = doc.data();
 			usersList.push({
 				id: doc.id,
-				name: data.name || "Khách chưa cập nhật tên",
-				phone: data.phone || "",
-				email: data.email || "",
-				type: data.type || "customer",     // Mặc định là customer
-				status: data.status || "active",   // Mặc định là active
+				name: data.Name || "Khách chưa cập nhật tên",
+				phone: data.Phone || "",
+				email: data.Email || "",
+				type: data.Role || "user",
+				status: data.status || "active",
 				joinDate: data.createdAt || new Date().toISOString(),
-				avatarUrl: data.avatarUrl || null
+				avatarUrl: data.avatarUrl || null,
+				membershipLevel: data.MembershipLevel || "Silver",
+				point: data.Point || 0
 			});
 		});
 
@@ -190,16 +192,15 @@ router.get('/users/:id', async (req, res) => {
 
 		const userInfo = {
 			id: userDoc.id,
-			name: data.name || "Khách chưa cập nhật tên",
-			phone: data.phone || "Chưa cập nhật SĐT",
-			email: data.email || "Chưa cập nhật Email",
-			type: data.type || "customer",
+			name: data.Name || "Khách chưa cập nhật tên",
+			phone: data.Phone || "Chưa cập nhật SĐT",
+			email: data.Email || "Chưa cập nhật Email",
+			type: data.Role || "user",
 			status: data.status || "active",
-			joinDate: data.createdAt || new Date().toISOString(), // Lấy ngày tạo từ DB
+			joinDate: data.createdAt || new Date().toISOString(),
 			avatarUrl: data.avatarUrl || null,
-			// Khuyến mãi thêm vài trường nếu DB có sẵn
-			point: data.point || 0,
-			membershipLevel: data.membershipLevel || "Silver"
+			point: data.Point || 0,
+			membershipLevel: data.MembershipLevel || "Silver"
 		};
 
 		// 5. Trả kết quả về cho Admin App
@@ -423,18 +424,18 @@ router.get('/vouchers', async (req, res) => {
 			const data = doc.data();
 			vouchersList.push({
 				id: doc.id,
-				code: data.code || "",
+				code: data.Code || "",
 				name: data.name || "Khuyến mãi chưa có tên",
-				discountType: data.discountType || "percent",
-				discountValue: data.discountValue || 0,
-				maxDiscount: data.maxDiscount || 0,
-				minSpend: data.minSpend || 0,
-				usageLimit: data.usageLimit || 0,
-				usedCount: data.usedCount || 0,
+				discountType: data.DiscountType || "Percentage",
+				discountValue: data.Value || 0,
+				maxDiscount: data.MaxDiscountValue || 0,
+				minSpend: data.MinSpend || 0,
+				usageLimit: data.UsageLimit || 0,
+				usedCount: (data.UsageHistory || []).length,
 				startDate: data.startDate || null,
 				endDate: data.endDate || null,
-				targetType: data.targetType || "all",
-				status: data.status || "active"
+				targetType: data.TargetType || "all",
+				status: data.Status || "Active"
 			});
 		});
 
@@ -503,19 +504,18 @@ router.get('/vouchers/:id', async (req, res) => {
 
 		const voucherDetail = {
 			id: voucherDoc.id,
-			code: data.code || "",
+			code: data.Code || "",
 			name: data.name || "Khuyến mãi chưa có tên",
-			discountType: data.discountType || "percent",
-			discountValue: data.discountValue || 0,
-			maxDiscount: data.maxDiscount || 0,
-			minSpend: data.minSpend || 0,
-			usageLimit: data.usageLimit || 0,
-			usedCount: data.usedCount || 0,
+			discountType: data.DiscountType || "Percentage",
+			discountValue: data.Value || 0,
+			maxDiscount: data.MaxDiscountValue || 0,
+			minSpend: data.MinSpend || 0,
+			usageLimit: data.UsageLimit || 0,
+			usedCount: (data.UsageHistory || []).length,
 			startDate: data.startDate || null,
 			endDate: data.endDate || null,
-			targetType: data.targetType || "all",
-			status: data.status || "active",
-			// Mentor thêm phần mô tả chi tiết nếu trong DB em có lưu
+			targetType: data.TargetType || "all",
+			status: data.Status || "Active",
 			description: data.description || "Chưa có mô tả chi tiết cho khuyến mãi này."
 		};
 
