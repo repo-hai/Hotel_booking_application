@@ -44,7 +44,7 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
         title: Row(
           children: [
             CircleAvatar(
-              backgroundImage: NetworkImage("https://randomuser.me/api/portraits/men/5.jpg"),
+              backgroundImage: NetworkImage("https://m.media-amazon.com/images/I/71-OTwKLziL._AC_SL1500_.jpg"),
               maxRadius: 20,
             ),
             SizedBox(width: 12,),

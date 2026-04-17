@@ -4,6 +4,7 @@ import 'package:hotel_booking_app/widgets/register.dart';
 import 'package:hotel_booking_app/widgets/forgot_password.dart';
 import 'package:hotel_booking_app/widgets/profile_view.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class Login extends StatelessWidget {
   const Login({super.key});
@@ -32,6 +33,7 @@ class _MyLoginPageState extends State<MyLoginPage> {
   String username = "";
   String password = "";
   bool passwordVisible = false;
+  bool isLoading = false;
 
   @override
   void initState(){
@@ -39,6 +41,7 @@ class _MyLoginPageState extends State<MyLoginPage> {
     passwordVisible=false;
     username = "";
     password = "";
+    isLoading = false;
   }
 
   void _onFaceBookLogin(){}
@@ -171,29 +174,35 @@ class _MyLoginPageState extends State<MyLoginPage> {
                                   onPressed: () {
                                     print("username: " + username);
                                     print("password: " + password);
+                                    setState(() {
+                                      isLoading = true;
+                                    });
                                     showDialog(
-                                        context: context,
-                                        builder: (ctx) =>
-                                            AlertDialog(
-                                              title: Text("Test dialog"),
-                                              backgroundColor: Colors.white,
-                                              actions: [
-                                                TextButton(
-                                                    onPressed: (){
-                                                      Navigator.of(ctx).pop();
-                                                      Navigator.of(context).push(
-                                                        MaterialPageRoute(
-                                                          builder: (context) => ProfileView(),
-                                                        ),
-                                                      );
-                                                    },
-                                                    child: Text(
-                                                      "OK",
-                                                      style: TextStyle(color: Colors.black),
-                                                    )
-                                                )
-                                              ],
+                                      context: context,
+                                      builder: (ctx) =>
+                                        AlertDialog(
+                                          title: Text("Test dialog"),
+                                          backgroundColor: Colors.white,
+                                          actions: [
+                                            TextButton(
+                                              onPressed: (){
+                                                Navigator.of(ctx).pop();
+                                                Navigator.of(context).push(
+                                                  MaterialPageRoute(
+                                                    builder: (context) => ProfileView(),
+                                                  ),
+                                                );
+                                              },
+                                              child: Text(
+                                                "OK",
+                                                style: TextStyle(color: Colors.black),
+                                              )
                                             )
+                                          ],
+                                        )
+                                      // isLoading ? SpinKitPouringHourGlass(
+                                      //   color: Colors.white,
+                                      // ) : Text(""),
                                     );
                                   },
                                   style: ElevatedButton.styleFrom(

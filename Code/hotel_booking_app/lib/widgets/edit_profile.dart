@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-double width_of_input_field = 430;
+double widthOfInputField = 430;
 double paddingLeft = 15;
 double paddingTop = 30;
 double paddingRight = 15;
@@ -34,6 +34,32 @@ class _EditProfileState extends State<EditProfileView> {
         padding: EdgeInsetsGeometry.fromLTRB(paddingLeft, paddingTop, paddingRight, paddingBottom),
         child: Column(
           children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(100)),
+                    image: DecorationImage(
+                      image: NetworkImage(
+                        "https://m.media-amazon.com/images/I/71-OTwKLziL._AC_SL1500_.jpg",
+                      )
+                    )
+                  ),
+                  child: IconButton(
+                    padding: EdgeInsetsGeometry.fromLTRB(50, 50, 50, 50),
+                    icon: Icon(
+                      Icons.camera_alt_outlined,
+                      size: 100,
+                      color: Color.fromRGBO(177, 221, 255, 1),
+                      fontWeight: FontWeight.w100,
+                    ),
+                    onPressed: (){
+                    },
+                  ),
+                ),
+              ],
+            ),
             Padding(
               padding: EdgeInsetsGeometry.fromLTRB(10, 0, 0, 0),
               child: ListTile(
@@ -42,7 +68,7 @@ class _EditProfileState extends State<EditProfileView> {
               ),
             ),
             SizedBox(
-              width: width_of_input_field,
+              width: widthOfInputField,
               child: TextField(
                 controller: TextEditingController(text: "John Smith"),
               ),
@@ -55,7 +81,7 @@ class _EditProfileState extends State<EditProfileView> {
               ),
             ),
             SizedBox(
-              width: width_of_input_field,
+              width: widthOfInputField,
               child: TextField(
                 controller: TextEditingController(text: "abcd@gmail.com"),
               ),
@@ -68,7 +94,7 @@ class _EditProfileState extends State<EditProfileView> {
               ),
             ),
             SizedBox(
-              width: width_of_input_field,
+              width: widthOfInputField,
               child: TextField(
                 keyboardType: TextInputType.number,
                 inputFormatters: [
