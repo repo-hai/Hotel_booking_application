@@ -7,31 +7,31 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Serve static files (uploaded images, etc.)
+// Public folder for uploaded files
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 // 1. Nhập các "Trưởng phòng" (Routers) vào
-// Sơn Hải
+//Sơn Hải
 const hotelRoutes = require('./routes/hotel');
 const bookingRoutes = require('./routes/booking');
 const userRoutes = require('./routes/user');
 
-// Minh
+//Minh
 const adminRoutes = require('./routes/admin');
 
-// Owner (Partner)
+// Owner (Partner) functionality
 const ownerRoutes = require('./routes/owner');
 
 // 2. Giao việc cho các Trưởng phòng
-// Sơn Hải
+// Bất cứ yêu cầu nào bắt đầu bằng '/api/hotels' sẽ được giao cho hotelRoutes xử lý
+//Sơn Hải
 app.use('/api/hotels', hotelRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/users', userRoutes);
 
-// Minh
+//Minh
 app.use('/api/admin', adminRoutes);
 
-// Owner
 app.use('/api/owner', ownerRoutes);
 
 // 3. API test thử xem server còn sống không

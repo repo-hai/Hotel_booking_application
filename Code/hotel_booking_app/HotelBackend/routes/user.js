@@ -5,7 +5,7 @@ const admin = require('firebase-admin');
 const db = require('../firebase');
 
 // ==========================================
-// 1. THÊM LỊCH SỬ TÌM KIẾM MỚI
+// 1. API: THÊM LỊCH SỬ TÌM KIẾM MỚI
 // ==========================================
 router.post('/:id/search-history', async (req, res) => {
 	try {
@@ -16,7 +16,7 @@ router.post('/:id/search-history', async (req, res) => {
 			return res.status(400).json({ message: "Cần có ít nhất tên thành phố để lưu lịch sử!" });
 		}
 
-		// Lưu theo cấu trúc mới (SearchingHistory với field viết hoa)
+		// Lưu theo cấu trúc SearchingHistory (field viết hoa)
 		const newSearchItem = {
 			ID: Date.now(),
 			Location: city,
@@ -40,7 +40,8 @@ router.post('/:id/search-history', async (req, res) => {
 });
 
 // ==========================================
-// 2. LẤY DANH SÁCH LỊCH SỬ TÌM KIẾM (CÓ PHÂN TRANG)
+// 2. API: LẤY DANH SÁCH LỊCH SỬ TÌM KIẾM (CÓ PHÂN TRANG)
+// Hỗ trợ cả 2 cấu trúc: SearchingHistory (mới) và searchHistory (cũ)
 // ==========================================
 router.get('/:id/search-history', async (req, res) => {
 	try {
@@ -52,18 +53,31 @@ router.get('/:id/search-history', async (req, res) => {
 		}
 
 		const userData = userDoc.data();
-		// Đọc từ 'SearchingHistory' (cấu trúc mới)
+
+		// Đọc từ SearchingHistory (cấu trúc mới, field viết hoa)
 		const rawHistory = userData.SearchingHistory || [];
 
-		// Chuẩn hóa về format thống nhất cho Flutter app
+		// Chuẩn hóa về format thống nhất cho app
 		let history = rawHistory.map(item => ({
-			city: item.Location || '',
-			checkIn: item.Checkin || null,
-			checkOut: item.Checkout || null,
-			guests: item.Capacity || 1,
-			rooms: item.RoomNum || 1,
+			city: item.Location || item.city || '',
+			checkIn: item.Checkin || item.checkIn || null,
+			checkOut: item.Checkout || item.checkOut || null,
+			guests: item.Capacity || item.guests || 1,
+			rooms: item.RoomNum || item.rooms || 1,
 			searchedAt: item.searchedAt || null
 		}));
+
+		// Nếu SearchingHistory rỗng, thử đọc từ searchHistory (cấu trúc cũ)
+		if (history.length === 0 && userData.searchHistory) {
+			history = userData.searchHistory.map(item => ({
+				city: item.city || '',
+				checkIn: item.checkIn || null,
+				checkOut: item.checkOut || null,
+				guests: item.guests || 1,
+				rooms: item.rooms || 1,
+				searchedAt: item.searchedAt || null
+			}));
+		}
 
 		history = history.sort((a, b) => new Date(b.searchedAt) - new Date(a.searchedAt));
 
@@ -85,7 +99,8 @@ router.get('/:id/search-history', async (req, res) => {
 });
 
 // ==========================================
-// 3. GỢI Ý KHÁCH SẠN DÀNH RIÊNG CHO USER (CÓ PHÂN TRANG)
+// 3. API: GỢI Ý KHÁCH SẠN DÀNH RIÊNG CHO USER (CÓ PHÂN TRANG)
+// Hỗ trợ cả field 'location' (mới) và 'city' (cũ) trên Hotels
 // ==========================================
 router.get('/:id/suggestions', async (req, res) => {
 	try {
@@ -95,10 +110,18 @@ router.get('/:id/suggestions', async (req, res) => {
 		// BƯỚC 1: Lấy địa điểm từ SearchingHistory (cấu trúc mới)
 		const userDoc = await db.collection('Users').doc(userId).get();
 		if (userDoc.exists) {
-			const rawHistory = userDoc.data().SearchingHistory || [];
+			const userData = userDoc.data();
+			const rawHistory = userData.SearchingHistory || [];
 			rawHistory.forEach(item => {
 				if (item.Location) suggestedLocations.push(item.Location);
 			});
+
+			// Fallback: đọc từ searchHistory cũ nếu không có SearchingHistory
+			if (suggestedLocations.length === 0 && userData.searchHistory) {
+				userData.searchHistory.forEach(item => {
+					if (item.city) suggestedLocations.push(item.city);
+				});
+			}
 		}
 
 		// BƯỚC 2: Lấy địa điểm từ lịch sử đặt phòng
@@ -115,48 +138,65 @@ router.get('/:id/suggestions', async (req, res) => {
 					.where(admin.firestore.FieldPath.documentId(), 'in', uniqueIds)
 					.get();
 				hotelsSnap.forEach(doc => {
-					if (doc.data().location) suggestedLocations.push(doc.data().location);
+					const data = doc.data();
+					// Hỗ trợ cả field 'location' (mới) và 'city' (cũ)
+					if (data.location) suggestedLocations.push(data.location);
+					else if (data.city) suggestedLocations.push(data.city);
 				});
 			}
 		}
 
-		// BƯỚC 3: Lọc trùng
-		let uniqueLocations = [...new Set(suggestedLocations)].filter(l => l);
+		// BƯỚC 3: Lọc trùng và loại bỏ giá trị rác
+		let uniqueLocations = [...new Set(suggestedLocations)].filter(l => l != null && l !== '');
 		if (uniqueLocations.length === 0) {
 			uniqueLocations = ["Lâm Đồng (Đà Lạt)", "Khánh Hòa (Nha Trang)", "Bà Rịa - Vũng Tàu", "Đà Nẵng"];
 		}
 		uniqueLocations = uniqueLocations.slice(0, 10);
 
-		// BƯỚC 4: Truy vấn khách sạn theo 'location' (cấu trúc mới)
-		const suggestedHotelsSnap = await db.collection('Hotels')
+		// BƯỚC 4: Truy vấn khách sạn — thử theo 'location' trước, fallback sang 'city'
+		let suggestedHotelsSnap = await db.collection('Hotels')
 			.where('location', 'in', uniqueLocations)
 			.limit(10)
 			.get();
+
+		if (suggestedHotelsSnap.empty) {
+			suggestedHotelsSnap = await db.collection('Hotels')
+				.where('city', 'in', uniqueLocations)
+				.limit(10)
+				.get();
+		}
 
 		let results = [];
 		for (const doc of suggestedHotelsSnap.docs) {
 			const data = doc.data();
 			const hotel = {
 				id: doc.id,
-				name: data.name || '',
-				city: data.location || '',
-				location: data.location || '',
-				address: data.location || '',
-				star: data.star || 0,
-				type: data.type || '',
-				images: (data.images || []).map(img => img.url || '').filter(Boolean),
-				amenities: (data.amenities || []).map(a => ({ name: a.name || '', icon: a.icon || '' }))
+				...data,
+				// Chuẩn hóa các field phổ biến
+				city: data.city || data.location || '',
+				location: data.location || data.city || '',
+				images: (data.images || []).map(img => (typeof img === 'string' ? img : img.url || '')).filter(Boolean),
+				amenities: (data.amenities || []).map(a => (typeof a === 'string' ? { name: a } : { name: a.name || '', icon: a.icon || '' }))
 			};
 
-			// Lấy giá phòng thấp nhất theo 'hotelID' (cấu trúc mới)
-			const roomSnap = await db.collection('RoomTypes').where('hotelID', '==', parseInt(hotel.id) || hotel.id).get();
+			// Lấy giá phòng thấp nhất — thử theo 'hotelId' trước, fallback sang 'hotelID'
+			let roomSnap = await db.collection('RoomTypes').where('hotelId', '==', hotel.id).get();
+			if (roomSnap.empty) {
+				roomSnap = await db.collection('RoomTypes').where('hotelID', '==', parseInt(hotel.id) || hotel.id).get();
+			}
+
 			let minPrice = 0;
+			let capacity = 2;
 			if (!roomSnap.empty) {
 				const prices = [];
-				roomSnap.forEach(r => prices.push(r.data().price || 0));
+				roomSnap.forEach(r => {
+					prices.push(r.data().price || 0);
+					capacity = r.data().capacity || capacity;
+				});
 				minPrice = Math.min(...prices);
 			}
 			hotel.minRoomPrice = minPrice;
+			hotel.suggestedCapacity = capacity;
 			results.push(hotel);
 		}
 
@@ -179,13 +219,8 @@ router.get('/:id/suggestions', async (req, res) => {
 	}
 });
 
-module.exports = router;
-
-
-
-
 // ==========================================
-// 4. LẤY DANH SÁCH VOUCHER KHẢ DỤNG CHO USER
+// 4. API: LẤY DANH SÁCH VOUCHER KHẢ DỤNG CHO USER
 // Lọc: Status=Active, còn hạn, còn lượt dùng, đơn hàng đủ MinSpend
 // ==========================================
 router.get('/vouchers/available', async (req, res) => {
@@ -253,3 +288,64 @@ router.get('/vouchers/available', async (req, res) => {
 		res.status(500).json({ message: "Lỗi Server!" });
 	}
 });
+
+// ==========================================
+// 5. API: LẤY THÔNG TIN CÁ NHÂN
+// ==========================================
+router.get('/:id', async (req, res) => {
+	try {
+		const userId = req.params.id;
+		const userDoc = await db.collection('Users').doc(userId).get();
+
+		if (!userDoc.exists) {
+			return res.status(404).json({ success: false, message: "Không tìm thấy người dùng!" });
+		}
+
+		const data = userDoc.data();
+		res.status(200).json({
+			success: true,
+			data: {
+				id: userDoc.id,
+				...data
+			}
+		});
+	} catch (error) {
+		console.error("Lỗi khi lấy profile: ", error);
+		res.status(500).json({ success: false, message: "Lỗi Server!" });
+	}
+});
+
+// ==========================================
+// 6. API: CẬP NHẬT THÔNG TIN CÁ NHÂN
+// ==========================================
+router.put('/:id', async (req, res) => {
+	try {
+		const userId = req.params.id;
+		const updateData = req.body;
+
+		// Ngăn chặn đổi ID
+		delete updateData.id;
+
+		const userRef = db.collection('Users').doc(userId);
+		const doc = await userRef.get();
+
+		if (!doc.exists) {
+			return res.status(404).json({ success: false, message: "Không tìm thấy người dùng!" });
+		}
+
+		await userRef.update({
+			...updateData,
+			updatedAt: new Date().toISOString()
+		});
+
+		res.status(200).json({
+			success: true,
+			message: "Cập nhật thông tin cá nhân thành công!"
+		});
+	} catch (error) {
+		console.error("Lỗi khi cập nhật profile: ", error);
+		res.status(500).json({ success: false, message: "Lỗi Server!" });
+	}
+});
+
+module.exports = router;

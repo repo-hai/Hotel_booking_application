@@ -3,19 +3,22 @@ const express = require('express');
 const router = express.Router();
 const db = require('../firebase');
 
+// ==========================================
 // Helper: chuẩn hóa hotel document → JSON trả về app
+// ==========================================
 function normalizeHotel(id, data) {
 	return {
 		id: id,
 		name: data.name || '',
 		city: data.location || '',        // field mới là 'location'
 		location: data.location || '',
-		address: data.location || '',     // dùng location làm address
+		address: data.location || '',
 		type: data.type || 'Khách sạn',
 		description: data.description || '',
 		telephone: data.telephone || '',
 		email: data.email || '',
 		star: data.star || 0,
+		userId: data.userId || null,
 		// images là array [{ID, url}]
 		images: (data.images || []).map(img => img.url || '').filter(Boolean),
 		amenities: (data.amenities || []).map(a => ({
@@ -30,7 +33,7 @@ function normalizeHotel(id, data) {
 function normalizeRoom(id, data) {
 	return {
 		id: id,
-		hotelId: data.hotelID || '',      // field mới là 'hotelID'
+		hotelId: data.hotelID || '',
 		name: data.name || '',
 		price: data.price || 0,
 		capacity: data.capacity || 1,
@@ -54,10 +57,15 @@ function normalizeRoom(id, data) {
 		}))
 	};
 }
+
+// Helper: chuyển hotelId string → number nếu cần (để query hotelID số nguyên)
 function hotelIdForQuery(id) {
 	const n = parseInt(id);
 	return isNaN(n) ? id : n;
 }
+
+// ==========================================
+// 1. API: Lấy danh sách tất cả khách sạn (CÓ PHÂN TRANG)
 // ==========================================
 router.get('/', async (req, res) => {
 	try {
@@ -85,7 +93,7 @@ router.get('/', async (req, res) => {
 });
 
 // ==========================================
-// 2. Tìm kiếm khách sạn (Địa điểm + Sức chứa + PHÂN TRANG)
+// 2. API: Tìm kiếm khách sạn (Địa điểm + Sức chứa + PHÂN TRANG)
 // ==========================================
 router.get('/search', async (req, res) => {
 	try {
@@ -114,16 +122,15 @@ router.get('/search', async (req, res) => {
 			const suitableRooms = [];
 			if (!roomSnapshot.empty) {
 				roomSnapshot.forEach(roomDoc => {
-					const roomData = roomDoc.data();
-					const normalized = normalizeRoom(roomDoc.id, roomData);
+					const normalized = normalizeRoom(roomDoc.id, roomDoc.data());
 					allRooms.push(normalized);
-					if ((roomData.capacity || 1) >= minCapacity) {
+					if ((roomDoc.data().capacity || 1) >= minCapacity) {
 						suitableRooms.push(normalized);
 					}
 				});
 			}
 
-			// Luôn thêm hotel, ưu tiên suitableRooms nếu có
+			// Luôn thêm hotel, ưu tiên suitableRooms nếu có, fallback sang allRooms
 			const displayRooms = suitableRooms.length > 0 ? suitableRooms : allRooms;
 			hotel.availableRoomTypes = displayRooms;
 			hotel.rooms = displayRooms;
@@ -151,11 +158,20 @@ router.get('/search', async (req, res) => {
 });
 
 // ==========================================
-// 3. Bộ lọc nâng cao + Sắp xếp (PHÂN TRANG)
+// 3. API: Bộ lọc nâng cao + Sắp xếp (PHÂN TRANG)
+// Hỗ trợ cả 'requiredAmenityIcons' và 'requiredAmenities' (tên cũ)
+// Hỗ trợ 'propertyTypes' để lọc theo loại chỗ nghỉ
 // ==========================================
 router.post('/filter', async (req, res) => {
 	try {
-		const { city, minPrice, maxPrice, minStar, requiredAmenityIcons, propertyTypes, sortBy } = req.body;
+		const {
+			city, minPrice, maxPrice, minStar,
+			requiredAmenityIcons, requiredAmenities, // hỗ trợ cả hai tên
+			propertyTypes, sortBy
+		} = req.body;
+
+		// Gộp cả hai tên field amenity filter
+		const amenityFilter = requiredAmenityIcons || requiredAmenities;
 
 		let query = db.collection('Hotels');
 		if (city) query = query.where('location', '==', city);
@@ -165,7 +181,9 @@ router.post('/filter', async (req, res) => {
 		for (const doc of hotelSnapshot.docs) {
 			const hotel = normalizeHotel(doc.id, doc.data());
 
-			const roomSnap = await db.collection('RoomTypes').where('hotelID', '==', hotelIdForQuery(hotel.id)).get();
+			const roomSnap = await db.collection('RoomTypes')
+				.where('hotelID', '==', hotelIdForQuery(hotel.id))
+				.get();
 			const roomsList = [];
 			roomSnap.forEach(r => roomsList.push(normalizeRoom(r.id, r.data())));
 
@@ -181,16 +199,14 @@ router.post('/filter', async (req, res) => {
 
 		// Lọc theo loại chỗ nghỉ (type)
 		if (propertyTypes && propertyTypes.length > 0) {
-			filteredHotels = filteredHotels.filter(h =>
-				propertyTypes.includes(h.type)
-			);
+			filteredHotels = filteredHotels.filter(h => propertyTypes.includes(h.type));
 		}
 
 		// Lọc theo tiện nghi — so sánh theo icon (fa-wifi, fa-spa...)
-		if (requiredAmenityIcons && requiredAmenityIcons.length > 0) {
+		if (amenityFilter && amenityFilter.length > 0) {
 			filteredHotels = filteredHotels.filter(h => {
 				const hotelIcons = h.amenities.map(a => a.icon);
-				return requiredAmenityIcons.every(icon => hotelIcons.includes(icon));
+				return amenityFilter.every(icon => hotelIcons.includes(icon));
 			});
 		}
 
@@ -233,7 +249,7 @@ router.post('/filter', async (req, res) => {
 });
 
 // ==========================================
-// 4. Reviews của 1 Khách sạn
+// 4. API: Reviews của 1 Khách sạn
 // Ưu tiên query trực tiếp theo hotelId, fallback qua bookings
 // ==========================================
 router.get('/:id/reviews', async (req, res) => {
@@ -318,19 +334,41 @@ router.get('/:id/reviews', async (req, res) => {
 });
 
 // ==========================================
-// 4. Chi tiết 1 Khách sạn
+// 5. API: Chi tiết 1 Khách sạn (kèm RoomTypes + thông tin Owner)
 // ==========================================
 router.get('/:id', async (req, res) => {
 	try {
 		const hotelId = req.params.id;
 		const hotelDoc = await db.collection('Hotels').doc(hotelId).get();
+
 		if (!hotelDoc.exists) {
 			return res.status(404).json({ message: "Khách sạn không tồn tại hoặc đã bị xóa!" });
 		}
 
 		const hotel = normalizeHotel(hotelDoc.id, hotelDoc.data());
+		const rawData = hotelDoc.data();
 
-		const roomSnapshot = await db.collection('RoomTypes').where('hotelID', '==', hotelIdForQuery(hotelId)).get();
+		// Lấy thông tin chủ khách sạn (owner) từ userId
+		if (rawData.userId) {
+			try {
+				const ownerDoc = await db.collection('Users').doc(String(rawData.userId)).get();
+				if (ownerDoc.exists) {
+					const ownerData = ownerDoc.data();
+					hotel.owner = {
+						id: ownerDoc.id,
+						name: ownerData.Name || '',
+						email: ownerData.Email || '',
+						phone: ownerData.Phone || ''
+					};
+				}
+			} catch (ownerErr) {
+				console.error("Lỗi khi lấy thông tin owner: ", ownerErr);
+			}
+		}
+
+		const roomSnapshot = await db.collection('RoomTypes')
+			.where('hotelID', '==', hotelIdForQuery(hotelId))
+			.get();
 		const rooms = [];
 		roomSnapshot.forEach(doc => rooms.push(normalizeRoom(doc.id, doc.data())));
 		hotel.rooms = rooms;

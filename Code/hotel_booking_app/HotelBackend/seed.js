@@ -1,5 +1,22 @@
-﻿const admin = require('firebase-admin');
+﻿/**
+ * seed.js — Upload dữ liệu từ các file JSON lên Firebase Firestore
+ *
+ * CÁCH CHẠY (thủ công, KHÔNG tự chạy khi start server):
+ *   node seed.js
+ *
+ * File này ĐỌC dữ liệu từ:
+ *   - hotels.json    → Collection 'Hotels'
+ *   - roomType.json  → Collection 'RoomTypes'
+ *   - user.json      → Collection 'Users'
+ *   - vouchers.json  → Collection 'Vouchers'
+ */
+
+const admin = require('firebase-admin');
 const serviceAccount = require('./serviceAccountKey.json');
+const hotelsData = require('./hotels.json');
+const roomTypesData = require('./roomType.json');
+const usersData = require('./user.json');
+const vouchersData = require('./vouchers.json');
 
 admin.initializeApp({
 	credential: admin.credential.cert(serviceAccount)
@@ -7,232 +24,179 @@ admin.initializeApp({
 
 const db = admin.firestore();
 
-const cities = ["Hà Nội", "Nha Trang", "Đà Lạt", "Đà Nẵng", "Phú Quốc", "Hồ Chí Minh", "Vũng Tàu"];
+async function seedAll() {
+	console.log('🌱 Bắt đầu seed dữ liệu từ các file JSON...\n');
 
-const hotelTypes = ["Khách sạn", "Resort", "Villa", "Homestay", "Căn hộ dịch vụ"];
+	await seedHotels();
+	await seedRoomTypes();
+	await seedUsers();
+	await seedVouchers();
 
-const amenityPool = [
-	{ ID: 1, name: "WiFi miễn phí", icon: "wifi" },
-	{ ID: 2, name: "Hồ bơi", icon: "pool" },
-	{ ID: 3, name: "Bãi đỗ xe", icon: "parking" },
-	{ ID: 4, name: "Phòng gym", icon: "gym" },
-	{ ID: 5, name: "Nhà hàng", icon: "restaurant" },
-	{ ID: 6, name: "Spa", icon: "spa" },
-	{ ID: 7, name: "Điều hòa không khí", icon: "ac" },
-	{ ID: 8, name: "Bữa sáng miễn phí", icon: "breakfast" },
-	{ ID: 9, name: "Thang máy", icon: "elevator" },
-	{ ID: 10, name: "Quầy bar", icon: "bar" },
-];
-
-const bedTypes = ["Giường đôi lớn (King)", "Giường đôi (Queen)", "2 giường đơn (Twin)", "Giường đơn (Single)"];
-
-const roomAmenityPool = [
-	{ ID: 1, name: "WiFi miễn phí", icon: "wifi" },
-	{ ID: 2, name: "Điều hòa không khí", icon: "ac" },
-	{ ID: 3, name: "TV màn hình phẳng", icon: "tv" },
-	{ ID: 4, name: "Tủ lạnh mini", icon: "fridge" },
-	{ ID: 5, name: "Két an toàn", icon: "safe" },
-];
-
-const policyPool = [
-	{ ID: 1, name: "Không hút thuốc" },
-	{ ID: 2, name: "Không mang thú cưng" },
-	{ ID: 3, name: "Không tổ chức tiệc" },
-	{ ID: 4, name: "Nhận phòng từ 14:00" },
-	{ ID: 5, name: "Trả phòng trước 12:00" },
-];
-
-const membershipLevels = ["Silver", "Gold", "Platinum"];
-const genders = ["Nam", "Nữ", "Khác"];
-const roles = ["user", "user", "user", "user", "admin"]; // 80% user, 20% admin
-
-const hotelImages = [
-	"https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=500&q=60",
-	"https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=500&q=60",
-	"https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=500&q=60",
-];
-
-const roomImages = [
-	"https://images.unsplash.com/photo-1611892440504-42a792e24d32?auto=format&fit=crop&w=500&q=60",
-	"https://images.unsplash.com/photo-1631049307264-da0ec9d70304?auto=format&fit=crop&w=500&q=60",
-	"https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&w=500&q=60",
-];
-
-function pickRandom(arr, count = 1) {
-	const shuffled = [...arr].sort(() => Math.random() - 0.5);
-	return count === 1 ? shuffled[0] : shuffled.slice(0, count);
+	console.log('\n✅ Seed hoàn tất!');
+	process.exit(0);
 }
 
-async function seedNewFormat() {
-	console.log("⏳ Bắt đầu seed dữ liệu theo cấu trúc MỚI...\n");
+// ── Hotels ────────────────────────────────────────────────────────────────────
+async function seedHotels() {
+	console.log(`📦 Seeding ${hotelsData.length} Hotels...`);
+	const batch = db.batch();
 
-	try {
-		for (let i = 1; i <= 100; i++) {
-			const city = cities[i % cities.length];
-			const userId = `user_${i}`;
-			const hotelId = `hotel_${i}`;
-			const roomTypeId = `roomtype_${i}`;
-			const bookingId = `booking_${i}`;
-			const voucherId = `voucher_${i}`;
+	for (const hotel of hotelsData) {
+		const docId = String(hotel.ID);
+		const ref = db.collection('Hotels').doc(docId);
+		batch.set(ref, {
+			ID: hotel.ID,
+			type: hotel.type,
+			name: hotel.name,
+			description: hotel.description,
+			telephone: hotel.telephone,
+			location: hotel.location,
+			email: hotel.email,
+			star: hotel.star,
+			images: hotel.images.map(img => ({ ID: img.ID, url: img.url })),
+			amenities: hotel.amenities.map(a => ({ ID: a.ID, name: a.name, icon: a.icon }))
+		});
+	}
 
-			// ── 1. USER (theo cấu trúc mới) ──────────────────────────────
-			const customerBookingInfos = [];
-			if (i % 3 === 0) {
-				customerBookingInfos.push({
-					ID: 1,
-					Name: `Khách Hàng ${i}`,
-					Email: `khachhang${i}@gmail.com`,
-					Phone: `0900000${i.toString().padStart(3, '0')}`,
-					Country: "Việt Nam",
-					IsDefault: true
-				});
-			}
+	await batch.commit();
+	console.log(`   ✔ ${hotelsData.length} Hotels uploaded`);
+}
 
-			await db.collection('Users').doc(userId).set({
-				Email: `khachhang${i}@gmail.com`,
-				Password: `hashed_password_${i}`,
-				Phone: `0900000${i.toString().padStart(3, '0')}`,
-				Name: `Khách Hàng Thứ ${i}`,
-				Location: city,
-				Gender: pickRandom(genders),
-				DateOfBirth: `199${i % 10}-0${(i % 9) + 1}-${(i % 28) + 1}`.replace(/-(\d)-/, '-0$1-'),
-				MembershipLevel: pickRandom(membershipLevels),
-				Point: i * 10,
-				TotalSpent: i * 500000,
-				Role: pickRandom(roles),
-				SearchingHistory: i % 2 === 0 ? [
-					{
-						ID: 1,
-						Location: city,
-						Checkin: "2026-05-10",
-						Checkout: "2026-05-12",
-						RoomNum: 1,
-						Capacity: 2,
-						searchedAt: new Date().toISOString()
-					}
-				] : [],
-				CustomerBookingInfo: customerBookingInfos
+// ── RoomTypes ─────────────────────────────────────────────────────────────────
+async function seedRoomTypes() {
+	console.log(`📦 Seeding ${roomTypesData.length} RoomTypes...`);
+
+	// Firestore batch giới hạn 500 ops, chia nhỏ nếu cần
+	const chunks = chunkArray(roomTypesData, 400);
+	let total = 0;
+
+	for (const chunk of chunks) {
+		const batch = db.batch();
+		for (const room of chunk) {
+			const docId = String(room.ID);
+			const ref = db.collection('RoomTypes').doc(docId);
+			batch.set(ref, {
+				ID: room.ID,
+				hotelID: room.hotelID,
+				name: room.name,
+				area: room.area,
+				price: room.price,
+				description: room.description,
+				bedType: room.bedType,
+				capacity: room.capacity,
+				bedNum: room.bedNum,
+				images: room.images.map(img => ({ ID: img.ID, url: img.url })),
+				policies: room.policies.map(p => ({ ID: p.ID, name: p.name })),
+				amenities: room.amenities.map(a => ({ ID: a.ID, name: a.name, icon: a.icon })),
+				rooms: room.rooms.map(r => ({ ID: r.ID, roomNumber: r.roomNumber, status: r.status }))
 			});
+		}
+		await batch.commit();
+		total += chunk.length;
+	}
 
-			// ── 2. HOTEL (theo cấu trúc mới) ─────────────────────────────
-			const hotelAmenities = pickRandom(amenityPool, (i % 4) + 2);
-			const hotelImgList = pickRandom(hotelImages, Math.min(hotelImages.length, (i % 3) + 1));
+	console.log(`   ✔ ${total} RoomTypes uploaded`);
+}
 
-			await db.collection('Hotels').doc(hotelId).set({
-				ID: i,
-				type: pickRandom(hotelTypes),
-				name: `Khách sạn ${city} ${(i % 5) + 1} Sao`,
-				description: `Khách sạn ${(i % 5) + 1} sao tọa lạc tại trung tâm ${city}. Cung cấp dịch vụ lưu trú cao cấp với đầy đủ tiện nghi hiện đại.`,
-				telephone: `02${i.toString().padStart(9, '0')}`,
-				location: city,
-				email: `hotel${i}@example.com`,
-				star: (i % 5) + 1,
-				images: (Array.isArray(hotelImgList) ? hotelImgList : [hotelImgList]).map((url, idx) => ({
-					ID: idx + 1,
-					url: url
-				})),
-				amenities: (Array.isArray(hotelAmenities) ? hotelAmenities : [hotelAmenities]).map(a => ({
-					ID: a.ID,
-					name: a.name,
-					icon: a.icon
-				}))
-			});
+// ── Users ─────────────────────────────────────────────────────────────────────
+async function seedUsers() {
+	console.log(`📦 Seeding ${usersData.length} Users...`);
+	const batch = db.batch();
 
-			// ── 3. ROOM TYPE (theo cấu trúc mới) ─────────────────────────
-			const roomAmenities = pickRandom(roomAmenityPool, (i % 3) + 2);
-			const roomPolicies = pickRandom(policyPool, (i % 3) + 1);
-			const roomImgList = pickRandom(roomImages, Math.min(roomImages.length, (i % 2) + 1));
-			const capacity = (i % 4) + 1;
-			const bedNum = capacity <= 2 ? 1 : 2;
+	for (const user of usersData) {
+		const docId = String(user.ID);
+		const ref = db.collection('Users').doc(docId);
 
-			await db.collection('RoomTypes').doc(roomTypeId).set({
-				ID: i,
-				hotelID: hotelId,
-				name: `Phòng ${pickRandom(bedTypes)}`,
-				area: 15 + (i % 6) * 5,
-				price: 500000 + (i * 15000),
-				description: `Phòng rộng rãi với tầm nhìn đẹp, đầy đủ tiện nghi hiện đại.`,
-				bedType: pickRandom(bedTypes),
-				capacity: capacity,
-				bedNum: bedNum,
-				images: (Array.isArray(roomImgList) ? roomImgList : [roomImgList]).map((url, idx) => ({
-					ID: idx + 1,
-					url: url
-				})),
-				policies: (Array.isArray(roomPolicies) ? roomPolicies : [roomPolicies]).map(p => ({
-					ID: p.ID,
-					name: p.name
-				})),
-				amenities: (Array.isArray(roomAmenities) ? roomAmenities : [roomAmenities]).map(a => ({
-					ID: a.ID,
-					name: a.name,
-					icon: a.icon
-				})),
-				rooms: [
-					{ ID: i * 10 + 1, roomNumber: `${i}01`, status: "Available" },
-					{ ID: i * 10 + 2, roomNumber: `${i}02`, status: i % 3 === 0 ? "Occupied" : "Available" }
-				]
-			});
+		const doc = {
+			ID: user.ID,
+			Email: user.Email,
+			Password: user.Password,
+			Phone: user.Phone,
+			Name: user.Name,
+			Location: user.Location,
+			Gender: user.Gender,
+			DateOfBirth: user.DateOfBirth,
+			MembershipLevel: user.MembershipLevel || null,
+			Point: user.Point || 0,
+			TotalSpent: user.TotalSpent || 0,
+			Role: user.Role
+		};
 
-			// ── 4. BOOKING ────────────────────────────────────────────────
-			await db.collection('Bookings').doc(bookingId).set({
-				userId: userId,
-				hotelId: hotelId,
-				hotelName: `Khách sạn ${city} ${(i % 5) + 1} Sao`,
-				customerName: `Khách Hàng Thứ ${i}`,
-				customerEmail: `khachhang${i}@gmail.com`,
-				customerPhone: `0900000${i.toString().padStart(3, '0')}`,
-				customerCountry: "Việt Nam",
-				checkIn: "2026-05-10T14:00:00Z",
-				checkOut: "2026-05-12T12:00:00Z",
-				bookedRooms: [
-					{ roomTypeId: roomTypeId, quantity: 1, price: 500000 + (i * 15000) }
-				],
-				originalPrice: (500000 + (i * 15000)) * 1.1,
-				discount: (500000 + (i * 15000)) * 0.1,
-				total: 500000 + (i * 15000),
-				status: i % 4 === 0 ? "Cancelled" : i % 3 === 0 ? "Completed" : "Confirmed",
-				createdAt: new Date().toISOString()
-			});
-
-			// ── 5. REVIEW ─────────────────────────────────────────────────
-			await db.collection('Reviews').doc(`rev_${i}`).set({
-				hotelId: hotelId,
-				bookingId: bookingId,
-				rating: (i % 5) + 1,
-				comment: `Trải nghiệm tại khách sạn ${city} rất tuyệt vời! Phòng sạch sẽ, nhân viên thân thiện.`,
-				guestName: `Khách Hàng Thứ ${i}`,
-				createdAt: new Date().toISOString()
-			});
-
-			// ── 6. VOUCHER (theo cấu trúc mới) ───────────────────────────
-			await db.collection('Vouchers').doc(voucherId).set({
-				ID: i,
-				Code: `SUMMER${i}`,
-				DiscountType: i % 2 === 0 ? "Percentage" : "Fixed",
-				Value: i % 2 === 0 ? (i % 5) + 5 : (i % 10 + 1) * 50000,
-				MaxDiscountValue: i % 2 === 0 ? 500000 : 0,
-				MinSpend: (i % 5 + 1) * 200000,
-				UsageLimit: (i % 10 + 1) * 10,
-				Status: i % 5 === 0 ? "Expired" : "Active",
-				TargetType: i % 3 === 0 ? "new_user" : "all",
-				startDate: "2026-01-01",
-				endDate: i % 5 === 0 ? "2026-03-31" : "2026-12-31",
-				UsageHistory: []
-			});
-
-			if (i % 10 === 0) {
-				console.log(`✔️ Đã seed ${i}/100 bản ghi...`);
-			}
+		// Thêm SearchingHistory nếu có
+		if (user.SearchingHistory && user.SearchingHistory.length > 0) {
+			doc.SearchingHistory = user.SearchingHistory.map(h => ({
+				ID: h.ID,
+				Location: h.Location,
+				Checkin: h.Checkin,
+				Checkout: h.Checkout,
+				RoomNum: h.RoomNum,
+				Capacity: h.Capacity,
+				searchedAt: new Date().toISOString()
+			}));
+		} else {
+			doc.SearchingHistory = [];
 		}
 
-		console.log("\n🎉 HOÀN TẤT! Dữ liệu đã được seed theo cấu trúc MỚI!");
-		process.exit(0);
+		// Thêm CustomerBookingInfo nếu có
+		if (user.CustomerBookingInfo && user.CustomerBookingInfo.length > 0) {
+			doc.CustomerBookingInfo = user.CustomerBookingInfo.map(c => ({
+				ID: c.ID,
+				Name: c.Name,
+				Email: c.Email,
+				Phone: c.Phone,
+				Country: c.Country,
+				IsDefault: c.IsDefault
+			}));
+		} else {
+			doc.CustomerBookingInfo = [];
+		}
 
-	} catch (error) {
-		console.error("❌ Lỗi khi seed:", error);
-		process.exit(1);
+		batch.set(ref, doc);
 	}
+
+	await batch.commit();
+	console.log(`   ✔ ${usersData.length} Users uploaded`);
 }
 
-seedNewFormat();
+// ── Vouchers ──────────────────────────────────────────────────────────────────
+async function seedVouchers() {
+	console.log(`📦 Seeding ${vouchersData.length} Vouchers...`);
+	const batch = db.batch();
+
+	for (const v of vouchersData) {
+		const docId = String(v.ID);
+		const ref = db.collection('Vouchers').doc(docId);
+		batch.set(ref, {
+			ID: v.ID,
+			Code: v.Code,
+			DiscountType: v.DiscountType,
+			Value: v.Value,
+			MaxDiscountValue: v.MaxDiscountValue,
+			MinSpend: v.MinSpend,
+			UsageLimit: v.UsageLimit,
+			Status: v.Status,
+			TargetType: v.TargetType,
+			startDate: v.startDate,
+			endDate: v.endDate,
+			UsageHistory: (v.UsageHistory || []).map(h => ({ ID: h.ID, UsedAt: h.UsedAt }))
+		});
+	}
+
+	await batch.commit();
+	console.log(`   ✔ ${vouchersData.length} Vouchers uploaded`);
+}
+
+// ── Helper ────────────────────────────────────────────────────────────────────
+function chunkArray(arr, size) {
+	const chunks = [];
+	for (let i = 0; i < arr.length; i += size) {
+		chunks.push(arr.slice(i, i + size));
+	}
+	return chunks;
+}
+
+// Chạy
+seedAll().catch(err => {
+	console.error('❌ Lỗi khi seed:', err);
+	process.exit(1);
+});

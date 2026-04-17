@@ -3,12 +3,9 @@ const express = require('express');
 const router = express.Router();
 const db = require('../firebase');
 
-// ==========================================
 // API: Lấy thống kê tổng quan cho Dashboard
-// ==========================================
 router.get('/dashboard/stats', async (req, res) => {
 	try {
-		// Chạy song song 4 lệnh đếm để tăng tốc độ phản hồi
 		const [usersSnap, hotelsSnap, bookingsSnap, vouchersSnap] = await Promise.all([
 			db.collection('Users').count().get(),
 			db.collection('Hotels').count().get(),
@@ -31,9 +28,7 @@ router.get('/dashboard/stats', async (req, res) => {
 	}
 });
 
-// ==========================================
 // API: Lấy danh sách 5 đơn đặt phòng mới nhất cho Dashboard
-// ==========================================
 router.get('/dashboard/recent-bookings', async (req, res) => {
 	try {
 		const snapshot = await db.collection('Bookings')
@@ -69,8 +64,9 @@ router.get('/dashboard/recent-bookings', async (req, res) => {
 });
 
 // ==========================================
-// API: Lấy danh sách User (Lọc theo Role, tìm kiếm keyword, phân trang)
-// Hỗ trợ cả field 'Role' (mới, viết hoa) và 'type' (cũ)
+// API: Lấy danh sách user (Lọc theo Role, tìm kiếm keyword, phân trang)
+// Fields mới: ID, Email, Password, Phone, Name, Location, Gender,
+//             DateOfBirth, MembershipLevel, Point, TotalSpent, Role
 // ==========================================
 router.get('/users', async (req, res) => {
 	try {
@@ -78,7 +74,7 @@ router.get('/users', async (req, res) => {
 
 		let query = db.collection('Users');
 
-		// Lọc theo Role — dùng field 'Role' (viết hoa, cấu trúc mới)
+		// Lọc theo Role (admin/owner/user) — frontend truyền type=user hoặc type=owner
 		if (type) {
 			query = query.where('Role', '==', type);
 		}
@@ -93,16 +89,11 @@ router.get('/users', async (req, res) => {
 				name: data.Name || "Chưa cập nhật tên",
 				phone: data.Phone || "",
 				email: data.Email || "",
-				// Hỗ trợ cả 'Role' (mới) và 'type' (cũ)
-				role: data.Role || data.type || "user",
-				type: data.Role || data.type || "user",
+				role: data.Role || "user",
 				location: data.Location || "",
 				gender: data.Gender || "",
 				dateOfBirth: data.DateOfBirth || null,
-				status: data.status || "active",
-				joinDate: data.createdAt || new Date().toISOString(),
-				avatarUrl: data.avatarUrl || null,
-				membershipLevel: data.MembershipLevel || "Silver",
+				membershipLevel: data.MembershipLevel || null,
 				point: data.Point || 0,
 				totalSpent: data.TotalSpent || 0
 			});
@@ -140,9 +131,7 @@ router.get('/users', async (req, res) => {
 	}
 });
 
-// ==========================================
 // API: Lấy chi tiết 1 User
-// ==========================================
 router.get('/users/:id', async (req, res) => {
 	try {
 		const userId = req.params.id;
@@ -150,79 +139,32 @@ router.get('/users/:id', async (req, res) => {
 		const userDoc = await userRef.get();
 
 		if (!userDoc.exists) {
-			return res.status(404).json({
-				success: false,
-				message: "Không tìm thấy người dùng này hoặc tài khoản đã bị xóa!"
-			});
+			return res.status(404).json({ success: false, message: "Không tìm thấy người dùng này!" });
 		}
 
 		const data = userDoc.data();
-		res.status(200).json({
-			success: true,
-			data: {
-				id: userDoc.id,
-				name: data.Name || "Chưa cập nhật tên",
-				phone: data.Phone || "",
-				email: data.Email || "",
-				role: data.Role || data.type || "user",
-				type: data.Role || data.type || "user",
-				location: data.Location || "",
-				gender: data.Gender || "",
-				dateOfBirth: data.DateOfBirth || null,
-				status: data.status || "active",
-				joinDate: data.createdAt || new Date().toISOString(),
-				avatarUrl: data.avatarUrl || null,
-				membershipLevel: data.MembershipLevel || "Silver",
-				point: data.Point || 0,
-				totalSpent: data.TotalSpent || 0
-			}
-		});
+		const userInfo = {
+			id: userDoc.id,
+			name: data.Name || "Chưa cập nhật tên",
+			phone: data.Phone || "",
+			email: data.Email || "",
+			role: data.Role || "user",
+			location: data.Location || "",
+			gender: data.Gender || "",
+			dateOfBirth: data.DateOfBirth || null,
+			membershipLevel: data.MembershipLevel || null,
+			point: data.Point || 0,
+			totalSpent: data.TotalSpent || 0
+		};
+
+		res.status(200).json({ success: true, data: userInfo });
 	} catch (error) {
 		console.error("Lỗi khi lấy chi tiết user: ", error);
 		res.status(500).json({ success: false, message: "Lỗi hệ thống khi lấy thông tin chi tiết!" });
 	}
 });
 
-// ==========================================
-// API: Thay đổi trạng thái user (Khóa hoặc Mở khóa tài khoản)
-// ==========================================
-router.patch('/users/:id/status', async (req, res) => {
-	try {
-		const userId = req.params.id;
-		const { status } = req.body;
-
-		if (!status || !['active', 'locked'].includes(status)) {
-			return res.status(400).json({
-				success: false,
-				message: "Trạng thái không hợp lệ! Chỉ nhận 'active' hoặc 'locked'."
-			});
-		}
-
-		const userRef = db.collection('Users').doc(userId);
-		const userDoc = await userRef.get();
-
-		if (!userDoc.exists) {
-			return res.status(404).json({ success: false, message: "Không tìm thấy người dùng này!" });
-		}
-
-		await userRef.update({
-			status: status,
-			updatedAt: new Date().toISOString()
-		});
-
-		res.status(200).json({
-			success: true,
-			message: status === 'locked' ? "Đã khóa tài khoản thành công!" : "Đã mở khóa tài khoản thành công!"
-		});
-	} catch (error) {
-		console.error("Lỗi khi cập nhật trạng thái user: ", error);
-		res.status(500).json({ success: false, message: "Lỗi hệ thống khi cập nhật trạng thái!" });
-	}
-});
-
-// ==========================================
 // API: Xóa vĩnh viễn 1 User
-// ==========================================
 router.delete('/users/:id', async (req, res) => {
 	try {
 		const userId = req.params.id;
@@ -242,7 +184,7 @@ router.delete('/users/:id', async (req, res) => {
 });
 
 // ==========================================
-// API: Lấy danh sách Đơn hàng cho Admin (Siêu bộ lọc)
+// API: Lấy danh sách Đơn hàng cho Admin
 // ==========================================
 router.get('/bookings', async (req, res) => {
 	try {
@@ -270,7 +212,7 @@ router.get('/bookings', async (req, res) => {
 			});
 		}
 
-		// Tìm kiếm đa năng theo Mã đơn, Tên khách, Tên khách sạn
+		// Tìm kiếm đa năng
 		if (search) {
 			const keyword = search.toLowerCase();
 			bookingsList = bookingsList.filter(booking => {
@@ -286,9 +228,8 @@ router.get('/bookings', async (req, res) => {
 			oldest: (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
 			price_desc: (a, b) => (b.total || 0) - (a.total || 0),
 			price_asc: (a, b) => (a.total || 0) - (b.total || 0),
-			newest: (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
 		};
-		bookingsList.sort(sortFn[sortBy] || sortFn.newest);
+		bookingsList.sort(sortFn[sortBy] || ((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
 
 		// Phân trang
 		const currentPage = parseInt(page) || 1;
@@ -314,7 +255,9 @@ router.get('/bookings', async (req, res) => {
 
 // ==========================================
 // API: Lấy danh sách Voucher cho Admin
-// Hỗ trợ cấu trúc Firestore mới (field viết hoa: Code, DiscountType, Value, Status, UsageHistory[])
+// Fields mới: ID, Code, DiscountType ("Percentage"/"Fixed"), Value (decimal),
+//             MaxDiscountValue, MinSpend, UsageLimit, Status, TargetType,
+//             startDate, endDate, UsageHistory[]
 // ==========================================
 router.get('/vouchers', async (req, res) => {
 	try {
@@ -322,7 +265,7 @@ router.get('/vouchers', async (req, res) => {
 
 		let query = db.collection('Vouchers');
 
-		// Lọc theo Status (viết hoa, cấu trúc mới: Active/Expired/Disabled)
+		// Lọc theo Status từ Database (Active, Expired, Disabled)
 		if (status) {
 			query = query.where('Status', '==', status);
 		}
@@ -335,31 +278,25 @@ router.get('/vouchers', async (req, res) => {
 			const usageHistory = data.UsageHistory || [];
 			vouchersList.push({
 				id: doc.id,
-				code: data.Code || data.code || "",
-				name: data.name || "",
-				discountType: data.DiscountType || data.discountType || "Percentage",
-				value: data.Value || data.discountValue || 0,
-				discountValue: data.Value || data.discountValue || 0,
-				maxDiscountValue: data.MaxDiscountValue || data.maxDiscount || 0,
-				maxDiscount: data.MaxDiscountValue || data.maxDiscount || 0,
-				minSpend: data.MinSpend || data.minSpend || 0,
-				usageLimit: data.UsageLimit || data.usageLimit || 0,
-				usedCount: usageHistory.length || data.usedCount || 0,
+				code: data.Code || "",
+				discountType: data.DiscountType || "Percentage",
+				value: data.Value || 0,
+				maxDiscountValue: data.MaxDiscountValue || 0,
+				minSpend: data.MinSpend || 0,
+				usageLimit: data.UsageLimit || 0,
+				usedCount: usageHistory.length,
 				startDate: data.startDate || null,
 				endDate: data.endDate || null,
-				targetType: data.TargetType || data.targetType || "all",
-				status: data.Status || data.status || "Active",
-				description: data.description || ""
+				targetType: data.TargetType || "all",
+				status: data.Status || "Active"
 			});
 		});
 
-		// Tìm kiếm theo Mã Voucher hoặc Tên chương trình
+		// Tìm kiếm theo Mã Voucher
 		if (search) {
 			const keyword = search.toLowerCase();
 			vouchersList = vouchersList.filter(voucher => {
-				const matchCode = (voucher.code || "").toLowerCase().includes(keyword);
-				const matchName = (voucher.name || "").toLowerCase().includes(keyword);
-				return matchCode || matchName;
+				return (voucher.code || "").toLowerCase().includes(keyword);
 			});
 		}
 
@@ -385,9 +322,7 @@ router.get('/vouchers', async (req, res) => {
 	}
 });
 
-// ==========================================
 // API: Lấy chi tiết 1 Voucher
-// ==========================================
 router.get('/vouchers/:id', async (req, res) => {
 	try {
 		const voucherId = req.params.id;
@@ -395,10 +330,7 @@ router.get('/vouchers/:id', async (req, res) => {
 		const voucherDoc = await voucherRef.get();
 
 		if (!voucherDoc.exists) {
-			return res.status(404).json({
-				success: false,
-				message: "Không tìm thấy mã giảm giá này hoặc đã bị xóa!"
-			});
+			return res.status(404).json({ success: false, message: "Không tìm thấy mã giảm giá này!" });
 		}
 
 		const data = voucherDoc.data();
@@ -408,21 +340,17 @@ router.get('/vouchers/:id', async (req, res) => {
 			success: true,
 			data: {
 				id: voucherDoc.id,
-				code: data.Code || data.code || "",
-				name: data.name || "",
-				discountType: data.DiscountType || data.discountType || "Percentage",
-				value: data.Value || data.discountValue || 0,
-				discountValue: data.Value || data.discountValue || 0,
-				maxDiscountValue: data.MaxDiscountValue || data.maxDiscount || 0,
-				maxDiscount: data.MaxDiscountValue || data.maxDiscount || 0,
-				minSpend: data.MinSpend || data.minSpend || 0,
-				usageLimit: data.UsageLimit || data.usageLimit || 0,
-				usedCount: usageHistory.length || data.usedCount || 0,
+				code: data.Code || "",
+				discountType: data.DiscountType || "Percentage",
+				value: data.Value || 0,
+				maxDiscountValue: data.MaxDiscountValue || 0,
+				minSpend: data.MinSpend || 0,
+				usageLimit: data.UsageLimit || 0,
+				usedCount: usageHistory.length,
 				startDate: data.startDate || null,
 				endDate: data.endDate || null,
-				targetType: data.TargetType || data.targetType || "all",
-				status: data.Status || data.status || "Active",
-				description: data.description || "Chưa có mô tả chi tiết cho khuyến mãi này."
+				targetType: data.TargetType || "all",
+				status: data.Status || "Active"
 			}
 		});
 	} catch (error) {
@@ -431,59 +359,45 @@ router.get('/vouchers/:id', async (req, res) => {
 	}
 });
 
-// ==========================================
 // API: Tạo Voucher mới
-// Lưu theo cấu trúc mới (field viết hoa) để đồng bộ với Firestore
-// ==========================================
 router.post('/vouchers', async (req, res) => {
 	try {
 		const {
-			code, name, discountType, value, discountValue,
-			maxDiscountValue, maxDiscount, minSpend, usageLimit,
-			startDate, endDate, targetType, status, description
+			code, discountType, value,
+			maxDiscountValue, minSpend, usageLimit,
+			startDate, endDate, targetType, status
 		} = req.body;
 
-		// Hỗ trợ cả tên field cũ (discountValue) và mới (value)
-		const resolvedValue = value !== undefined ? value : discountValue;
-		const resolvedMaxDiscount = maxDiscountValue !== undefined ? maxDiscountValue : maxDiscount;
-
-		if (!code || !discountType || resolvedValue === undefined || !startDate || !endDate) {
+		if (!code || !discountType || value === undefined || !startDate || !endDate) {
 			return res.status(400).json({
 				success: false,
-				message: "Vui lòng điền đầy đủ các thông tin bắt buộc (Mã, Loại giảm giá, Giá trị, Ngày bắt đầu, Ngày kết thúc)!"
+				message: "Vui lòng điền đầy đủ các thông tin bắt buộc!"
 			});
 		}
 
 		const upperCode = code.toUpperCase();
 
-		// Kiểm tra trùng mã (kiểm tra cả field 'Code' và 'code')
-		const [existSnap1, existSnap2] = await Promise.all([
-			db.collection('Vouchers').where('Code', '==', upperCode).get(),
-			db.collection('Vouchers').where('code', '==', upperCode).get()
-		]);
-		if (!existSnap1.empty || !existSnap2.empty) {
+		// Kiểm tra trùng mã
+		const existSnapshot = await db.collection('Vouchers').where('Code', '==', upperCode).get();
+		if (!existSnapshot.empty) {
 			return res.status(400).json({
 				success: false,
-				message: `Mã voucher '${upperCode}' đã tồn tại! Vui lòng tạo mã khác.`
+				message: `Mã voucher '${upperCode}' đã tồn tại!`
 			});
 		}
 
-		// Lưu theo cấu trúc mới (field viết hoa)
 		const newVoucher = {
 			Code: upperCode,
-			name: name || "",
 			DiscountType: discountType,
-			Value: Number(resolvedValue),
-			MaxDiscountValue: Number(resolvedMaxDiscount) || 0,
+			Value: Number(value),
+			MaxDiscountValue: Number(maxDiscountValue) || 0,
 			MinSpend: Number(minSpend) || 0,
 			UsageLimit: Number(usageLimit) || 0,
 			startDate: startDate,
 			endDate: endDate,
 			TargetType: targetType || "all",
 			Status: status || "Active",
-			UsageHistory: [],
-			description: description || "",
-			createdAt: new Date().toISOString()
+			UsageHistory: []
 		};
 
 		const docRef = await db.collection('Vouchers').add(newVoucher);
@@ -499,16 +413,14 @@ router.post('/vouchers', async (req, res) => {
 	}
 });
 
-// ==========================================
 // API: Cập nhật thông tin Voucher
-// ==========================================
 router.put('/vouchers/:id', async (req, res) => {
 	try {
 		const voucherId = req.params.id;
 		const {
-			code, name, discountType, value, discountValue,
-			maxDiscountValue, maxDiscount, minSpend, usageLimit,
-			startDate, endDate, targetType, status, description
+			code, discountType, value,
+			maxDiscountValue, minSpend, usageLimit,
+			startDate, endDate, targetType, status
 		} = req.body;
 
 		const voucherRef = db.collection('Vouchers').doc(voucherId);
@@ -519,42 +431,32 @@ router.put('/vouchers/:id', async (req, res) => {
 		}
 
 		const currentData = voucherDoc.data();
-		let upperCode = currentData.Code || currentData.code;
+		let upperCode = currentData.Code;
 
 		if (code) {
 			upperCode = code.toUpperCase();
-			const currentCode = currentData.Code || currentData.code;
-			if (upperCode !== currentCode) {
-				const [existSnap1, existSnap2] = await Promise.all([
-					db.collection('Vouchers').where('Code', '==', upperCode).get(),
-					db.collection('Vouchers').where('code', '==', upperCode).get()
-				]);
-				if (!existSnap1.empty || !existSnap2.empty) {
+			if (upperCode !== currentData.Code) {
+				const existSnapshot = await db.collection('Vouchers').where('Code', '==', upperCode).get();
+				if (!existSnapshot.empty) {
 					return res.status(400).json({
 						success: false,
-						message: `Mã voucher '${upperCode}' đã tồn tại ở một chương trình khác!`
+						message: `Mã voucher '${upperCode}' đã tồn tại!`
 					});
 				}
 			}
 		}
 
-		const resolvedValue = value !== undefined ? value : discountValue;
-		const resolvedMaxDiscount = maxDiscountValue !== undefined ? maxDiscountValue : maxDiscount;
-
 		await voucherRef.update({
 			Code: upperCode,
-			name: name !== undefined ? name : (currentData.name || ""),
-			DiscountType: discountType || currentData.DiscountType || currentData.discountType,
-			Value: resolvedValue !== undefined ? Number(resolvedValue) : (currentData.Value || currentData.discountValue || 0),
-			MaxDiscountValue: resolvedMaxDiscount !== undefined ? Number(resolvedMaxDiscount) : (currentData.MaxDiscountValue || currentData.maxDiscount || 0),
-			MinSpend: minSpend !== undefined ? Number(minSpend) : (currentData.MinSpend || currentData.minSpend || 0),
-			UsageLimit: usageLimit !== undefined ? Number(usageLimit) : (currentData.UsageLimit || currentData.usageLimit || 0),
+			DiscountType: discountType || currentData.DiscountType,
+			Value: value !== undefined ? Number(value) : currentData.Value,
+			MaxDiscountValue: maxDiscountValue !== undefined ? Number(maxDiscountValue) : currentData.MaxDiscountValue,
+			MinSpend: minSpend !== undefined ? Number(minSpend) : currentData.MinSpend,
+			UsageLimit: usageLimit !== undefined ? Number(usageLimit) : currentData.UsageLimit,
 			startDate: startDate || currentData.startDate,
 			endDate: endDate || currentData.endDate,
-			TargetType: targetType || currentData.TargetType || currentData.targetType,
-			Status: status || currentData.Status || currentData.status,
-			description: description !== undefined ? description : (currentData.description || ""),
-			updatedAt: new Date().toISOString()
+			TargetType: targetType || currentData.TargetType,
+			Status: status || currentData.Status
 		});
 
 		res.status(200).json({ success: true, message: "Cập nhật voucher thành công" });
@@ -564,9 +466,7 @@ router.put('/vouchers/:id', async (req, res) => {
 	}
 });
 
-// ==========================================
 // API: Xóa vĩnh viễn Voucher
-// ==========================================
 router.delete('/vouchers/:id', async (req, res) => {
 	try {
 		const voucherId = req.params.id;
