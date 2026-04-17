@@ -1,6 +1,7 @@
 [
   {
     "ID": 1,
+    "userId": 2,
     "type": "Khách sạn",
     "name": "Sofitel Legend Metropole",
     "description": "Khách sạn sang trọng mang kiến trúc Pháp cổ điển giữa lòng thủ đô.",
@@ -22,6 +23,7 @@
   },
   {
     "ID": 2,
+    "userId": 2,
     "type": "Resort",
     "name": "InterContinental Danang Sun Peninsula Resort",
     "description": "Khu nghỉ dưỡng sang trọng bậc nhất thế giới trên bán đảo Sơn Trà.",
@@ -45,6 +47,7 @@
   },
   {
     "ID": 3,
+    "userId": 3,
     "type": "Khách sạn",
     "name": "The Reverie Saigon",
     "description": "Khách sạn lộng lẫy và đắt đỏ với thiết kế hoàng gia Ý.",
@@ -65,6 +68,7 @@
   },
   {
     "ID": 4,
+    "userId": 3,
     "type": "Resort",
     "name": "JW Marriott Phu Quoc Emerald Bay",
     "description": "Kiệt tác kiến trúc của Bill Bensley trên đảo ngọc Phú Quốc.",
@@ -87,6 +91,7 @@
   },
   {
     "ID": 5,
+    "userId": 4,
     "type": "Khách sạn",
     "name": "Hotel de la Coupole - MGallery",
     "description": "Cung điện Pháp thu nhỏ giữa biển mây sương mù Sapa.",
@@ -104,6 +109,7 @@
   },
   {
     "ID": 6,
+    "userId": 4,
     "type": "Khách sạn",
     "name": "Dalat Palace Heritage Hotel",
     "description": "Di sản kiến trúc Pháp mang đậm dấu ấn lịch sử tại Đà Lạt.",
@@ -125,6 +131,7 @@
   },
   {
     "ID": 7,
+    "userId": 3,
     "type": "Resort",
     "name": "Vinpearl Resort Nha Trang",
     "description": "Biểu tượng nghỉ dưỡng với công viên giải trí tuyệt đỉnh trên đảo Hòn Tre.",
@@ -145,6 +152,7 @@
   },
   {
     "ID": 8,
+    "userId": 2,
     "type": "Khách sạn",
     "name": "The Imperial Hotel Vung Tau",
     "description": "Khách sạn mang phong cách cổ điển phương Tây duy nhất tại Bãi Sau.",
@@ -167,6 +175,7 @@
   },
   {
     "ID": 9,
+    "userId": 4,
     "type": "Resort",
     "name": "FLC Halong Bay Golf Club & Luxury Resort",
     "description": "Khu nghỉ dưỡng tọa lạc trên đồi với tầm nhìn bao quát kỳ quan vịnh Hạ Long.",
@@ -188,6 +197,7 @@
   },
   {
     "ID": 10,
+    "userId": 2,
     "type": "Villa",
     "name": "Azerai La Residence",
     "description": "Khu dinh thự cổ kính ven bờ sông Hương thơ mộng.",
@@ -208,6 +218,7 @@
   },
   {
     "ID": 11,
+    "userId": 3,
     "type": "Resort",
     "name": "Victoria Can Tho Resort",
     "description": "Khu nghỉ dưỡng đậm chất Đông Dương bên bờ sông Hậu.",
@@ -230,6 +241,7 @@
   },
   {
     "ID": 12,
+    "userId": 2,
     "type": "Khách sạn",
     "name": "Hotel Royal Hoi An - MGallery",
     "description": "Khách sạn Boutique lấy cảm hứng từ chuyện tình lãng mạn Nhật Bản - Việt Nam.",
@@ -247,6 +259,7 @@
   },
   {
     "ID": 13,
+    "userId": 4,
     "type": "Resort",
     "name": "Avani Quy Nhon Resort",
     "description": "Khu nghỉ dưỡng yên bình nép mình bên bãi biển cát trắng Ghềnh Ráng.",
@@ -270,6 +283,7 @@
   },
   {
     "ID": 14,
+    "userId": 3,
     "type": "Villa",
     "name": "Six Senses Ninh Van Bay Villas",
     "description": "Biệt thự thân thiện môi trường ẩn mình giữa thiên nhiên hoang sơ.",
@@ -290,6 +304,7 @@
   },
   {
     "ID": 15,
+    "userId": 3,
     "type": "Khách sạn",
     "name": "Meliá Vinpearl Thanh Hóa",
     "description": "Tòa tháp khách sạn cao nhất thành phố, biểu tượng mới của sự phồn vinh.",
@@ -311,6 +326,7 @@
   },
   {
     "ID": 16,
+    "userId": 2,
     "type": "Khách sạn",
     "name": "Muong Thanh Luxury Phu Tho",
     "description": "Khách sạn tiêu chuẩn 5 sao nổi bật tại vùng Đất Tổ.",
@@ -332,6 +348,7 @@
   },
   {
     "ID": 17,
+    "userId": 3,
     "type": "Khách sạn",
     "name": "Vinpearl Hotel Lạng Sơn",
     "description": "Trung tâm lưu trú hiện đại bậc nhất khu vực biên giới phía Bắc.",
@@ -354,6 +371,7 @@
   },
   {
     "ID": 18,
+    "userId": 4,
     "type": "Resort",
     "name": "Serena Resort Kim Bôi",
     "description": "Khu nghỉ dưỡng tắm khoáng nóng hòa mình vào thiên nhiên Tây Bắc.",
@@ -371,6 +389,7 @@
   },
   {
     "ID": 19,
+    "userId": 2,
     "type": "Khách sạn",
     "name": "Central Hotel Thanh Hóa",
     "description": "Khách sạn hiện đại nằm ngay vị trí trung tâm thành phố Thanh Hóa.",
@@ -391,6 +410,7 @@
   },
   {
     "ID": 20,
+    "userId": 4,
     "type": "Homestay",
     "name": "Tombo Homestay Bắc Ninh",
     "description": "Homestay sinh thái mang nét yên bình của đồng quê.",
@@ -411,6 +431,7 @@
   },
   {
     "ID": 21,
+    "userId": 2,
     "type": "Khách sạn",
     "name": "Nam Cường Nam Định Hotel",
     "description": "Một trong những khách sạn cao cấp lớn nhất tại trung tâm Nam Định.",
@@ -434,6 +455,7 @@
   },
   {
     "ID": 22,
+    "userId": 2,
     "type": "Khách sạn",
     "name": "Pullman Vung Tau",
     "description": "Không gian nghỉ dưỡng hiện đại mang tiêu chuẩn quốc tế gần biển.",
@@ -455,6 +477,7 @@
   },
   {
     "ID": 23,
+    "userId": 3,
     "type": "Căn hộ dịch vụ",
     "name": "Lotte Serviced Apartments Hanoi",
     "description": "Căn hộ dịch vụ sang trọng đỉnh cao tại tòa tháp Lotte.",
@@ -475,6 +498,7 @@
   },
   {
     "ID": 24,
+    "userId": 4,
     "type": "Resort",
     "name": "Emeralda Resort Ninh Binh",
     "description": "Khu nghỉ dưỡng mang phong cách cung đình Bắc Bộ xưa.",
@@ -497,6 +521,7 @@
   },
   {
     "ID": 25,
+    "userId": 2,
     "type": "Khách sạn",
     "name": "Muong Thanh Holiday Moc Chau",
     "description": "Điểm dừng chân lý tưởng giữa thảo nguyên Mộc Châu xanh ngát.",
@@ -517,6 +542,7 @@
   },
   {
     "ID": 26,
+    "userId": 4,
     "type": "Villa",
     "name": "Flamingo Dai Lai Villas",
     "description": "Quần thể biệt thự xanh độc đáo hòa mình cùng hồ Đại Lải.",
@@ -538,6 +564,7 @@
   },
   {
     "ID": 27,
+    "userId": 2,
     "type": "Căn hộ dịch vụ",
     "name": "Novotel Danang Premier Apartments",
     "description": "Căn hộ dịch vụ cao cấp nằm ngay bờ Tây sông Hàn.",
@@ -558,6 +585,7 @@
   },
   {
     "ID": 28,
+    "userId": 3,
     "type": "Villa",
     "name": "Amanoi Resort Villas",
     "description": "Biệt thự nghỉ dưỡng riêng tư bậc nhất ẩn mình tại Vườn Quốc gia Núi Chúa.",
@@ -581,6 +609,7 @@
   },
   {
     "ID": 29,
+    "userId": 4,
     "type": "Khách sạn",
     "name": "Sai Gon Dong Ha Hotel",
     "description": "Điểm lưu trú tiêu chuẩn cao ngay tại trung tâm thành phố Đông Hà.",
@@ -601,6 +630,7 @@
   },
   {
     "ID": 30,
+    "userId": 3,
     "type": "Homestay",
     "name": "Mekong Rustic Cai Be Homestay",
     "description": "Trải nghiệm hòa mình vào đời sống dân dã của miền Tây sông nước.",

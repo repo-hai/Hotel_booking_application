@@ -7,7 +7,7 @@ import json
 def upload_hotels_to_firestore():
     # 1. Khởi tạo Firebase Admin SDK với Service Account Key
     try:
-        cred = credentials.Certificate("serviceAccountKey.json")
+        cred = credentials.Certificate("../serviceAccountKey.json")
         firebase_admin.initialize_app(cred)
         db = firestore.client()
         print("Đã kết nối thành công với Firebase!")
@@ -17,14 +17,14 @@ def upload_hotels_to_firestore():
 
     # 2. Đọc dữ liệu từ file JSON
     try:
-        with open("vouchers.json", "r", encoding="utf-8") as file:
+        with open("hotels.json", "r", encoding="utf-8") as file:
             hotels_data = json.load(file)
     except FileNotFoundError:
-        print("Không tìm thấy file 'vouchers.json'. Vui lòng kiểm tra lại.")
+        print("Không tìm thấy file 'hotels.json'. Vui lòng kiểm tra lại.")
         return
 
     # 3. Đẩy dữ liệu lên collection 'Vouchers'
-    collection_name = "Vouchers"
+    collection_name = "Hotels"
     success_count = 0
 
     print(

@@ -69,6 +69,8 @@ class _HotelDetailScreenState extends State<HotelDetailScreen> {
                         children: [
                           _buildHotelInfoSection(),
                           const SizedBox(height: 12),
+                          _buildOwnerSection(),
+                          const SizedBox(height: 12),
                           _buildPriceSection(),
                           const SizedBox(height: 12),
                           _buildRoomsSection(),
@@ -327,6 +329,101 @@ class _HotelDetailScreenState extends State<HotelDetailScreen> {
     );
   }
 
+  Widget _buildOwnerSection() {
+    final owner = _hotel.owner;
+    if (owner == null) {
+      return _card(
+        margin: const EdgeInsets.symmetric(horizontal: 16),
+        child: const Row(
+          children: [
+            Icon(Icons.person_outline, size: 20, color: AppColors.textSecondary),
+            SizedBox(width: 8),
+            Text('Chưa có thông tin chủ khách sạn',
+                style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+          ],
+        ),
+      );
+    }
+    return _card(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Chủ khách sạn',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 22,
+                backgroundColor: AppColors.primary.withOpacity(0.1),
+                child: Text(
+                  owner.name.isNotEmpty ? owner.name[0].toUpperCase() : '?',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primary,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      owner.name,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    if (owner.email.isNotEmpty)
+                      Row(
+                        children: [
+                          const Icon(Icons.email_outlined,
+                              size: 14, color: AppColors.textSecondary),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(owner.email,
+                                style: const TextStyle(
+                                    fontSize: 12,
+                                    color: AppColors.textSecondary)),
+                          ),
+                        ],
+                      ),
+                    if (owner.phone.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Row(
+                        children: [
+                          const Icon(Icons.phone_outlined,
+                              size: 14, color: AppColors.textSecondary),
+                          const SizedBox(width: 4),
+                          Text(owner.phone,
+                              style: const TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.textSecondary)),
+                        ],
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildPriceSection() {
     return _card(
       margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -409,45 +506,93 @@ class _HotelDetailScreenState extends State<HotelDetailScreen> {
 
   Widget _buildRoomRow(HotelRoomType room) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: AppColors.statBlue,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: const Icon(Icons.bed_outlined,
-                color: AppColors.statIconBlue, size: 20),
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: AppColors.statBlue,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.bed_outlined,
+                    color: AppColors.statIconBlue, size: 20),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(room.name,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary,
+                        )),
+                    const SizedBox(height: 2),
+                    Text(
+                        '${room.bedType} • ${room.capacity} khách • ${room.area}m²',
+                        style: const TextStyle(
+                            fontSize: 12, color: AppColors.textSecondary)),
+                  ],
+                ),
+              ),
+              Text(
+                '${_formatNumber(room.price)}đ',
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primary,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(room.name,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
-                    )),
-                const SizedBox(height: 2),
-                Text(
-                    '${room.bedType} • ${room.capacity} khách • ${room.area}m²',
-                    style: const TextStyle(
-                        fontSize: 12, color: AppColors.textSecondary)),
-              ],
+          if (room.rooms.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.only(left: 52),
+              child: Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: room.rooms.map((r) {
+                  Color bgColor;
+                  Color textColor;
+                  switch (r.status) {
+                    case 'Available':
+                      bgColor = const Color(0xFFE8F5E9);
+                      textColor = const Color(0xFF2E7D32);
+                      break;
+                    case 'Occupied':
+                      bgColor = const Color(0xFFFFEBEE);
+                      textColor = const Color(0xFFC62828);
+                      break;
+                    default:
+                      bgColor = const Color(0xFFFFF8E1);
+                      textColor = const Color(0xFFF57F17);
+                  }
+                  return Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: bgColor,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      r.roomNumber,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: textColor,
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
             ),
-          ),
-          Text(
-            '${_formatNumber(room.price)}đ',
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: AppColors.primary,
-            ),
-          ),
+          ],
         ],
       ),
     );

@@ -114,6 +114,27 @@ class HotelRoomType {
   }
 }
 
+class HotelOwner {
+  final String id;
+  final String name;
+  final String email;
+  final String phone;
+
+  HotelOwner({
+    required this.id,
+    required this.name,
+    required this.email,
+    required this.phone,
+  });
+
+  factory HotelOwner.fromJson(Map<String, dynamic> j) => HotelOwner(
+        id: (j['id'] ?? '').toString(),
+        name: (j['name'] ?? '') as String,
+        email: (j['email'] ?? '') as String,
+        phone: (j['phone'] ?? '') as String,
+      );
+}
+
 class HotelModel {
   final String id;
   final int hotelNumericId;
@@ -127,6 +148,7 @@ class HotelModel {
   final List<HotelImage> images;
   final List<HotelAmenity> amenities;
   final List<HotelRoomType> rooms;
+  final HotelOwner? owner;
 
   HotelModel({
     required this.id,
@@ -141,6 +163,7 @@ class HotelModel {
     required this.images,
     required this.amenities,
     required this.rooms,
+    this.owner,
   });
 
   factory HotelModel.fromJson(Map<String, dynamic> j) {
@@ -157,6 +180,7 @@ class HotelModel {
       images: _parseList(j['images'], (e) => HotelImage.fromJson(Map<String, dynamic>.from(e))),
       amenities: _parseList(j['amenities'], (e) => HotelAmenity.fromJson(Map<String, dynamic>.from(e))),
       rooms: _parseList(j['rooms'], (e) => HotelRoomType.fromJson(Map<String, dynamic>.from(e))),
+      owner: j['owner'] != null ? HotelOwner.fromJson(Map<String, dynamic>.from(j['owner'])) : null,
     );
   }
 

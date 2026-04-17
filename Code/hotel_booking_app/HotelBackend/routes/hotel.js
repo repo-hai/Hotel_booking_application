@@ -205,10 +205,31 @@ router.get('/:id', async (req, res) => {
 
 		const hotelData = { id: hotelDoc.id, ...hotelDoc.data() };
 
+		// Lấy thông tin chủ khách sạn (owner) từ userId
+		if (hotelData.userId) {
+			const ownerDoc = await db.collection('Users').doc(String(hotelData.userId)).get();
+			if (ownerDoc.exists) {
+				const ownerData = ownerDoc.data();
+				hotelData.owner = {
+					id: ownerDoc.id,
+					name: ownerData.Name || '',
+					email: ownerData.Email || '',
+					phone: ownerData.Phone || '',
+				};
+			}
+		}
+
 		// RoomType dùng field 'hotelID'
+		// Debug: kiểm tra collection RoomTypes
+		const allRooms = await db.collection('RoomTypes').limit(3).get();
+		console.log('>>> RoomTypes count:', allRooms.size);
+		allRooms.forEach(d => console.log('>>> sample room:', d.id, 'hotelID:', d.data().hotelID, typeof d.data().hotelID));
+		console.log('>>> query hotelID ==', hotelData.ID, typeof hotelData.ID);
+
 		const roomSnapshot = await db.collection('RoomTypes')
 			.where('hotelID', '==', hotelData.ID || parseInt(hotelId))
 			.get();
+		console.log('>>> matched rooms:', roomSnapshot.size);
 		const rooms = [];
 		roomSnapshot.forEach(doc => {
 			rooms.push({ id: doc.id, ...doc.data() });
