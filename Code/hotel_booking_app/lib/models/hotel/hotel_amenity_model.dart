@@ -11,14 +11,14 @@ class HotelAmenity {
 
   factory HotelAmenity.fromJson(Map<String, dynamic> json) {
     return HotelAmenity(
-      id: json['id']?.toString() ?? '',
+      id: (json['ID'] ?? json['id'])?.toString() ?? '',
       name: json['name'] ?? '',
       icon: json['icon'] ?? '',
     );
   }
 
   Map<String, dynamic> toJson() => {
-    'id': id,
+    'ID': int.tryParse(id) ?? id,
     'name': name,
     'icon': icon,
   };

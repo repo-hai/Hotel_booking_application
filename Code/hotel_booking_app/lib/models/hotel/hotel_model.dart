@@ -30,14 +30,14 @@ class Hotel {
 
   factory Hotel.fromJson(Map<String, dynamic> json) {
     return Hotel(
-      id: json['id']?.toString() ?? '',
-      type: json['type'] ?? 'Hotel',
+      id: (json['id'] ?? json['ID'])?.toString() ?? '',
+      type: json['type'] ?? 'Khách sạn',
       name: json['name'] ?? '',
       description: json['description'] ?? '',
       telephone: json['telephone'] ?? '',
-      location: (json['address'] != null && json['city'] != null && json['address'].toString().isNotEmpty)
+      location: json['location'] ?? ((json['address'] != null && json['city'] != null && json['address'].toString().isNotEmpty)
           ? "${json['address']}, ${json['city']}"
-          : (json['city'] ?? json['location'] ?? ''),
+          : (json['city'] ?? '')),
       email: json['email'] ?? '',
       star: json['star'] is int ? json['star'] : int.tryParse(json['star']?.toString() ?? '0') ?? 0,
       // Map list images (Hỗ trợ cả List<String> từ Firestore và List<Map> cũ)
@@ -56,7 +56,7 @@ class Hotel {
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
+      'ID': int.tryParse(id) ?? id,
       'type': type,
       'name': name,
       'description': description,

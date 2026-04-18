@@ -5,9 +5,9 @@ class RoomImage {
   RoomImage({required this.id, required this.url});
 
   factory RoomImage.fromJson(Map<String, dynamic> json) => RoomImage(
-        id: json['id']?.toString() ?? '',
+        id: (json['ID'] ?? json['id'])?.toString() ?? '',
         url: json['url'] ?? '',
       );
 
-  Map<String, dynamic> toJson() => {'id': id, 'url': url};
+  Map<String, dynamic> toJson() => {'ID': int.tryParse(id) ?? id, 'url': url};
 }

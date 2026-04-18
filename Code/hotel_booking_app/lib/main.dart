@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'providers/owner_provider.dart';
-import 'screens/owner/owner_home_screen.dart';
+import 'package:hotel_booking_app/presentation/screens/owner/owner_home_screen.dart';
+import 'package:hotel_booking_app/providers/owner_provider.dart';
 
 void main() {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => OwnerProvider()),
+        ChangeNotifierProvider(
+          create: (_) => OwnerProvider(),
+        ),
       ],
       child: const MyApp(),
     ),
@@ -19,14 +21,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Hotel Booking App',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        useMaterial3: true,
-      ),
-      home: const OwnerHomeScreen(),
+    return const MaterialApp(
       debugShowCheckedModeBanner: false,
+      home: OwnerHomeScreen(),
     );
   }
 }

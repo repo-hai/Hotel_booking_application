@@ -9,7 +9,13 @@ import '../models/review/review_model.dart';
 
 class OwnerProvider with ChangeNotifier {
   final OwnerApiService _apiService = OwnerApiService();
-  final String ownerId = "owner_demo_01"; // Default demo owner ID
+  final String ownerId = '2'; // Default demo owner ID
+
+  String _ownerName = 'Chủ khách sạn';
+  String get ownerName => _ownerName;
+
+  Map<String, dynamic> _ownerProfile = {};
+  Map<String, dynamic> get ownerProfile => _ownerProfile;
 
   // Dashboard Stats
   Map<String, dynamic> _dashboardStats = {};
@@ -52,6 +58,16 @@ class OwnerProvider with ChangeNotifier {
       final stats = await _apiService.getDashboardStats(ownerId);
       final list = await _apiService.getHotels(ownerId);
       
+      final fetchedProfile = await _apiService.getOwnerProfile(ownerId);
+      if (fetchedProfile != null) {
+        _ownerProfile = fetchedProfile;
+        if (fetchedProfile['Name'] != null) {
+          _ownerName = fetchedProfile['Name'];
+        } else if (fetchedProfile['name'] != null) {
+          _ownerName = fetchedProfile['name'];
+        }
+      }
+
       _dashboardStats = stats;
       _hotels = list;
     } catch (e) {
@@ -131,6 +147,7 @@ class OwnerProvider with ChangeNotifier {
 
   // Thêm hạng phòng mới
   Future<bool> createRoomType(RoomType newRoom) async {
+    lastCreateRoomError = null;
     _isLoading = true;
     notifyListeners();
     final result = await _apiService.createRoomType(newRoom);
@@ -140,6 +157,7 @@ class OwnerProvider with ChangeNotifier {
       notifyListeners();
       return true;
     }
+    lastCreateRoomError = _apiService.lastError;
     _isLoading = false;
     notifyListeners();
     return false;
@@ -271,15 +289,24 @@ class OwnerProvider with ChangeNotifier {
     }
   }
 
-  // Upload image proxy
+  // Lỗi chi tiết từ lần upload/create cuối – UI dùng để hiển thị SnackBar
+  String? lastUploadError;
+  String? lastCreateError;
+  String? lastCreateRoomError;
+
+  // Upload image proxy – truyền lỗi chi tiết từ service
   Future<String?> uploadImage(XFile file) async {
-    return await _apiService.uploadImage(file);
+    lastUploadError = null;
+    final url = await _apiService.uploadImage(file);
+    if (url == null) lastUploadError = _apiService.lastError;
+    return url;
   }
 
   // --- Hotel Methods ---
 
   Future<bool> createHotel() async {
     if (draftHotel == null) return false;
+    lastCreateError = null;
     _isLoading = true;
     notifyListeners();
     final result = await _apiService.createHotel(ownerId, draftHotel!);
@@ -289,6 +316,7 @@ class OwnerProvider with ChangeNotifier {
       notifyListeners();
       return true;
     }
+    lastCreateError = _apiService.lastError;
     _isLoading = false;
     notifyListeners();
     return false;

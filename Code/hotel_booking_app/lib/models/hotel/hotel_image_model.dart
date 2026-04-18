@@ -9,13 +9,13 @@ class HotelImage {
 
   factory HotelImage.fromJson(Map<String, dynamic> json) {
     return HotelImage(
-      id: json['id']?.toString() ?? '',
+      id: (json['ID'] ?? json['id'])?.toString() ?? '',
       url: json['url'] ?? '',
     );
   }
 
   Map<String, dynamic> toJson() => {
-    'id': id,
+    'ID': int.tryParse(id) ?? id,
     'url': url,
   };
 }

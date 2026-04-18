@@ -6,13 +6,13 @@ class Room {
   Room({required this.id, required this.roomNumber, required this.status});
 
   factory Room.fromJson(Map<String, dynamic> json) => Room(
-        id: (json['roomId'] ?? json['id'] ?? json['ID'] ?? '')?.toString() ?? '',
+        id: (json['ID'] ?? json['roomId'] ?? json['id'] ?? '')?.toString() ?? '',
         roomNumber: (json['roomNumber'] ?? json['name'] ?? '')?.toString() ?? '',
         status: json['status'] ?? 'Available',
       );
 
   Map<String, dynamic> toJson() => {
-        'roomId': id,
+        'ID': int.tryParse(id) ?? id,
         'roomNumber': roomNumber,
         'status': status,
       };
