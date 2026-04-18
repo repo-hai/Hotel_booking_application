@@ -146,70 +146,50 @@ router.post('/', async (req, res) => {
 router.get('/', async (req, res) => {
 	try {
 		const status = req.query.status;
-		const userId = req.query.userId; // Lọc theo userId
+		const userId = req.query.userId;
 
-		// 1. Lấy tham số phân trang từ query URL (Mặc định: Trang 1, giới hạn 10 đơn/trang)
 		const page = parseInt(req.query.page) || 1;
-		const limit = parseInt(req.query.limit) || 10;
-		const offset = (page - 1) * limit; // Tính toán bỏ qua bao nhiêu bản ghi
+		const limit = parseInt(req.query.limit) || 50;
+		const offset = (page - 1) * limit;
 
 		let query = db.collection('Bookings');
 
-		// 2. Lọc theo userId nếu có (bắt buộc để tránh lộ dữ liệu người khác)
+		// Lọc theo userId
 		if (userId) {
 			query = query.where('userId', '==', userId);
 		}
 
-		// 3. Nếu có lọc theo status
+		// Lọc theo status
 		if (status) {
 			query = query.where('status', '==', status);
 		}
 
-		// 3. Đếm tổng số bản ghi để tính toán tổng số trang
-		const totalSnapshot = await query.count().get();
-		const totalItems = totalSnapshot.data().count;
-		const totalPages = Math.ceil(totalItems / limit);
-
-		// 4. Áp dụng sắp xếp, bỏ qua (offset) và giới hạn (limit)
-		const snapshot = await query.orderBy('createdAt', 'desc')
-			.offset(offset)
-			.limit(limit)
-			.get();
-
-		const bookingsList = [];
-
-		// 5. Xử lý trường hợp không có dữ liệu
-		if (snapshot.empty) {
-			return res.status(200).json({
-				message: status ? `Không có đơn hàng nào ở trạng thái ${status}.` : "Chưa có đơn đặt phòng nào.",
-				data: [],
-				pagination: {
-					currentPage: page,
-					limit: limit,
-					totalPages: totalPages,
-					totalItems: totalItems
-				}
-			});
+		// Lấy dữ liệu — nếu có userId filter thì không dùng orderBy (tránh lỗi Firestore composite index)
+		let snapshot;
+		if (userId) {
+			snapshot = await query.get();
+		} else {
+			snapshot = await query.orderBy('createdAt', 'desc').offset(offset).limit(limit).get();
 		}
 
-		// 6. Đổ dữ liệu vào mảng
+		const bookingsList = [];
 		snapshot.forEach(doc => {
-			bookingsList.push({
-				id: doc.id,
-				...doc.data()
-			});
+			bookingsList.push({ id: doc.id, ...doc.data() });
 		});
 
-		// 7. Trả kết quả chuẩn JSON kèm block 'pagination'
+		// Sort theo createdAt giảm dần khi có userId filter
+		if (userId) {
+			bookingsList.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+		}
+
+		const totalItems = bookingsList.length;
+		const totalPages = Math.ceil(totalItems / limit);
+		const paginatedList = userId ? bookingsList.slice(offset, offset + limit) : bookingsList;
+
 		res.status(200).json({
 			message: "Lấy danh sách đơn hàng thành công!",
-			data: bookingsList,
-			pagination: {
-				currentPage: page,
-				limit: limit,
-				totalPages: totalPages,
-				totalItems: totalItems
-			}
+			data: paginatedList,
+			pagination: { currentPage: page, limit, totalPages, totalItems }
 		});
 
 	} catch (error) {

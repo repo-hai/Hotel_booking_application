@@ -106,12 +106,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
         };
       }).toList();
 
-      // Lấy userId từ SharedPreferences
-      final prefs = await SharedPreferences.getInstance();
-      final userId = prefs.getString('userId');
-
       final body = {
-        if (userId != null && userId.isNotEmpty) 'userId': userId,
         'hotelId': widget.hotel.id,
         'hotelName': widget.hotel.name,
         'customerInfo': widget.customerInfo.toJson(),
@@ -123,6 +118,13 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
         'totalPrice': _finalPrice,
         if (_selectedVoucher != null) 'voucherCode': _selectedVoucher!.code,
       };
+
+      // Thêm userId từ SharedPreferences để booking gắn với user hiện tại
+      final prefs = await SharedPreferences.getInstance();
+      final userId = prefs.getString('userId');
+      if (userId != null && userId.isNotEmpty) {
+        body['userId'] = userId;
+      }
 
       final response = await http.post(
         Uri.parse('${ApiConstants.baseUrl}${ApiConstants.bookings}'),
