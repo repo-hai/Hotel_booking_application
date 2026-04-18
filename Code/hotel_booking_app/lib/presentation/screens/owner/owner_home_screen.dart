@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../providers/owner_provider.dart';
 import '../../../models/hotel/hotel_model.dart';
+import '../../widgets/network_image_with_placeholder.dart';
 import 'edit_hotel_master.dart';
 import 'add_hotel/add_hotel_master.dart'; 
 import 'hotel_detail_screen_giang.dart';
 import 'statistics_home_screen.dart';
+import 'owner_account_screen.dart';
+import '../profile_view.dart';
 
 class OwnerHomeScreen extends StatefulWidget {
   const OwnerHomeScreen({super.key});
@@ -142,12 +145,16 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
             child: Icon(Icons.person, color: Colors.white, size: 30),
           ),
           const SizedBox(width: 12),
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("Chào chủ khách sạn! 👋", style: TextStyle(color: Colors.grey, fontSize: 13)),
-                Text("Demo Partner", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                const Text("Chào chủ khách sạn! 👋", style: TextStyle(color: Colors.grey, fontSize: 13)),
+                Consumer<OwnerProvider>(
+                  builder: (context, provider, child) {
+                    return Text(provider.ownerName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16));
+                  },
+                ),
               ],
             ),
           ),
@@ -187,13 +194,12 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
         ),
         child: Row(
           children: [
-            ClipRRect(
+            NetworkImageWithPlaceholder(
+              url: hotel.images.isNotEmpty ? hotel.images[0].url : null,
+              width: 80,
+              height: 80,
               borderRadius: BorderRadius.circular(12),
-              child: Image.network(
-                hotel.images.isNotEmpty ? hotel.images[0].url : 'https://via.placeholder.com/150',
-                width: 80, height: 80, fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Container(color: Colors.grey[200], width: 80, height: 80, child: const Icon(Icons.hotel)),
-              ),
+              placeholderIcon: Icons.hotel,
             ),
             const SizedBox(width: 15),
             Expanded(
@@ -249,6 +255,8 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
       onTap: (index) {
         if (index == 1) {
           Navigator.push(context, MaterialPageRoute(builder: (_) => const StatisticsHomeScreen()));
+        } else if (index == 3) {
+          Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileView(isOwner: true)));
         }
       },
       items: const [

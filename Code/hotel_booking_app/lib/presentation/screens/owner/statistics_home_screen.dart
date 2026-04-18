@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../providers/owner_provider.dart';
 import '../../../models/hotel/hotel_model.dart';
+import '../../widgets/network_image_with_placeholder.dart';
 import 'statistics_screen.dart';
+import 'owner_account_screen.dart';
+import 'owner_home_screen.dart';
+import '../profile_view.dart';
 
 class StatisticsHomeScreen extends StatefulWidget {
   const StatisticsHomeScreen({super.key});
@@ -58,7 +62,12 @@ class _StatisticsHomeScreenState extends State<StatisticsHomeScreen> {
       currentIndex: 1,
       onTap: (index) {
         if (index == 0) {
-          Navigator.pop(context); // Quay về trang chủ
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (_) => const OwnerHomeScreen()),
+            (route) => false,
+          );
+        } else if (index == 3) {
+          Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileView(isOwner: true)));
         }
       },
       items: const [
@@ -88,13 +97,12 @@ class _StatisticsHomeScreenState extends State<StatisticsHomeScreen> {
         ),
         child: Row(
           children: [
-            ClipRRect(
+            NetworkImageWithPlaceholder(
+              url: hotel.images.isNotEmpty ? hotel.images[0].url : null,
+              width: 80,
+              height: 80,
               borderRadius: BorderRadius.circular(12),
-              child: Image.network(
-                hotel.images.isNotEmpty ? hotel.images[0].url : 'https://via.placeholder.com/150',
-                width: 80, height: 80, fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Container(color: Colors.grey[200], width: 80, height: 80, child: const Icon(Icons.hotel)),
-              ),
+              placeholderIcon: Icons.hotel,
             ),
             const SizedBox(width: 15),
             Expanded(

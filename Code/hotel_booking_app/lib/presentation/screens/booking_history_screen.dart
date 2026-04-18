@@ -371,7 +371,7 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen>
                     label: 'Liên hệ với chỗ nghỉ',
                     onTap: () {},
                   ),
-                  if (type == 'active')
+                  if (type == 'active' && booking.status == 'Pending')
                     _buildAction(
                       icon: Icons.cancel_outlined,
                       label: 'Hủy đặt phòng',
@@ -439,6 +439,15 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen>
   }
 
   Future<void> _confirmCancel(BookingHistoryModel booking) async {
+    // Chỉ cho hủy booking đang chờ xác nhận (Pending)
+    if (booking.status != 'Pending') {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Chỉ có thể hủy đặt phòng đang chờ xác nhận.'),
+        backgroundColor: Colors.orange,
+      ));
+      return;
+    }
+
     final reason = await showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
@@ -448,23 +457,29 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen>
 
     if (reason == null || !mounted) return;
 
-    // Hiện loading
+    // Hiện loading overlay
+    bool loadingShown = false;
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => const Center(
-        child: CircularProgressIndicator(color: AppColors.primaryLight),
-      ),
+      builder: (_) {
+        loadingShown = true;
+        return const Center(
+          child: CircularProgressIndicator(color: AppColors.primaryLight),
+        );
+      },
     );
 
     final ok = await BookingService.cancelBooking(booking.id, reason);
 
     if (!mounted) return;
-    Navigator.pop(context); // đóng loading
+
+    // Đóng loading nếu đang hiện
+    if (loadingShown) Navigator.of(context, rootNavigator: true).pop();
 
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(ok
-          ? 'Đã gửi yêu cầu hủy thành công!'
+          ? 'Đã hủy đặt phòng thành công!'
           : 'Không thể hủy. Vui lòng thử lại!'),
       backgroundColor: ok ? Colors.green : Colors.red,
     ));
@@ -482,7 +497,15 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen>
     return BottomNavigationBar(
       currentIndex: 2, // Tab "Đặt chỗ"
       onTap: (index) {
-        if (index == 0) Navigator.popUntil(context, (r) => r.isFirst);
+        if (index == 0) {
+          // Tìm kiếm → quay về BookingHomeScreen
+          Navigator.pop(context);
+        } else if (index == 2) {
+          // Đang ở trang này rồi, không làm gì
+        } else if (index == 3) {
+          // Tài khoản → quay về rồi để BookingHomeScreen xử lý
+          Navigator.pop(context);
+        }
       },
       type: BottomNavigationBarType.fixed,
       selectedItemColor: AppColors.primaryLight,
@@ -493,7 +516,7 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen>
         BottomNavigationBarItem(
             icon: Icon(Icons.search), label: 'Tìm kiếm'),
         BottomNavigationBarItem(
-            icon: Icon(Icons.favorite_border), label: 'Đã lưu'),
+            icon: Icon(Icons.smart_toy_outlined), label: 'Chatbot'),
         BottomNavigationBarItem(
             icon: Icon(Icons.luggage_outlined), label: 'Đặt chỗ'),
         BottomNavigationBarItem(

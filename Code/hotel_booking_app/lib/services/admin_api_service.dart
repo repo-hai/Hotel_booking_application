@@ -80,10 +80,10 @@ class AdminApiService {
     final res = await _getJson('/api/admin/dashboard/stats');
     final d = res['data'] as Map<String, dynamic>;
     return DashboardStats(
-      totalUsers: (d['totalUsers'] ?? 0) as int,
-      totalHotels: (d['totalHotels'] ?? 0) as int,
-      totalBookings: (d['totalBookings'] ?? 0) as int,
-      totalVouchers: (d['totalVouchers'] ?? 0) as int,
+      totalUsers: (d['totalUsers'] as num? ?? 0).toInt(),
+      totalHotels: (d['totalHotels'] as num? ?? 0).toInt(),
+      totalBookings: (d['totalBookings'] as num? ?? 0).toInt(),
+      totalVouchers: (d['totalVouchers'] as num? ?? 0).toInt(),
     );
   }
 
@@ -117,9 +117,9 @@ class AdminApiService {
         .toList();
     return UsersPage(
       users: users,
-      total: (data['total'] ?? 0) as int,
-      page: (data['page'] ?? 1) as int,
-      limit: (data['limit'] ?? limit) as int,
+      total: (data['total'] as num? ?? 0).toInt(),
+      page: (data['page'] as num? ?? 1).toInt(),
+      limit: (data['limit'] as num? ?? limit).toInt(),
     );
   }
 
@@ -139,9 +139,9 @@ class AdminApiService {
     final pagination = res['pagination'] as Map<String, dynamic>? ?? {};
     return HotelsPage(
       hotels: list.map(HotelModel.fromJson).toList(),
-      currentPage: (pagination['currentPage'] ?? page) as int,
-      totalPages: (pagination['totalPages'] ?? 1) as int,
-      totalItems: (pagination['totalItems'] ?? list.length) as int,
+      currentPage: (pagination['currentPage'] as num? ?? page).toInt(),
+      totalPages: (pagination['totalPages'] as num? ?? 1).toInt(),
+      totalItems: (pagination['totalItems'] as num? ?? list.length).toInt(),
     );
   }
 
@@ -176,9 +176,9 @@ class AdminApiService {
         .toList();
     return BookingsPage(
       bookings: bookings,
-      total: (data['total'] ?? 0) as int,
-      page: (data['page'] ?? 1) as int,
-      limit: (data['limit'] ?? limit) as int,
+      total: (data['total'] as num? ?? 0).toInt(),
+      page: (data['page'] as num? ?? 1).toInt(),
+      limit: (data['limit'] as num? ?? limit).toInt(),
     );
   }
 
@@ -206,9 +206,9 @@ class AdminApiService {
         .toList();
     return VouchersPage(
       vouchers: vouchers,
-      total: (data['total'] ?? 0) as int,
-      page: (data['page'] ?? 1) as int,
-      limit: (data['limit'] ?? limit) as int,
+      total: (data['total'] as num? ?? 0).toInt(),
+      page: (data['page'] as num? ?? 1).toInt(),
+      limit: (data['limit'] as num? ?? limit).toInt(),
     );
   }
 

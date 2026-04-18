@@ -33,23 +33,28 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
+          color: Colors.white,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
+              color: Colors.black26,
               blurRadius: 10,
-              offset: const Offset(0, -2),
+              offset: Offset(0, -2),
             ),
           ],
         ),
         child: BottomNavigationBar(
           currentIndex: _currentIndex,
-          onTap: (index) => setState(() => _currentIndex = index),
+          onTap: (index) {
+            setState(() => _currentIndex = index);
+          },
           type: BottomNavigationBarType.fixed,
-          backgroundColor: AppColors.white,
+          backgroundColor: Colors.white,
           selectedItemColor: AppColors.primary,
           unselectedItemColor: AppColors.textSecondary,
-          selectedLabelStyle: const TextStyle(fontSize: 12),
+          selectedLabelStyle: const TextStyle(
+              fontSize: 12, fontWeight: FontWeight.bold),
           unselectedLabelStyle: const TextStyle(fontSize: 12),
+          elevation: 0,
           items: const [
             BottomNavigationBarItem(
               icon: Icon(Icons.dashboard_outlined),

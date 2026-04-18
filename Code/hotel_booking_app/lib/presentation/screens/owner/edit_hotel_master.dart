@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -17,16 +18,26 @@ class EditHotelScreen extends StatefulWidget {
 }
 
 class _EditHotelScreenState extends State<EditHotelScreen> with SingleTickerProviderStateMixin {
+  final _basicFormKey = GlobalKey<FormState>();
+  final _locationFormKey = GlobalKey<FormState>();
+
   late TabController _tabController;
   late TextEditingController _nameController;
   late TextEditingController _descController;
   late TextEditingController _phoneController;
   late TextEditingController _emailController;
 
-  late TextEditingController _cityController;
-  late TextEditingController _districtController;
-  late TextEditingController _wardController;
-  late TextEditingController _addressController;
+  // Danh sách tỉnh/thành phố
+  static const List<String> _locationOptions = [
+    'Hà Nội', 'Hồ Chí Minh', 'Đà Nẵng', 'Kiên Giang (Phú Quốc)',
+    'Lào Cai (Sapa)', 'Lâm Đồng (Đà Lạt)', 'Khánh Hòa (Nha Trang)',
+    'Bà Rịa - Vũng Tàu', 'Quảng Ninh (Hạ Long)', 'Thừa Thiên Huế',
+    'Cần Thơ', 'Quảng Nam (Hội An)', 'Bình Định (Quy Nhơn)',
+    'Thanh Hóa', 'Phú Thọ', 'Lạng Sơn', 'Hòa Bình', 'Bắc Ninh',
+    'Nam Định', 'Ninh Bình', 'Sơn La (Mộc Châu)', 'Vĩnh Phúc',
+    'Ninh Thuận', 'Quảng Trị', 'Tiền Giang',
+  ];
+  String? _selectedLocation;
 
   final Set<String> _selectedAmenities = {};
   List<HotelImage> _existingImages = [];
@@ -49,12 +60,10 @@ class _EditHotelScreenState extends State<EditHotelScreen> with SingleTickerProv
       _selectedAmenities.add(a.name);
     }
 
-    // Khởi tạo tab Vị trí - Parse chuỗi location "Địa chỉ, Phường, Quận, Thành phố"
-    List<String> locParts = widget.hotel.location.split(', ');
-    _addressController = TextEditingController(text: locParts.isNotEmpty ? locParts[0] : "");
-    _wardController = TextEditingController(text: locParts.length > 1 ? locParts[1] : "");
-    _districtController = TextEditingController(text: locParts.length > 2 ? locParts[2] : "");
-    _cityController = TextEditingController(text: locParts.length > 3 ? locParts.sublist(3).join(', ') : "");
+    // Khởi tạo tab Vị trí — chỉ lấy thành phố
+    // Nếu location hiện tại khớp với danh sách thì chọn sẵn
+    final currentLoc = widget.hotel.location;
+    _selectedLocation = _locationOptions.contains(currentLoc) ? currentLoc : null;
 
     // Khởi tạo tab Ảnh
     _existingImages = List.from(widget.hotel.images);
@@ -67,10 +76,6 @@ class _EditHotelScreenState extends State<EditHotelScreen> with SingleTickerProv
     _descController.dispose();
     _phoneController.dispose();
     _emailController.dispose();
-    _cityController.dispose();
-    _districtController.dispose();
-    _wardController.dispose();
-    _addressController.dispose();
     super.dispose();
   }
 
@@ -78,7 +83,7 @@ class _EditHotelScreenState extends State<EditHotelScreen> with SingleTickerProv
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (BuildContext context) {
+      builder: (BuildContext dialogContext) {
         return Dialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           child: Padding(
@@ -102,8 +107,8 @@ class _EditHotelScreenState extends State<EditHotelScreen> with SingleTickerProv
                 const SizedBox(height: 30),
                 ElevatedButton(
                   onPressed: () {
-                    Navigator.pop(context); // Đóng popup
-                    Navigator.pop(context); // Quay về Home
+                    Navigator.pop(dialogContext); // Đóng popup
+                    if (mounted) Navigator.pop(context); // Quay về màn hình trước
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF2E5AAC),
@@ -169,6 +174,18 @@ class _EditHotelScreenState extends State<EditHotelScreen> with SingleTickerProv
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
           onPressed: _isSaving ? null : () async {
+            bool isBasicValid = _basicFormKey.currentState?.validate() ?? true;
+
+            if (!isBasicValid) {
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Vui lòng điền đúng và đủ thông tin bắt buộc!'), backgroundColor: Colors.red));
+              return;
+            }
+
+            if (_selectedLocation == null) {
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Vui lòng chọn tỉnh/thành phố!'), backgroundColor: Colors.red));
+              return;
+            }
+
             setState(() => _isSaving = true);
             final provider = Provider.of<OwnerProvider>(context, listen: false);
 
@@ -181,9 +198,6 @@ class _EditHotelScreenState extends State<EditHotelScreen> with SingleTickerProv
               }
             }
 
-            // Xử lý Vị trí
-            final loc = "${_addressController.text}, ${_wardController.text}, ${_districtController.text}, ${_cityController.text}";
-            
             // Xử lý Amenities
             final ams = _selectedAmenities.map((a) => HotelAmenity(id: "", name: a, icon: "")).toList();
 
@@ -193,7 +207,7 @@ class _EditHotelScreenState extends State<EditHotelScreen> with SingleTickerProv
               name: _nameController.text,
               description: _descController.text,
               telephone: _phoneController.text,
-              location: loc,
+              location: _selectedLocation!,
               email: _emailController.text,
               star: widget.hotel.star,
               images: finalImgs,
@@ -222,17 +236,33 @@ class _EditHotelScreenState extends State<EditHotelScreen> with SingleTickerProv
   // ============== TABS ==============
 
   Widget _buildBasicTab() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildInput("Tên khách sạn *", _nameController),
-          _buildInput("Mô tả khách sạn *", _descController, maxLines: 3),
-          _buildInput("Số điện thoại *", _phoneController),
-          _buildInput("Địa chỉ email *", _emailController),
-          
-          const SizedBox(height: 10),
+    return Form(
+      key: _basicFormKey,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildInput("Tên khách sạn *", _nameController, 
+              validator: (val) => (val == null || val.isEmpty) ? 'Vui lòng nhập tên khách sạn' : null),
+            _buildInput("Mô tả khách sạn *", _descController, maxLines: 3, 
+              validator: (val) => (val == null || val.isEmpty) ? 'Vui lòng nhập mô tả' : null),
+            _buildInput("Số điện thoại *", _phoneController, 
+              keyboardType: TextInputType.phone,
+              validator: (val) {
+                if (val == null || val.isEmpty) return 'Vui lòng nhập số điện thoại';
+                if (!RegExp(r'^[0-9]{10,11}$').hasMatch(val)) return 'Số điện thoại không hợp lệ (10-11 số)';
+                return null;
+              }),
+            _buildInput("Địa chỉ email *", _emailController, 
+              keyboardType: TextInputType.emailAddress,
+              validator: (val) {
+                if (val == null || val.isEmpty) return 'Vui lòng nhập email';
+                if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(val)) return 'Email không đúng định dạng';
+                return null;
+              }),
+            
+            const SizedBox(height: 10),
           const Text("Tiện ích", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
           const SizedBox(height: 10),
           _buildCheckItem("Wifi miễn phí"),
@@ -241,6 +271,7 @@ class _EditHotelScreenState extends State<EditHotelScreen> with SingleTickerProv
           _buildCheckItem("Quầy bar"),
           _buildCheckItem("Spa"),
         ],
+      ),
       ),
     );
   }
@@ -251,10 +282,44 @@ class _EditHotelScreenState extends State<EditHotelScreen> with SingleTickerProv
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildInput("Tỉnh/Thành phố *", _cityController),
-          _buildInput("Quận/Huyện *", _districtController),
-          _buildInput("Phường/Xã *", _wardController),
-          _buildInput("Địa chỉ cụ thể *", _addressController),
+          const Text.rich(
+            TextSpan(
+              children: [
+                TextSpan(
+                  text: 'Tỉnh/Thành phố',
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+                ),
+                TextSpan(
+                  text: ' *',
+                  style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 10),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.grey.shade50,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Colors.grey.shade300),
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: _selectedLocation,
+                isExpanded: true,
+                hint: const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 14),
+                  child: Text('Chọn tỉnh/thành phố', style: TextStyle(color: Colors.grey)),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                borderRadius: BorderRadius.circular(10),
+                items: _locationOptions
+                    .map((loc) => DropdownMenuItem(value: loc, child: Text(loc)))
+                    .toList(),
+                onChanged: (val) => setState(() => _selectedLocation = val),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -310,9 +375,18 @@ class _EditHotelScreenState extends State<EditHotelScreen> with SingleTickerProv
                           width: 150, height: 150,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(15),
-                            image: DecorationImage(
-                              image: kIsWeb ? NetworkImage(xfile.path) as ImageProvider : FileImage(File(xfile.path)), 
-                              fit: BoxFit.cover
+                            color: Colors.grey.shade200,
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(15),
+                            child: FutureBuilder<Uint8List>(
+                              future: xfile.readAsBytes(),
+                              builder: (context, snapshot) {
+                                if (snapshot.hasData) {
+                                  return Image.memory(snapshot.data!, fit: BoxFit.cover);
+                                }
+                                return const Center(child: CircularProgressIndicator(strokeWidth: 2));
+                              },
                             ),
                           ),
                         ),
@@ -381,7 +455,8 @@ class _EditHotelScreenState extends State<EditHotelScreen> with SingleTickerProv
     );
   }
 
-  Widget _buildInput(String label, TextEditingController controller, {int maxLines = 1}) {
+  Widget _buildInput(String label, TextEditingController controller, 
+      {int maxLines = 1, TextInputType? keyboardType, String? Function(String?)? validator}) {
     bool isRequired = label.contains('*');
     String cleanLabel = label.replaceAll('*', '').trim();
 
@@ -398,9 +473,11 @@ class _EditHotelScreenState extends State<EditHotelScreen> with SingleTickerProv
           ),
         ),
         const SizedBox(height: 8),
-        TextField(
+        TextFormField(
           controller: controller,
           maxLines: maxLines,
+          keyboardType: keyboardType,
+          validator: validator,
           decoration: InputDecoration(
             filled: true,
             fillColor: Colors.grey.shade50,

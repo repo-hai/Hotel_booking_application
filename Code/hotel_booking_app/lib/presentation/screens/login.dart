@@ -1,10 +1,17 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:hotel_booking_app/presentation/screens/privacy_view.dart';
 import 'package:hotel_booking_app/presentation/screens/register.dart';
 import 'package:hotel_booking_app/presentation/screens/forgot_password.dart';
-import 'package:hotel_booking_app/presentation/screens/profile_view.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
+import 'package:hotel_booking_app/presentation/screens/admin/admin_main_screen.dart';
+import 'package:hotel_booking_app/presentation/screens/owner/owner_home_screen.dart';
+import 'package:hotel_booking_app/presentation/screens/booking_home_screen.dart';
+import 'package:hotel_booking_app/presentation/screens/profile_view.dart';
 
 class Login extends StatelessWidget {
   const Login({super.key});
@@ -33,7 +40,6 @@ class _MyLoginPageState extends State<MyLoginPage> {
   String username = "";
   String password = "";
   bool passwordVisible = false;
-  bool isLoading = false;
 
   @override
   void initState(){
@@ -41,9 +47,7 @@ class _MyLoginPageState extends State<MyLoginPage> {
     passwordVisible=false;
     username = "";
     password = "";
-    isLoading = false;
   }
-
   void _onFaceBookLogin(){}
 
   void _onGoogleLogin(){}
@@ -171,39 +175,52 @@ class _MyLoginPageState extends State<MyLoginPage> {
                                     )
                                 ),
                                 child: ElevatedButton(
-                                  onPressed: () {
-                                    print("username: " + username);
-                                    print("password: " + password);
-                                    setState(() {
-                                      isLoading = true;
-                                    });
-                                    showDialog(
-                                      context: context,
-                                      builder: (ctx) =>
-                                        AlertDialog(
-                                          title: Text("Test dialog"),
-                                          backgroundColor: Colors.white,
-                                          actions: [
-                                            TextButton(
-                                              onPressed: (){
-                                                Navigator.of(ctx).pop();
-                                                Navigator.of(context).push(
-                                                  MaterialPageRoute(
-                                                    builder: (context) => ProfileView(),
-                                                  ),
-                                                );
-                                              },
-                                              child: Text(
-                                                "OK",
-                                                style: TextStyle(color: Colors.black),
-                                              )
-                                            )
-                                          ],
-                                        )
-                                      // isLoading ? SpinKitPouringHourGlass(
-                                      //   color: Colors.white,
-                                      // ) : Text(""),
+                                  onPressed:  () async {
+                                    final response = await http.post(
+                                      Uri.parse('http://localhost:3000/login'),
+                                      headers: <String, String>{
+                                        'Content-Type': 'application/json; charset=UTF-8',
+                                      },
+                                      body: jsonEncode(<String, String>{'email': username, 'password': password}),
                                     );
+                                    final SharedPreferences prefs = await SharedPreferences.getInstance();
+                                    if(response.statusCode == 200){
+                                      print(jsonDecode(response.body));
+                                      await prefs.setString('userId', jsonDecode(response.body)["user_id"]);
+                                      await prefs.setString('email', username);
+                                      await prefs.setString('password', jsonDecode(response.body)["password"]);
+                                      await prefs.setString('role', jsonDecode(response.body)["role"]);
+                                      final String? role = prefs.getString('role');
+                                      if(role == "admin"){
+                                        Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                            builder: (context) => AdminMainScreen(),
+                                          ),
+                                        );
+                                      } else if(role == "owner"){
+                                        Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                            builder: (context) => OwnerHomeScreen(),
+                                          ),
+                                        );
+                                      } else {
+                                        Navigator.of(context).pushAndRemoveUntil(
+                                          MaterialPageRoute(
+                                            builder: (context) => BookingHomeScreen(),
+                                          ),
+                                          (route) => false,
+                                        );
+                                      }
+                                    } else {
+                                      showDialog(context: context, builder: (ctx) => AlertDialog(
+                                        title: Text("Sai tên đăng nhập hoặc mật khẩu"),
+                                        actions: [
+                                          TextButton(onPressed: () {
+                                            Navigator.pop(ctx);
+                                          }, child: Text("OK"))
+                                        ],
+                                      ));
+                                    }
                                   },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.transparent,
@@ -304,11 +321,31 @@ class _MyLoginPageState extends State<MyLoginPage> {
                                   ),
                                   TextButton(
                                       onPressed: () {
-                                        Navigator.of(context).push(
-                                          MaterialPageRoute(
-                                            builder: (context) => RegisterView(),
-                                          ),
-                                        );
+                                        showDialog(context: context, builder: (ctx) => AlertDialog(
+                                          title: Text("Chọn loại tài khoản"),
+                                          actions: [
+                                            TextButton(onPressed: () async {
+                                              final SharedPreferences prefs = await SharedPreferences.getInstance();
+                                              await prefs.setString('registry_role', 'owner');
+                                              Navigator.pop(ctx);
+                                              Navigator.of(context).push(
+                                                MaterialPageRoute(
+                                                  builder: (context) => RegisterView(),
+                                                ),
+                                              );
+                                            }, child: Text("Chủ khách sạn")),
+                                            TextButton(onPressed: () async {
+                                              final SharedPreferences prefs = await SharedPreferences.getInstance();
+                                              await prefs.setString('registry_role', 'user');
+                                              Navigator.pop(ctx);
+                                              Navigator.of(context).push(
+                                                MaterialPageRoute(
+                                                  builder: (context) => RegisterView(),
+                                                ),
+                                              );
+                                            }, child: Text("Người dùng"))
+                                          ],
+                                        ));
                                       },
                                       style: ButtonStyle(
                                         padding: WidgetStatePropertyAll<EdgeInsetsGeometry>(EdgeInsetsGeometry.zero),

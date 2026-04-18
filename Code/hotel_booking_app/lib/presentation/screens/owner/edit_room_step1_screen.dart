@@ -13,6 +13,7 @@ class EditRoomStep1Screen extends StatefulWidget {
 }
 
 class _EditRoomStep1ScreenState extends State<EditRoomStep1Screen> {
+  final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _capacityController = TextEditingController();
   final TextEditingController _sizeController = TextEditingController();
@@ -66,6 +67,7 @@ class _EditRoomStep1ScreenState extends State<EditRoomStep1Screen> {
   }
 
   void _saveAndNext() {
+    if (!_formKey.currentState!.validate()) return;
     final provider = Provider.of<OwnerProvider>(context, listen: false);
     final rId = widget.roomTypeId ?? (provider.roomTypes.isNotEmpty ? provider.roomTypes[0].id : "");
     
@@ -99,29 +101,40 @@ class _EditRoomStep1ScreenState extends State<EditRoomStep1Screen> {
         ),
         title: const Text("Thông tin phòng", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildField("Tên loại phòng *", _nameController, "Nhập tên"),
-            _buildField("Sức chứa tối đa *", _capacityController, "người lớn", isSuffix: true),
-            _buildField("Diện tích phòng *", _sizeController, "m²", isSuffix: true),
-            _buildField("Loại giường *", _bedTypeController, "Nhập loại giường"),
-            _buildField("Số lượng giường *", _bedCountController, "Nhập số lượng"),
-            const SizedBox(height: 20),
-            const Text("Tiện ích", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 10),
-            ...["Chống âm", "Phòng tắm riêng", "Điều hòa", "Bữa sáng miễn phí", "Bữa trưa miễn phí", "Wifi miễn phí"].map((e) => _buildCheck(e)),
-            const SizedBox(height: 30),
-            _buildNextBtn(),
-          ],
+      body: Form(
+        key: _formKey,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildField("Tên loại phòng *", _nameController, "Nhập tên",
+                validator: (val) => (val == null || val.isEmpty) ? 'Bắt buộc' : null),
+              _buildField("Sức chứa tối đa *", _capacityController, "người lớn", isSuffix: true,
+                keyboardType: TextInputType.number,
+                validator: (val) => (val == null || val.isEmpty || int.tryParse(val) == null) ? 'Số liệu không hợp lệ' : null),
+              _buildField("Diện tích phòng *", _sizeController, "m²", isSuffix: true,
+                keyboardType: TextInputType.number,
+                validator: (val) => (val == null || val.isEmpty || double.tryParse(val) == null) ? 'Số liệu không hợp lệ' : null),
+              _buildField("Loại giường *", _bedTypeController, "Nhập loại giường",
+                validator: (val) => (val == null || val.isEmpty) ? 'Bắt buộc' : null),
+              _buildField("Số lượng giường *", _bedCountController, "Nhập số lượng",
+                keyboardType: TextInputType.number,
+                validator: (val) => (val == null || val.isEmpty || int.tryParse(val) == null) ? 'Số liệu không hợp lệ' : null),
+              const SizedBox(height: 20),
+              const Text("Tiện ích", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 10),
+              ...["Chống âm", "Phòng tắm riêng", "Điều hòa", "Bữa sáng miễn phí", "Bữa trưa miễn phí", "Wifi miễn phí"].map((e) => _buildCheck(e)),
+              const SizedBox(height: 30),
+              _buildNextBtn(),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildField(String label, TextEditingController controller, String hint, {bool isSuffix = false}) {
+  Widget _buildField(String label, TextEditingController controller, String hint, {bool isSuffix = false, TextInputType? keyboardType, String? Function(String?)? validator}) {
     bool isRequired = label.contains('*');
     String cleanLabel = label.replaceAll('*', '').trim();
 
@@ -136,8 +149,10 @@ class _EditRoomStep1ScreenState extends State<EditRoomStep1Screen> {
         ),
       ),
       const SizedBox(height: 8),
-      TextField(
+      TextFormField(
         controller: controller,
+        keyboardType: keyboardType,
+        validator: validator,
         decoration: InputDecoration(
           suffixText: isSuffix ? hint : null,
           filled: true,

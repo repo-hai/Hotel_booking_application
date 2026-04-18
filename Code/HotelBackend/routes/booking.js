@@ -146,6 +146,7 @@ router.post('/', async (req, res) => {
 router.get('/', async (req, res) => {
 	try {
 		const status = req.query.status;
+		const userId = req.query.userId; // Lọc theo userId
 
 		// 1. Lấy tham số phân trang từ query URL (Mặc định: Trang 1, giới hạn 10 đơn/trang)
 		const page = parseInt(req.query.page) || 1;
@@ -154,7 +155,12 @@ router.get('/', async (req, res) => {
 
 		let query = db.collection('Bookings');
 
-		// 2. Nếu có lọc theo status
+		// 2. Lọc theo userId nếu có (bắt buộc để tránh lộ dữ liệu người khác)
+		if (userId) {
+			query = query.where('userId', '==', userId);
+		}
+
+		// 3. Nếu có lọc theo status
 		if (status) {
 			query = query.where('status', '==', status);
 		}

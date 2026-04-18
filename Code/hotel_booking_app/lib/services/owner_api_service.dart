@@ -6,9 +6,13 @@ import '../models/hotel/hotel_model.dart';
 import '../models/room/room_type_model.dart';
 import '../models/booking/booking_model.dart';
 import '../models/review/review_model.dart';
+import 'api_config.dart';
 
 class OwnerApiService {
-  static const String baseUrl = 'http://localhost:3000/api/owner';
+  static String get baseUrl => '${ApiConfig.baseUrl}/api/owner';
+
+  // Lưu thông báo lỗi chi tiết nhất từ lần gọi API cuối
+  String? lastError;
 
   // 1. Dashboard Stats
   Future<Map<String, dynamic>> getDashboardStats(String ownerId) async {
@@ -22,6 +26,43 @@ class OwnerApiService {
     } catch (e) {
       debugPrint("Lỗi getDashboardStats: $e");
       return {};
+    }
+  }
+
+  // Get Owner Name
+  Future<String?> getOwnerName(String ownerId) async {
+    try {
+      // Gọi qua endpoint users
+      final url = '${ApiConfig.baseUrl}/api/users/$ownerId';
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final body = jsonDecode(response.body);
+        if (body['success'] == true && body['data'] != null) {
+          return body['data']['Name'] ?? body['data']['name'];
+        }
+      }
+      return null;
+    } catch (e) {
+      debugPrint("Lỗi getOwnerName: $e");
+      return null;
+    }
+  }
+
+  // Get Owner Profile
+  Future<Map<String, dynamic>?> getOwnerProfile(String ownerId) async {
+    try {
+      final url = '${ApiConfig.baseUrl}/api/users/$ownerId';
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final body = jsonDecode(response.body);
+        if (body['success'] == true && body['data'] != null) {
+          return body['data'];
+        }
+      }
+      return null;
+    } catch (e) {
+      debugPrint("Lỗi getOwnerProfile: $e");
+      return null;
     }
   }
 
@@ -56,46 +97,45 @@ class OwnerApiService {
   }
 
   Future<Hotel?> createHotel(String ownerId, Hotel hotel) async {
+    lastError = null;
     try {
-      // Bóc tách city từ location (thường là phần cuối cùng sau dấu phẩy)
-      List<String> parts = hotel.location.split(', ');
-      String city = parts.length > 1 ? parts.last : hotel.location;
-      String address = parts.length > 1 ? parts.sublist(0, parts.length - 1).join(', ') : hotel.location;
-
       final response = await http.post(
         Uri.parse('$baseUrl/hotels'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           ...hotel.toJson(),
-          'userId': ownerId, // Backend yêu cầu userId thay vì ownerId
-          'address': address,
-          'city': city,
+          'userId': ownerId,
+          'location': hotel.location,
         }),
       );
       if (response.statusCode == 201) {
         final body = jsonDecode(response.body);
         return Hotel.fromJson(body['data']);
       }
+      // Lấy message lỗi cụ thể từ server
+      try {
+        final errBody = jsonDecode(response.body);
+        lastError = errBody['message'] ?? 'HTTP ${response.statusCode}';
+      } catch (_) {
+        lastError = 'HTTP ${response.statusCode}: ${response.body}';
+      }
+      debugPrint('Lỗi createHotel: $lastError');
       return null;
     } catch (e) {
-      debugPrint("Lỗi createHotel: $e");
+      lastError = 'Không kết nối được server: $e';
+      debugPrint('Lỗi createHotel: $lastError');
       return null;
     }
   }
 
   Future<bool> updateHotel(Hotel hotel) async {
     try {
-      List<String> parts = hotel.location.split(', ');
-      String city = parts.length > 1 ? parts.last : hotel.location;
-      String address = parts.length > 1 ? parts.sublist(0, parts.length - 1).join(', ') : hotel.location;
-
       final response = await http.put(
         Uri.parse('$baseUrl/hotels/${hotel.id}'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           ...hotel.toJson(),
-          'address': address,
-          'city': city,
+          'location': hotel.location, // Gửi location trực tiếp theo cấu trúc database
         }),
       );
       return response.statusCode == 200;
@@ -131,6 +171,7 @@ class OwnerApiService {
   }
 
   Future<RoomType?> createRoomType(RoomType roomType) async {
+    lastError = null;
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/room-types'),
@@ -141,9 +182,17 @@ class OwnerApiService {
         final body = jsonDecode(response.body);
         return RoomType.fromJson(body['data']);
       }
+      try {
+        final errBody = jsonDecode(response.body);
+        lastError = errBody['message'] ?? 'HTTP ${response.statusCode}';
+      } catch (_) {
+        lastError = 'HTTP ${response.statusCode}: ${response.body}';
+      }
+      debugPrint('Lỗi createRoomType: $lastError');
       return null;
     } catch (e) {
-      debugPrint("Lỗi createRoomType: $e");
+      lastError = 'Không kết nối được server: $e';
+      debugPrint('Lỗi createRoomType: $lastError');
       return null;
     }
   }
@@ -172,22 +221,40 @@ class OwnerApiService {
     }
   }
 
-  // Upload ảnh
+  // Upload ảnh – endpoint: POST /api/owner/upload
   Future<String?> uploadImage(XFile file) async {
+    lastError = null;
     try {
-      var request = http.MultipartRequest('POST', Uri.parse('$baseUrl/upload'));
-      request.files.add(http.MultipartFile.fromBytes('image', await file.readAsBytes(), filename: file.name));
-      
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse('$baseUrl/upload'),
+      );
+      request.files.add(
+        http.MultipartFile.fromBytes(
+          'image',
+          await file.readAsBytes(),
+          filename: file.name,
+        ),
+      );
+
       var streamedResponse = await request.send();
       var response = await http.Response.fromStream(streamedResponse);
-      
-      if (response.statusCode == 200) {
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
         final body = jsonDecode(response.body);
-        return body['url'];
+        return body['url'] ?? body['imageUrl'] ?? body['data']?['url'];
       }
+      try {
+        final errBody = jsonDecode(response.body);
+        lastError = errBody['message'] ?? 'Upload thất bại (HTTP ${response.statusCode})';
+      } catch (_) {
+        lastError = 'Upload thất bại (HTTP ${response.statusCode})';
+      }
+      debugPrint('Lỗi uploadImage: $lastError');
       return null;
     } catch (e) {
-      debugPrint("Lỗi uploadImage: $e");
+      lastError = 'Không kết nối được server để upload ảnh: $e';
+      debugPrint('Lỗi uploadImage: $lastError');
       return null;
     }
   }

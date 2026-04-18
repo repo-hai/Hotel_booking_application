@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_strings.dart';
 import '../../data/models/hotel_model.dart';
@@ -10,6 +11,9 @@ import 'location_picker_screen.dart';
 import 'search_results_screen.dart';
 import 'booking_history_screen.dart';
 import 'hotel_detail_screen.dart';
+import '../screens/client/chatbot_screen.dart';
+import 'account_screen.dart';
+import 'profile_view.dart';
 
 class BookingHomeScreen extends StatefulWidget {
   const BookingHomeScreen({super.key});
@@ -31,16 +35,24 @@ class _BookingHomeScreenState extends State<BookingHomeScreen> {
   bool _isLoadingHistory = false;
   bool _isLoadingSuggestions = false;
 
-  // User ID — khớp với document ID trong Firebase (dùng số "1", "2"...)
-  // TODO: Sau khi có Auth, lấy từ Firebase Auth UID
-  static const String _userId = '1';
+  // User ID — lấy từ SharedPreferences sau khi đăng nhập
+  String _userId = '';
 
   int _currentNavIndex = 0;
 
   @override
   void initState() {
     super.initState();
-    _loadData();
+    _initUserId();
+  }
+
+  Future<void> _initUserId() async {
+    final prefs = await SharedPreferences.getInstance();
+    final id = prefs.getString('userId') ?? '';
+    if (mounted) {
+      setState(() => _userId = id);
+      _loadData();
+    }
   }
 
   Future<void> _loadData() async {
@@ -759,13 +771,27 @@ class _BookingHomeScreenState extends State<BookingHomeScreen> {
     return BottomNavigationBar(
       currentIndex: _currentNavIndex,
       onTap: (index) {
+        if (index == 1) {
+          // Tab "Chatbot" → mở màn hình chatbot
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const ChatbotScreen()),
+          );
+          return;
+        }
         if (index == 2) {
           // Tab "Đặt chỗ" → mở lịch sử đặt phòng
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (_) => const BookingHistoryScreen(),
-            ),
+            MaterialPageRoute(builder: (_) => const BookingHistoryScreen()),
+          );
+          return;
+        }
+        if (index == 3) {
+          // Tab "Tài khoản" → mở màn hình tài khoản
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const ProfileView()),
           );
           return;
         }
@@ -782,8 +808,8 @@ class _BookingHomeScreenState extends State<BookingHomeScreen> {
           label: AppStrings.timKiem,
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.favorite_border),
-          label: AppStrings.daLuu,
+          icon: Icon(Icons.smart_toy_outlined),
+          label: 'Chatbot',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.luggage_outlined),

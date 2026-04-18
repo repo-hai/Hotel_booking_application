@@ -1,26 +1,27 @@
-const {db} = require('../config/firebase');
+const db = require('../../firebase');
 let nodemailer = require('nodemailer');
 const crypto = require("crypto");
 
-function generateConfirmCode(){
+function generateConfirmCode() {
   return crypto.randomInt(1000, 9999).toString();
 }
 
-function generateUserID(){
+function generateUserID() {
   return crypto.randomUUID();
 }
 
 module.exports.register = async (req, res) => {
   try {
     const body = req.body;
-    console.log(`Tao tai khoan moi. Thong tin: name: ${body.name}, email: ${body.email}, password: ${body.password}.`)
+    console.log(`Tao tai khoan moi. Thong tin: role: ${body.role}, name: ${body.name}, email: ${body.email}, password: ${body.password}.`)
     const myCollection = db.collection('Users');
     const querySnapshot = await myCollection.where('Email', '==', body.email).get();
-    
-    if(!querySnapshot.empty){
+
+    if (!querySnapshot.empty) {
       console.log("Duplicate email");
-      return res.status(500).send();
+      return res.status(500).send("Duplicate email");
     } else {
+      console.log("Chuẩn bị gửi email");
       let transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
@@ -35,29 +36,43 @@ module.exports.register = async (req, res) => {
         from: 'dinhhoanghai.email@gmail.com',
         to: body.email,
         subject: 'Confirm email',
-        text: confirmCode
+        text: `Your confirm code is: ${confirmCode}`
       };
-
-      transporter.sendMail(mailOptions, function(error, info){
-        if(error){
+      console.log("Chuẩn bị hoàn tất. Bắt đầu gửi email");
+      transporter.sendMail(mailOptions, async function (error, info) {
+        if (error) {
           console.log(error);
           return res.status(500).json({
             error: "Lỗi chưa gửi được email",
           });
         } else {
-          const userid = generateUserID();
           console.log('Email sent: ' + info.response);
+          const allUsersSnap = await myCollection.get();
+          const userid = allUsersSnap.size + 1;
+          console.log("New user ID:", userid);
           const unconfirmUserObject = {
-            UserId: userid,
+            ID: userid,
             Email: body.email,
             Password: body.password,
-            ConfirmCode: confirmCode
+            ConfirmCode: confirmCode,
+            Role: body.role,
+            Location: "Hà Nội",
+            MembershipLevel: null,
+            Name: body.name,
+            Phone: body.phone,
+            Point: 0,
+            SearchingHistory: [],
+            CustomerBookInfo: [],
+            TotalSpent: null,
+            DateOfBirth: "1999-01-01"
           };
-          const myUnconfirmCollection = db.collection("UnconfirmAccount");
-          myUnconfirmCollection.doc(userid).set(unconfirmUserObject);
+          console.log(unconfirmUserObject);
 
-          console.log(`Thong tin tai khoan chua xac nhan: id: ${unconfirmUserObject.UserId}, email: ${body.email}, password: ${body.password}.`)
-          
+          const myUnconfirmCollection = db.collection("UnconfirmAccount");
+          await myUnconfirmCollection.doc(userid.toString()).set(unconfirmUserObject);
+
+          console.log(`Thong tin tai khoan chua xac nhan: id: ${unconfirmUserObject.ID}, email: ${body.email}, password: ${body.password}.`)
+
           return res.status(200).send({
             message: 'create unconfirm account successfully',
           });
@@ -65,7 +80,7 @@ module.exports.register = async (req, res) => {
       });
     }
   } catch (error) {
-    console.log("Đã có lỗi khi thực thi hàm login");
+    console.log("Register - Đã có lỗi khi thực thi hàm");
     return res.status(500).json(error.message).send();
   }
 };

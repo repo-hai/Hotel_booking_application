@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -49,13 +50,29 @@ class _Step5UploadImageState extends State<Step5UploadImage> {
 
     final provider = Provider.of<OwnerProvider>(context, listen: false);
     List<HotelImage> finalImgs = [];
+    final List<String> uploadErrors = [];
 
     // Tải ảnh lên Server Nodejs
-    for (var xfile in _selectedImages) {
+    for (int i = 0; i < _selectedImages.length; i++) {
+      final xfile = _selectedImages[i];
       String? url = await provider.uploadImage(xfile);
       if (url != null) {
-        finalImgs.add(HotelImage(id: "", url: url));
+        finalImgs.add(HotelImage(id: '', url: url));
+      } else {
+        final err = provider.lastUploadError ?? 'Không rõ lỗi';
+        uploadErrors.add('Ảnh ${i + 1}: $err');
       }
+    }
+
+    // Cảnh báo nếu có ảnh upload lỗi nhưng không dừng lại
+    if (uploadErrors.isNotEmpty && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Một số ảnh không upload được:\n${uploadErrors.join('\n')}'),
+          backgroundColor: Colors.orange,
+          duration: const Duration(seconds: 4),
+        ),
+      );
     }
 
     if (provider.draftHotel != null) {
@@ -73,18 +90,25 @@ class _Step5UploadImageState extends State<Step5UploadImage> {
       );
 
       bool success = await provider.createHotel();
-      
+
       if (mounted) {
         setState(() => _isUploading = false);
         if (success) {
-          provider.draftHotel = null; // Clean up
-          widget.onNext(); // Navigate to success
+          provider.draftHotel = null;
+          widget.onNext();
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Lỗi tạo khách sạn trên Server.")));
+          final errMsg = provider.lastCreateError ?? 'Lỗi không xác định từ server';
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Lỗi tạo khách sạn: $errMsg'),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 5),
+            ),
+          );
         }
       }
     } else {
-      setState(() => _isUploading = false);
+      if (mounted) setState(() => _isUploading = false);
     }
   }
 
@@ -119,9 +143,18 @@ class _Step5UploadImageState extends State<Step5UploadImage> {
                                 height: 150,
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(15),
-                                  image: DecorationImage(
-                                    image: kIsWeb ? NetworkImage(xfile.path) as ImageProvider : FileImage(File(xfile.path)), 
-                                    fit: BoxFit.cover
+                                  color: Colors.grey.shade200,
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(15),
+                                  child: FutureBuilder<Uint8List>(
+                                    future: xfile.readAsBytes(),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.hasData) {
+                                        return Image.memory(snapshot.data!, fit: BoxFit.cover);
+                                      }
+                                      return const Center(child: CircularProgressIndicator(strokeWidth: 2));
+                                    },
                                   ),
                                 ),
                               ),

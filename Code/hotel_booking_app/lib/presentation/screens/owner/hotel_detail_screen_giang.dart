@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../providers/owner_provider.dart';
 import '../../../models/hotel/hotel_model.dart';
+import '../../widgets/network_image_with_placeholder.dart';
 import 'all_reviews_screen.dart'; 
 import 'booking_management_screen.dart';
 import 'all_room_types_screen.dart';
@@ -9,7 +10,6 @@ import 'package:intl/intl.dart';
 import '../../../models/review/review_model.dart';
 import '../../../models/booking/booking_model.dart';
 import '../../../models/room/room_type_model.dart';
-import 'statistics_screen.dart';
 
 class HotelDetailScreen extends StatefulWidget {
   final Hotel hotel;
@@ -68,7 +68,11 @@ class _HotelDetailScreenState extends State<HotelDetailScreen> {
 
                     // Section Reviews
                     _buildSectionTitle(context, "Reviews (${summary['totalCount'] ?? 0})", () {
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => AllReviewsScreen(hotelId: widget.hotel.id)));
+                      Navigator.push(context, MaterialPageRoute(builder: (_) => AllReviewsScreen(hotelId: widget.hotel.id))).then((_) {
+                        if (context.mounted) {
+                          Provider.of<OwnerProvider>(context, listen: false).fetchReviews(widget.hotel.id);
+                        }
+                      });
                     }),
                     reviews.isNotEmpty 
                         ? _buildReviewPreview(reviews[0])
@@ -77,7 +81,11 @@ class _HotelDetailScreenState extends State<HotelDetailScreen> {
 
                     // Section Bookings
                     _buildSectionTitle(context, "Lượt đặt phòng", () {
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => BookingManagementScreen(hotelId: widget.hotel.id)));
+                      Navigator.push(context, MaterialPageRoute(builder: (_) => BookingManagementScreen(hotelId: widget.hotel.id))).then((_) {
+                        if (context.mounted) {
+                          Provider.of<OwnerProvider>(context, listen: false).fetchBookings(widget.hotel.id);
+                        }
+                      });
                     }),
                     bookings.isNotEmpty
                         ? _buildBookingPreview(bookings[0])
@@ -92,7 +100,11 @@ class _HotelDetailScreenState extends State<HotelDetailScreen> {
                           builder: (_) => AllRoomTypesScreen(hotelId: widget.hotel.id),
                           settings: const RouteSettings(name: 'AllRoomTypesScreen'),
                         )
-                      );
+                      ).then((_) {
+                        if (context.mounted) {
+                          Provider.of<OwnerProvider>(context, listen: false).fetchHotelDetails(widget.hotel.id);
+                        }
+                      });
                     }),
                     rTypes.isNotEmpty
                         ? _buildRoomTypePreview(rTypes[0])
@@ -151,12 +163,12 @@ class _HotelDetailScreenState extends State<HotelDetailScreen> {
       ),
       child: Row(
         children: [
-          ClipRRect(
+          NetworkImageWithPlaceholder(
+            url: widget.hotel.images.isNotEmpty ? widget.hotel.images[0].url : null,
+            width: 70,
+            height: 70,
             borderRadius: BorderRadius.circular(15),
-            child: Image.network(
-              widget.hotel.images.isNotEmpty ? widget.hotel.images[0].url : 'https://via.placeholder.com/80',
-              width: 70, height: 70, fit: BoxFit.cover,
-            ),
+            placeholderIcon: Icons.hotel,
           ),
           const SizedBox(width: 15),
           Expanded(
@@ -262,13 +274,12 @@ class _HotelDetailScreenState extends State<HotelDetailScreen> {
               ],
             ),
           ),
-          ClipRRect(
+          NetworkImageWithPlaceholder(
+            url: rt.images.isNotEmpty ? rt.images[0].url : null,
+            width: 80,
+            height: 80,
             borderRadius: BorderRadius.circular(10),
-            child: Image.network(
-              rt.images.isNotEmpty ? rt.images[0].url : 'https://via.placeholder.com/100',
-              width: 80, height: 80, fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => const Icon(Icons.meeting_room, size: 40),
-            ),
+            placeholderIcon: Icons.meeting_room,
           ),
         ],
       ),

@@ -4,6 +4,9 @@ import 'package:hotel_booking_app/presentation/screens/login.dart';
 import 'package:hotel_booking_app/presentation/screens/privacy_view.dart';
 import 'package:flutter/services.dart';
 import 'package:hotel_booking_app/presentation/screens/authenticate_email.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class RegisterView extends StatelessWidget {
   const RegisterView({super.key});
@@ -19,8 +22,7 @@ class RegisterView extends StatelessWidget {
 class MyRegisterPage extends StatefulWidget {
   const MyRegisterPage({super.key});
 
-  // Fields in a Widget subclass are
-  // always marked "final".
+
 
   @override
   State<MyRegisterPage> createState() => _MyRegisterPage();
@@ -29,6 +31,11 @@ class MyRegisterPage extends StatefulWidget {
 class _MyRegisterPage extends State<MyRegisterPage> {
   final String registerState = "not register";
   bool passwordVisible = false;
+  String username = "";
+  String password = "";
+  String phoneNumber = "";
+  String rewritePassword = "";
+  String name = "";
   bool confirmPasswordVisible = false;
 
   @override
@@ -36,6 +43,11 @@ class _MyRegisterPage extends State<MyRegisterPage> {
     super.initState();
     passwordVisible=false;
     confirmPasswordVisible = false;
+    username = "";
+    password = "";
+    phoneNumber = "";
+    rewritePassword = "";
+    name = "";
   }
 
   void _onFaceBookLogin(){}
@@ -101,6 +113,11 @@ class _MyRegisterPage extends State<MyRegisterPage> {
                           width: 360,
                           height: 30,
                           child: TextField(
+                            onChanged: (String s){
+                              setState(() {
+                                name = s;
+                              });
+                            },
                             decoration: InputDecoration(
                               contentPadding: EdgeInsetsGeometry.fromLTRB(0, 0, 0, 12),
                             ),
@@ -121,6 +138,11 @@ class _MyRegisterPage extends State<MyRegisterPage> {
                           width: 360,
                           height: 30,
                           child: TextField(
+                            onChanged: (String s){
+                              setState(() {
+                                username = s;
+                              });
+                            },
                             decoration: InputDecoration(
                               contentPadding: EdgeInsetsGeometry.fromLTRB(0, 0, 0, 12),
                             ),
@@ -141,6 +163,11 @@ class _MyRegisterPage extends State<MyRegisterPage> {
                           width: 360,
                           height: 30,
                           child: TextField(
+                            onChanged: (String s){
+                              setState(() {
+                                phoneNumber = s;
+                              });
+                            },
                             keyboardType: TextInputType.number,
                             inputFormatters: [
                               FilteringTextInputFormatter.digitsOnly,
@@ -165,6 +192,11 @@ class _MyRegisterPage extends State<MyRegisterPage> {
                           width: 360,
                           height: 30,
                           child: TextField(
+                            onChanged: (String s){
+                              setState(() {
+                                password = s;
+                              });
+                            },
                             obscureText: !passwordVisible,
                             decoration: InputDecoration(
                               contentPadding: EdgeInsetsGeometry.all(0),
@@ -198,6 +230,11 @@ class _MyRegisterPage extends State<MyRegisterPage> {
                           width: 360,
                           height: 30,
                           child: TextField(
+                            onChanged: (String s){
+                              setState(() {
+                                rewritePassword = s;
+                              });
+                            },
                             obscureText: !confirmPasswordVisible,
                             decoration: InputDecoration(
                               contentPadding: EdgeInsetsGeometry.all(0),
@@ -235,12 +272,56 @@ class _MyRegisterPage extends State<MyRegisterPage> {
                                     )
                                 ),
                                 child: ElevatedButton(
-                                  onPressed: () {
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (context) => AuthenticateEmail(),
-                                      ),
-                                    );
+                                  onPressed: () async {
+                                    if(rewritePassword != password){
+                                      showDialog(context: context, builder: (ctx) => AlertDialog(
+                                        title: Text("Mật khẩu nhập lại không khớp"),
+                                        actions: [
+                                          TextButton(onPressed: (){
+                                            Navigator.pop(ctx);
+                                          }, child: Text("OK"))
+                                        ],
+                                      ));
+                                    } else {
+                                      final SharedPreferences prefs = await SharedPreferences.getInstance();
+                                      prefs.setString('email', username);
+                                      final response = await http.post(
+                                        Uri.parse('http://localhost:3000/register'),
+                                        headers: <String, String>{
+                                          'Content-Type': 'application/json; charset=UTF-8',
+                                        },
+                                        body: jsonEncode(<String, String>{'email': username, 'password': password, 'name': name, 'phone': phoneNumber, 'role': prefs.getString('registry_role')!}),
+                                      );
+                                      if(response.statusCode == 200){
+                                        showDialog(context: context, builder: (ctx) => AlertDialog(
+                                          title: Text("Đăng kí thành công, vui lòng xác nhận mã được gửi qua email"),
+                                          actions: [
+                                            TextButton(onPressed: (){
+                                              Navigator.pop(ctx);
+                                              Navigator.of(context).push(MaterialPageRoute(builder: (context) => AuthenticateEmail()));
+                                            }, child: Text("OK"))
+                                          ],
+                                        ));
+                                      } else if (response.statusCode == 400){
+                                        showDialog(context: context, builder: (ctx) => AlertDialog(
+                                          title: Text("Email đã tồn tài, vui lòng sử dụng một email khác"),
+                                          actions: [
+                                            TextButton(onPressed: () {
+                                              Navigator.pop(ctx);
+                                            }, child: Text("OK"))
+                                          ],
+                                        ));
+                                      } else {
+                                        showDialog(context: context, builder: (ctx) => AlertDialog(
+                                          title: Text("Lỗi hệ thống, vui lòng thử lại"),
+                                          actions: [
+                                            TextButton(onPressed: () {
+                                              Navigator.pop(ctx);
+                                            }, child: Text("OK"))
+                                          ],
+                                        ));
+                                      }
+                                    }
                                   },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.transparent,

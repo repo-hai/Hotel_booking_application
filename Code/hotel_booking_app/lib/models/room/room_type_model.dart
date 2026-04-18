@@ -41,14 +41,15 @@ class RoomType {
   factory RoomType.fromJson(Map<String, dynamic> json) {
     return RoomType(
       id: json['id']?.toString() ?? '',
-      hotelId: json['hotelId']?.toString() ?? '',
+      // Backend seed dùng 'hotelID' (uppercase), bản mới dùng 'hotelId'
+      hotelId: (json['hotelId'] ?? json['hotelID'])?.toString() ?? '',
       name: json['name'] ?? '',
       area: (json['area'] as num?)?.toDouble() ?? 0.0,
-      price: json['price'] is int ? json['price'] : int.tryParse(json['price']?.toString() ?? '0') ?? 0,
+      price: (json['price'] as num?)?.toInt() ?? int.tryParse(json['price']?.toString() ?? '0') ?? 0,
       description: json['description'] ?? '',
       bedType: json['bedType'] ?? '',
-      capacity: json['capacity'] is int ? json['capacity'] : int.tryParse(json['capacity']?.toString() ?? '0') ?? 0,
-      bedNum: json['bedNum'] ?? 0,
+      capacity: (json['capacity'] as num?)?.toInt() ?? int.tryParse(json['capacity']?.toString() ?? '0') ?? 0,
+      bedNum: (json['bedNum'] as num?)?.toInt() ?? 0,
       cancellationPolicy: json['cancellationPolicy'] ?? 'Không thể hoàn trả',
       // Map list amenities (Hỗ trợ cả List<String> từ Firestore và List<Map> cũ)
       amenities: (json['amenities'] as List? ?? [])
@@ -72,7 +73,8 @@ class RoomType {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'hotelId': hotelId,
+      'hotelId': hotelId,   // server owner.js đọc 'hotelId' khi POST
+      'hotelID': hotelId,   // fallback cho seed data format
       'name': name,
       'area': area,
       'price': price,
@@ -83,7 +85,6 @@ class RoomType {
       'cancellationPolicy': cancellationPolicy,
       'amenities': amenities.map((e) => e.name).toList(),
       'images': images.map((e) => e.url).toList(),
-      // Mặc định cho empty priceCalendars
       'priceCalendars': priceCalendars.map((e) => e.toJson()).toList(),
       'rooms': rooms.map((e) => e.toJson()).toList(),
     };

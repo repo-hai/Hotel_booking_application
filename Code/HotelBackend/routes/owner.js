@@ -5,11 +5,18 @@ const db = require('../firebase');
 const { sendNotificationToUser } = require('../utils/notifications');
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
+
+// Đảm bảo thư mục uploads tồn tại trước khi Multer dùng
+const uploadDir = path.join(__dirname, '..', 'public', 'uploads');
+if (!fs.existsSync(uploadDir)) {
+	fs.mkdirSync(uploadDir, { recursive: true });
+}
 
 // Cấu hình Multer để upload ảnh
 const storage = multer.diskStorage({
 	destination: function (req, file, cb) {
-		cb(null, 'public/uploads/');
+		cb(null, uploadDir);
 	},
 	filename: function (req, file, cb) {
 		const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
@@ -22,12 +29,37 @@ const upload = multer({ storage: storage });
 router.post('/upload', upload.single('image'), (req, res) => {
 	try {
 		if (!req.file) return res.status(400).json({ success: false, message: 'No file uploaded' });
-		// Lấy domain hiện tại, ở đây ta dùng localhost:3000 làm mặc định.
-		// Bạn có thể tùy biến khi deploy.
-		const fileUrl = `http://localhost:3000/uploads/${req.file.filename}`;
+		// Sử dụng request host để app Flutter có thể load được qua 10.0.2.2 hoặc IP cụ thể.
+		const fileUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
 		res.status(200).json({ success: true, url: fileUrl });
 	} catch (error) {
 		res.status(500).json({ success: false, message: 'Upload error' });
+	}
+});
+
+// GET /api/owner/proxy-image - Proxy ảnh hỗ trợ fix CORS cho Flutter Web
+router.get('/proxy-image', async (req, res) => {
+	try {
+		const targetUrl = req.query.url;
+		if (!targetUrl) return res.status(400).send('No URL provided');
+
+		const response = await fetch(targetUrl, {
+			headers: {
+				'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+			}
+		});
+		if (!response.ok) return res.status(response.status).send('Lỗi máy chủ nguồn ảnh');
+
+		const contentType = response.headers.get('content-type');
+		if (contentType) res.setHeader('Content-Type', contentType);
+
+		// stream luồng dữ liệu của fetch response
+		const arrayBuffer = await response.arrayBuffer();
+		const buffer = Buffer.from(arrayBuffer);
+		res.status(200).send(buffer);
+	} catch (err) {
+		console.error("Proxy Image Error:", err);
+		res.status(500).send('Proxy error');
 	}
 });
 
@@ -54,34 +86,56 @@ router.post('/hotels', async (req, res) => {
 	try {
 		const {
 			userId, name, type, description, telephone, email, address, city, star, images, amenities,
-			checkInTime, checkOutTime, cancellationPolicy
+			checkInTime, checkOutTime, cancellationPolicy, location
 		} = req.body;
 
 		if (!userId || !name) {
 			return res.status(400).json({ success: false, message: "Thiếu thông tin bắt buộc!" });
 		}
 
+		// Tìm ID lớn nhất hiện tại để tạo ID tiếp theo (int, nối tiếp)
+		const allHotelsSnap = await db.collection('Hotels').get();
+		let maxId = 0;
+		allHotelsSnap.forEach(doc => {
+			const data = doc.data();
+			const docIdNum = parseInt(doc.id);
+			const dataIdNum = data.ID ? Number(data.ID) : 0;
+			maxId = Math.max(maxId, isNaN(docIdNum) ? 0 : docIdNum, dataIdNum);
+		});
+		const newId = maxId + 1;
+
+		// Chuẩn hóa images và amenities theo cấu trúc database
+		const formattedImages = (images || []).map((img, idx) => {
+			if (typeof img === 'string') return { ID: idx + 1, url: img };
+			return { ID: img.ID || img.id || idx + 1, url: img.url };
+		});
+
+		const formattedAmenities = (amenities || []).map((a, idx) => {
+			if (typeof a === 'string') return { ID: idx + 1, name: a, icon: '' };
+			return { ID: a.ID || a.id || idx + 1, name: a.name, icon: a.icon || '' };
+		});
+
+		// Xử lý location: có thể nhận address+city hoặc location đơn
+		const finalLocation = location || ((address && city) ? `${address}, ${city}` : (city || address || ''));
+
 		const newHotel = {
+			ID: newId,
 			userId, name,
-			type: type || "Hotel",
+			type: type || "Khách sạn",
 			description: description || "",
 			telephone: telephone || "",
 			email: email || "",
-			address: address || "",
-			city: city || "",
-			lat: Number(req.body.lat) || 0, // Hỗ trợ tọa độ từ bản đồ
-			lng: Number(req.body.lng) || 0,
+			location: finalLocation,
 			star: Number(star) || 1,
-			images: images || [],
-			amenities: amenities || [],
-			checkInTime: checkInTime || "14:00",
-			checkOutTime: checkOutTime || "12:00",
-			cancellationPolicy: cancellationPolicy || "Linh hoạt",
+			images: formattedImages,
+			amenities: formattedAmenities,
 			createdAt: new Date().toISOString()
 		};
 
-		const docRef = await db.collection('Hotels').add(newHotel);
-		res.status(201).json({ success: true, data: { id: docRef.id, ...newHotel } });
+		// Sử dụng ID làm document ID (giống seed.js)
+		const docId = String(newId);
+		await db.collection('Hotels').doc(docId).set(newHotel);
+		res.status(201).json({ success: true, data: { id: docId, ...newHotel } });
 	} catch (error) {
 		console.error("Lỗi khi tạo khách sạn: ", error);
 		res.status(500).json({ success: false, message: "Lỗi hệ thống!" });
@@ -124,9 +178,24 @@ router.delete('/hotels/:id', async (req, res) => {
 router.get('/hotels/:hotelId/room-types', async (req, res) => {
 	try {
 		const { hotelId } = req.params;
-		const snapshot = await db.collection('RoomTypes').where('hotelId', '==', hotelId).get();
-		const roomTypes = [];
-		snapshot.forEach(doc => roomTypes.push({ id: doc.id, ...doc.data() }));
+
+		// Database seed sử dụng hotelID (uppercase, kiểu number)
+		// Thử query cả 2 trường hợp để tương thích
+		let roomTypes = [];
+
+		// Query với hotelID (int) - dữ liệu từ seed
+		const hotelIdNum = Number(hotelId);
+		if (!isNaN(hotelIdNum)) {
+			const snapshot1 = await db.collection('RoomTypes').where('hotelID', '==', hotelIdNum).get();
+			snapshot1.forEach(doc => roomTypes.push({ id: doc.id, ...doc.data() }));
+		}
+
+		// Nếu không tìm thấy, thử query với hotelId (string) - dữ liệu mới tạo
+		if (roomTypes.length === 0) {
+			const snapshot2 = await db.collection('RoomTypes').where('hotelId', '==', hotelId).get();
+			snapshot2.forEach(doc => roomTypes.push({ id: doc.id, ...doc.data() }));
+		}
+
 		res.status(200).json({ success: true, data: roomTypes });
 	} catch (error) {
 		console.error("Lỗi khi lấy danh sách hạng phòng: ", error);
@@ -138,22 +207,63 @@ router.get('/hotels/:hotelId/room-types', async (req, res) => {
 router.post('/room-types', async (req, res) => {
 	try {
 		const { hotelId, name, price, capacity, area, description, bedType, bedNum, images, amenities, rooms, cancellationPolicy } = req.body;
+
+		// Tìm ID lớn nhất hiện tại để tạo ID tiếp theo (int, nối tiếp)
+		const allRoomTypesSnap = await db.collection('RoomTypes').get();
+		let maxId = 0;
+		allRoomTypesSnap.forEach(doc => {
+			const data = doc.data();
+			const docIdNum = parseInt(doc.id);
+			const dataIdNum = data.ID ? Number(data.ID) : 0;
+			maxId = Math.max(maxId, isNaN(docIdNum) ? 0 : docIdNum, dataIdNum);
+		});
+		const newId = maxId + 1;
+
+		// Chuẩn hóa images theo cấu trúc database
+		const formattedImages = (images || []).map((img, idx) => {
+			if (typeof img === 'string') return { ID: idx + 1, url: img };
+			return { ID: img.ID || img.id || idx + 1, url: img.url };
+		});
+
+		// Chuẩn hóa amenities theo cấu trúc database
+		const formattedAmenities = (amenities || []).map((a, idx) => {
+			if (typeof a === 'string') return { ID: idx + 1, name: a, icon: '' };
+			return { ID: a.ID || a.id || idx + 1, name: a.name, icon: a.icon || '' };
+		});
+
+		// Chuẩn hóa rooms theo cấu trúc database
+		const formattedRooms = (rooms || []).map((r, idx) => {
+			return {
+				ID: r.ID || r.id || r.roomId || (newId * 100 + idx + 1),
+				roomNumber: r.roomNumber || r.name || '',
+				status: r.status || 'Available'
+			};
+		});
+
+		// Chuẩn hóa policies
+		const formattedPolicies = [{ ID: 1, name: cancellationPolicy || "Không thể hoàn trả" }];
+
 		const newRoomType = {
-			hotelId, name,
+			ID: newId,
+			hotelID: Number(hotelId) || hotelId,
+			name,
 			price: Number(price) || 0,
 			capacity: Number(capacity) || 1,
 			area: Number(area) || 0,
 			description: description || "",
 			bedType: bedType || "",
 			bedNum: Number(bedNum) || 1,
-			images: images || [],
-			amenities: amenities || [],
-			rooms: rooms || [],
-			cancellationPolicy: cancellationPolicy || "Không thể hoàn trả",
+			images: formattedImages,
+			amenities: formattedAmenities,
+			rooms: formattedRooms,
+			policies: formattedPolicies,
 			createdAt: new Date().toISOString()
 		};
-		const docRef = await db.collection('RoomTypes').add(newRoomType);
-		res.status(201).json({ success: true, data: { id: docRef.id, ...newRoomType } });
+
+		// Sử dụng ID làm document ID (giống seed.js)
+		const docId = String(newId);
+		await db.collection('RoomTypes').doc(docId).set(newRoomType);
+		res.status(201).json({ success: true, data: { id: docId, ...newRoomType } });
 	} catch (error) {
 		console.error("Lỗi khi tạo hạng phòng: ", error);
 		res.status(500).json({ success: false, message: "Lỗi hệ thống!" });
@@ -228,35 +338,53 @@ router.get('/hotels/:hotelId/bookings', async (req, res) => {
 		const { status } = req.query; // 'Pending', 'Confirmed' (Sắp tới), 'Completed', 'Cancelled'
 
 		// 1. Fetch RoomTypes first to map ID -> Name
-		const roomTypesSnap = await db.collection('RoomTypes').where('hotelId', '==', hotelId).get();
+		// Hỗ trợ cả hotelID (int, từ seed) và hotelId (string, từ bản tạo mới)
 		const roomTypeNameMap = {};
-		roomTypesSnap.forEach(doc => {
-			roomTypeNameMap[doc.id] = doc.data().name;
-		});
-
-		let query = db.collection('Bookings').where('hotelId', '==', hotelId);
-		if (status) {
-			query = query.where('status', '==', status);
+		const hotelIdNum = Number(hotelId);
+		if (!isNaN(hotelIdNum)) {
+			const snap1 = await db.collection('RoomTypes').where('hotelID', '==', hotelIdNum).get();
+			snap1.forEach(doc => { roomTypeNameMap[doc.id] = doc.data().name; });
+		}
+		if (Object.keys(roomTypeNameMap).length === 0) {
+			const snap2 = await db.collection('RoomTypes').where('hotelId', '==', hotelId).get();
+			snap2.forEach(doc => { roomTypeNameMap[doc.id] = doc.data().name; });
 		}
 
-		const snapshot = await query.get();
-		const bookings = [];
-		snapshot.forEach(doc => {
-			const data = doc.data();
+		// Query bookings - hỗ trợ cả 2 format hotelId: "1" (doc ID) và "hotel_1" (format cũ)
+		const hotelIdVariants = [hotelId, `hotel_${hotelId}`];
+		const allBookings = [];
 
-			// Map room type name
-			let roomTypeName = Object.values(roomTypeNameMap)[0] || "Standard"; // Mặc định lấy tên hạng phòng đầu tiên hoặc Standard
-			if (data.bookedRooms && data.bookedRooms.length > 0) {
-				roomTypeName = data.bookedRooms[0].roomTypeName || roomTypeNameMap[data.bookedRooms[0].roomTypeId] || roomTypeName;
-			} else if (data.roomTypeId) {
-				roomTypeName = roomTypeNameMap[data.roomTypeId] || roomTypeName;
+		for (const hid of hotelIdVariants) {
+			let query = db.collection('Bookings').where('hotelId', '==', hid);
+			if (status) {
+				query = query.where('status', '==', status);
 			}
+			const snapshot = await query.get();
+			snapshot.forEach(doc => {
+				const data = doc.data();
 
-			bookings.push({
-				id: doc.id,
-				...data,
-				roomTypeName: roomTypeName
+				// Map room type name
+				let roomTypeName = Object.values(roomTypeNameMap)[0] || "Standard";
+				if (data.bookedRooms && data.bookedRooms.length > 0) {
+					roomTypeName = data.bookedRooms[0].roomTypeName || roomTypeNameMap[data.bookedRooms[0].roomTypeId] || roomTypeName;
+				} else if (data.roomTypeId) {
+					roomTypeName = roomTypeNameMap[data.roomTypeId] || roomTypeName;
+				}
+
+				allBookings.push({
+					id: doc.id,
+					...data,
+					roomTypeName: roomTypeName
+				});
 			});
+		}
+
+		// Loại bỏ duplicate nếu có
+		const seen = new Set();
+		const bookings = allBookings.filter(b => {
+			if (seen.has(b.id)) return false;
+			seen.add(b.id);
+			return true;
 		});
 
 		bookings.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -324,46 +452,56 @@ router.get('/hotels/:hotelId/statistics', async (req, res) => {
 		const { startDate, endDate } = req.query; // Định dạng YYYY-MM-DD
 
 		// 1. Fetch RoomTypes first to have ID -> Name map
-		const roomTypesSnap = await db.collection('RoomTypes').where('hotelId', '==', hotelId).get();
+		// Hỗ trợ cả hotelID (int, từ seed) và hotelId (string, từ bản tạo mới)
 		const roomTypeNameMap = {};
-		roomTypesSnap.forEach(doc => {
-			roomTypeNameMap[doc.id] = doc.data().name;
-		});
+		const hotelIdNum = Number(hotelId);
+		if (!isNaN(hotelIdNum)) {
+			const snap1 = await db.collection('RoomTypes').where('hotelID', '==', hotelIdNum).get();
+			snap1.forEach(doc => { roomTypeNameMap[doc.id] = doc.data().name; });
+		}
+		if (Object.keys(roomTypeNameMap).length === 0) {
+			const snap2 = await db.collection('RoomTypes').where('hotelId', '==', hotelId).get();
+			snap2.forEach(doc => { roomTypeNameMap[doc.id] = doc.data().name; });
+		}
 
-		const bookingsSnap = await db.collection('Bookings').where('hotelId', '==', hotelId).get();
+		// Query bookings - hỗ trợ cả 2 format hotelId
+		const hotelIdVariants = [hotelId, `hotel_${hotelId}`];
 		let totalRevenue = 0, confirmed = 0, cancelled = 0;
 		const roomTypeStats = {};
 
-		bookingsSnap.forEach(doc => {
-			const data = doc.data();
-			const createdDate = data.createdAt.split('T')[0];
+		for (const hid of hotelIdVariants) {
+			const bookingsSnap = await db.collection('Bookings').where('hotelId', '==', hid).get();
+			bookingsSnap.forEach(doc => {
+				const data = doc.data();
+				const createdDate = data.createdAt.split('T')[0];
 
-			// Áp dụng bộ lọc ngày nếu có
-			if (startDate && createdDate < startDate) return;
-			if (endDate && createdDate > endDate) return;
+				// Áp dụng bộ lọc ngày nếu có
+				if (startDate && createdDate < startDate) return;
+				if (endDate && createdDate > endDate) return;
 
-			if (data.status === 'Confirmed' || data.status === 'Checked-out' || data.status === 'Checked-in') {
-				totalRevenue += (data.total || 0);
-				confirmed++;
+				if (data.status === 'Confirmed' || data.status === 'Checked-out' || data.status === 'Checked-in') {
+					totalRevenue += (data.total || 0);
+					confirmed++;
 
-				// Track room type counts
-				if (data.bookedRooms && data.bookedRooms.length > 0) {
-					data.bookedRooms.forEach(room => {
-						let name = room.roomTypeName || roomTypeNameMap[room.roomTypeId];
-						if (!name && room.roomTypeId === 'roomtype_1') name = "Phòng Standard";
+					// Track room type counts
+					if (data.bookedRooms && data.bookedRooms.length > 0) {
+						data.bookedRooms.forEach(room => {
+							let name = room.roomTypeName || roomTypeNameMap[room.roomTypeId];
+							if (!name && room.roomTypeId === 'roomtype_1') name = "Phòng Standard";
+							name = name || "Hạng phòng";
+							roomTypeStats[name] = (roomTypeStats[name] || 0) + (room.quantity || 1);
+						});
+					} else if (data.roomTypeId) {
+						let name = roomTypeNameMap[data.roomTypeId];
+						if (!name && data.roomTypeId === 'roomtype_1') name = "Phòng Standard";
 						name = name || "Hạng phòng";
-						roomTypeStats[name] = (roomTypeStats[name] || 0) + (room.quantity || 1);
-					});
-				} else if (data.roomTypeId) {
-					let name = roomTypeNameMap[data.roomTypeId];
-					if (!name && data.roomTypeId === 'roomtype_1') name = "Phòng Standard";
-					name = name || "Hạng phòng";
-					roomTypeStats[name] = (roomTypeStats[name] || 0) + 1;
+						roomTypeStats[name] = (roomTypeStats[name] || 0) + 1;
+					}
+				} else if (data.status === 'Cancelled') {
+					cancelled++;
 				}
-			} else if (data.status === 'Cancelled') {
-				cancelled++;
-			}
-		});
+			});
+		}
 
 		let mostPopularRoom = "Phòng Standard", maxRooms = 0;
 		if (Object.keys(roomTypeStats).length > 0) {
@@ -419,11 +557,14 @@ router.get('/hotels/:hotelId/revenue-report', async (req, res) => {
 router.get('/hotels/:hotelId/reviews', async (req, res) => {
 	try {
 		const { hotelId } = req.params;
-		const snapshot = await db.collection('Bookings').where('hotelId', '==', hotelId).get();
+		const hotelIdVariants = [hotelId, `hotel_${hotelId}`];
 		const reviews = [];
-		snapshot.forEach(doc => {
-			if (doc.data().review) reviews.push({ bookingId: doc.id, customerName: doc.data().customerName, ...doc.data().review });
-		});
+		for (const hid of hotelIdVariants) {
+			const snapshot = await db.collection('Bookings').where('hotelId', '==', hid).get();
+			snapshot.forEach(doc => {
+				if (doc.data().review) reviews.push({ bookingId: doc.id, customerName: doc.data().customerName, ...doc.data().review });
+			});
+		}
 		res.status(200).json({ success: true, data: reviews });
 	} catch (error) {
 		res.status(500).json({ success: false, message: "Lỗi hệ thống!" });
@@ -433,16 +574,19 @@ router.get('/hotels/:hotelId/reviews', async (req, res) => {
 router.get('/hotels/:hotelId/reviews/summary', async (req, res) => {
 	try {
 		const { hotelId } = req.params;
-		const snapshot = await db.collection('Bookings').where('hotelId', '==', hotelId).get();
+		const hotelIdVariants = [hotelId, `hotel_${hotelId}`];
 		const dist = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
 		let totalRating = 0, count = 0;
-		snapshot.forEach(doc => {
-			const r = doc.data().review;
-			if (r && r.rating) {
-				const s = Math.round(r.rating);
-				if (dist[s] !== undefined) { dist[s]++; totalRating += r.rating; count++; }
-			}
-		});
+		for (const hid of hotelIdVariants) {
+			const snapshot = await db.collection('Bookings').where('hotelId', '==', hid).get();
+			snapshot.forEach(doc => {
+				const r = doc.data().review;
+				if (r && r.rating) {
+					const s = Math.round(r.rating);
+					if (dist[s] !== undefined) { dist[s]++; totalRating += r.rating; count++; }
+				}
+			});
+		}
 		res.status(200).json({
 			success: true,
 			data: {

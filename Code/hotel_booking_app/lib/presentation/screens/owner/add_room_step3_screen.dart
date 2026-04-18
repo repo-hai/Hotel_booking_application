@@ -52,35 +52,60 @@ class _AddRoomStep3ScreenState extends State<AddRoomStep3Screen> {
 
     final provider = Provider.of<OwnerProvider>(context, listen: false);
     List<RoomImage> uploadedImgs = [];
+    final List<String> uploadErrors = [];
 
     // Upload từng ảnh lên Express server
-    for (var xfile in _selectedImages) {
+    for (int i = 0; i < _selectedImages.length; i++) {
+      final xfile = _selectedImages[i];
       String? url = await provider.uploadImage(xfile);
       if (url != null) {
-        uploadedImgs.add(RoomImage(id: "", url: url));
+        uploadedImgs.add(RoomImage(id: '', url: url));
+      } else {
+        final err = provider.lastUploadError ?? 'Không rõ lỗi';
+        uploadErrors.add('Ảnh ${i + 1}: $err');
       }
+    }
+
+    // Cảnh báo ảnh upload lỗi
+    if (uploadErrors.isNotEmpty && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Một số ảnh không upload được:\n${uploadErrors.join('\n')}'),
+          backgroundColor: Colors.orange,
+          duration: const Duration(seconds: 4),
+        ),
+      );
     }
 
     if (provider.draftRoomType != null) {
       provider.draftRoomType = provider.draftRoomType!.copyWith(images: uploadedImgs);
       // Gọi lên Backend tạo dữ liệu mới
       bool success = await provider.createRoomType(provider.draftRoomType!);
-      
+
       if (mounted) {
         setState(() {
           _isUploading = false;
         });
         if (success) {
-          provider.draftRoomType = null; // dọn dẹp biến tạm
+          provider.draftRoomType = null;
           Navigator.push(context, MaterialPageRoute(builder: (_) => const AddRoomStep4Screen()));
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Lỗi tạo hạng phòng!")));
+          final errMsg = provider.lastCreateRoomError ?? 'Lỗi không xác định từ server';
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Lỗi tạo hạng phòng: $errMsg'),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 5),
+            ),
+          );
         }
       }
     } else {
       if (mounted) {
         setState(() => _isUploading = false);
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Lỗi dữ liệu hệ thống (Form trống)")));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Lỗi dữ liệu hệ thống (Form trống)')),
+        );
       }
     }
   }

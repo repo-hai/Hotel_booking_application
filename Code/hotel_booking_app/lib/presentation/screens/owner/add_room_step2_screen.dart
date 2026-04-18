@@ -3,7 +3,6 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../../providers/owner_provider.dart';
 import '../../../models/room/room_model.dart';
-import 'price_calendar_screen.dart';
 import 'add_room_step3_screen.dart';
 
 class AddRoomStep2Screen extends StatefulWidget {
@@ -14,18 +13,22 @@ class AddRoomStep2Screen extends StatefulWidget {
 }
 
 class _AddRoomStep2ScreenState extends State<AddRoomStep2Screen> {
+  final _formKey = GlobalKey<FormState>();
   late TextEditingController _priceController;
   final TextEditingController _descController = TextEditingController();
   final TextEditingController _roomsController = TextEditingController();
   
-  int _currentPrice = 0;
   String _selectedPolicy = "Không thể hoàn trả";
+
+  int get _parsedPrice {
+    final str = _priceController.text.replaceAll(RegExp(r'[^0-9]'), '');
+    return int.tryParse(str) ?? 0;
+  }
 
   @override
   void initState() {
     super.initState();
-    _currentPrice = 0;
-    _priceController = TextEditingController(text: "0 VND");
+    _priceController = TextEditingController();
   }
 
   @override
@@ -36,21 +39,9 @@ class _AddRoomStep2ScreenState extends State<AddRoomStep2Screen> {
     super.dispose();
   }
 
-  Future<void> _openCalendar() async {
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => PriceCalendarScreen(initialPrice: _currentPrice)),
-    );
-
-    if (result != null && result is int) {
-      setState(() {
-        _currentPrice = result;
-        _priceController.text = "${NumberFormat("#,###").format(_currentPrice)} VND";
-      });
-    }
-  }
-
   void _saveAndNext() {
+    if (!_formKey.currentState!.validate()) return;
+    
     final provider = Provider.of<OwnerProvider>(context, listen: false);
     if (provider.draftRoomType != null) {
       // Logic tự động sinh danh sách phòng từ chuỗi nhập vào
@@ -69,7 +60,7 @@ class _AddRoomStep2ScreenState extends State<AddRoomStep2Screen> {
       }).toList();
 
       provider.draftRoomType = provider.draftRoomType!.copyWith(
-        price: _currentPrice,
+        price: _parsedPrice,
         description: _descController.text,
         rooms: generatedRooms,
         cancellationPolicy: _selectedPolicy,
@@ -91,71 +82,76 @@ class _AddRoomStep2ScreenState extends State<AddRoomStep2Screen> {
         ),
         title: const Text("Thông tin phòng", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text.rich(
-              const TextSpan(
-                children: [
-                   TextSpan(text: "Giá phòng", style: TextStyle(fontWeight: FontWeight.bold)),
-                   TextSpan(text: ' *', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
-                ],
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextFormField(
-              controller: _priceController,
-              readOnly: true,
-              decoration: InputDecoration(
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.calendar_today_outlined, size: 20, color: Colors.black),
-                  onPressed: _openCalendar,
+      body: Form(
+        key: _formKey,
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text.rich(
+                const TextSpan(
+                  children: [
+                     TextSpan(text: "Giá phòng", style: TextStyle(fontWeight: FontWeight.bold)),
+                     TextSpan(text: ' *', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                  ],
                 ),
-                filled: true,
-                fillColor: Colors.grey.shade100,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
               ),
-            ),
-            const SizedBox(height: 20),
-            
-            _buildInput("Mô tả phòng *", "Nhập mô tả chi tiết", _descController),
-            
-            const Text("Chính sách hoàn trả *", style: TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            _buildDropdown(),
-            
-            const SizedBox(height: 20),
-            _buildInput("Danh sách phòng *", "VD: P101, P102, P103", _roomsController),
-            const Text("ℹ Nhập danh sách phòng, cách nhau bằng dấu \",\"", style: TextStyle(fontSize: 11, color: Colors.grey)),
-            
-            const Spacer(),
-            
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _saveAndNext,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2E5AAC),
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              const SizedBox(height: 8),
+              TextFormField(
+                controller: _priceController,
+                keyboardType: TextInputType.number,
+                validator: (val) => _parsedPrice <= 0 ? 'Giá phòng phải lớn hơn 0' : null,
+                decoration: InputDecoration(
+                  suffixText: 'VND',
+                  hintText: 'VD: 500000',
+                  filled: true,
+                  fillColor: Colors.grey.shade100,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
                 ),
-                child: const Text("Tiếp", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
               ),
-            ),
-          ],
+              const SizedBox(height: 20),
+              
+              _buildInput("Mô tả phòng *", "Nhập mô tả chi tiết", _descController,
+                validator: (val) => (val == null || val.isEmpty) ? 'Bắt buộc nhập mô tả' : null),
+              
+              const Text("Chính sách hoàn trả *", style: TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              _buildDropdown(),
+              
+              const SizedBox(height: 20),
+              _buildInput("Danh sách phòng *", "VD: P101, P102, P103", _roomsController,
+                validator: (val) => (val == null || val.isEmpty) ? 'Bắt buộc nhập danh sách phòng' : null),
+              const Text("ℹ Nhập danh sách phòng, cách nhau bằng dấu \",\"", style: TextStyle(fontSize: 11, color: Colors.grey)),
+              
+              const Spacer(),
+              
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _saveAndNext,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF2E5AAC),
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                  child: const Text("Tiếp", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildInput(String label, String hint, TextEditingController controller) {
+  Widget _buildInput(String label, String hint, TextEditingController controller, {String? Function(String?)? validator}) {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
       const SizedBox(height: 8),
-      TextField(
+      TextFormField(
         controller: controller,
+        validator: validator,
         decoration: InputDecoration(
           hintText: hint,
           filled: true,

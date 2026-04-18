@@ -1,12 +1,22 @@
 import 'package:flutter/material.dart';
 
+// Helper dùng chung cho toàn file
+int _safeInt(dynamic v) {
+  if (v == null) return 0;
+  if (v is int) return v;
+  if (v is num) return v.toInt();
+  final s = v.toString().trim();
+  if (s.isEmpty) return 0;
+  return int.tryParse(s) ?? double.tryParse(s)?.toInt() ?? 0;
+}
+
 class HotelImage {
   final int id;
   final String url;
   HotelImage({required this.id, required this.url});
 
   factory HotelImage.fromJson(Map<String, dynamic> j) => HotelImage(
-        id: (j['ID'] ?? 0) is int ? j['ID'] as int : int.tryParse('${j['ID']}') ?? 0,
+        id: _safeInt(j['ID'] ?? j['id']),
         url: (j['url'] ?? '') as String,
       );
 }
@@ -18,7 +28,7 @@ class HotelAmenity {
   HotelAmenity({required this.id, required this.name, required this.icon});
 
   factory HotelAmenity.fromJson(Map<String, dynamic> j) => HotelAmenity(
-        id: (j['ID'] ?? 0) is int ? j['ID'] as int : int.tryParse('${j['ID']}') ?? 0,
+        id: _safeInt(j['ID'] ?? j['id']),
         name: (j['name'] ?? '') as String,
         icon: (j['icon'] ?? '') as String,
       );
@@ -30,7 +40,7 @@ class RoomPolicy {
   RoomPolicy({required this.id, required this.name});
 
   factory RoomPolicy.fromJson(Map<String, dynamic> j) => RoomPolicy(
-        id: (j['ID'] ?? 0) is int ? j['ID'] as int : 0,
+        id: _safeInt(j['ID'] ?? j['id']),
         name: (j['name'] ?? '') as String,
       );
 }
@@ -42,7 +52,7 @@ class PhysicalRoom {
   PhysicalRoom({required this.id, required this.roomNumber, required this.status});
 
   factory PhysicalRoom.fromJson(Map<String, dynamic> j) => PhysicalRoom(
-        id: (j['ID'] ?? 0) is int ? j['ID'] as int : 0,
+        id: _safeInt(j['ID'] ?? j['id']),
         roomNumber: (j['roomNumber'] ?? '') as String,
         status: (j['status'] ?? '') as String,
       );
@@ -81,7 +91,7 @@ class HotelRoomType {
 
   factory HotelRoomType.fromJson(Map<String, dynamic> j) => HotelRoomType(
         id: (j['id'] ?? j['ID'] ?? '').toString(),
-        hotelID: _toInt(j['hotelID']),
+        hotelID: _toInt(j['hotelID'] ?? j['hotelId']),
         name: (j['name'] ?? '') as String,
         area: _toDouble(j['area']),
         price: _toInt(j['price']),
@@ -89,7 +99,10 @@ class HotelRoomType {
         bedType: (j['bedType'] ?? '') as String,
         capacity: _toInt(j['capacity']),
         bedNum: _toInt(j['bedNum']),
-        images: _parseList(j['images'], (e) => HotelImage.fromJson(Map<String, dynamic>.from(e))),
+        images: _parseList(j['images'], (e) {
+          if (e is String) return HotelImage(id: 0, url: e);
+          return HotelImage.fromJson(Map<String, dynamic>.from(e));
+        }),
         policies: _parseList(j['policies'], (e) => RoomPolicy.fromJson(Map<String, dynamic>.from(e))),
         amenities: _parseList(j['amenities'], (e) => HotelAmenity.fromJson(Map<String, dynamic>.from(e))),
         rooms: _parseList(j['rooms'], (e) => PhysicalRoom.fromJson(Map<String, dynamic>.from(e))),
@@ -98,19 +111,25 @@ class HotelRoomType {
   int get availableRoomCount => rooms.where((r) => r.status == 'Available').length;
 
   static int _toInt(dynamic v) {
+    if (v == null) return 0;
     if (v is int) return v;
     if (v is num) return v.toInt();
-    return int.tryParse('$v') ?? 0;
+    final s = v.toString().trim();
+    if (s.isEmpty) return 0;
+    return int.tryParse(s) ?? double.tryParse(s)?.toInt() ?? 0;
   }
 
   static double _toDouble(dynamic v) {
+    if (v == null) return 0.0;
     if (v is num) return v.toDouble();
-    return double.tryParse('$v') ?? 0.0;
+    final s = v.toString().trim();
+    if (s.isEmpty) return 0.0;
+    return double.tryParse(s) ?? 0.0;
   }
 
-  static List<T> _parseList<T>(dynamic raw, T Function(Map) mapper) {
+  static List<T> _parseList<T>(dynamic raw, T Function(dynamic) mapper) {
     if (raw is! List) return [];
-    return raw.whereType<Map>().map(mapper).toList();
+    return raw.where((e) => e != null).map(mapper).toList();
   }
 }
 
@@ -167,6 +186,18 @@ class HotelModel {
   });
 
   factory HotelModel.fromJson(Map<String, dynamic> j) {
+    // images: backend có thể trả về [{ID, url}] hoặc ["url1", "url2"]
+    final rawImages = j['images'] as List<dynamic>? ?? [];
+    final parsedImages = rawImages.map((img) {
+      if (img is String) {
+        return HotelImage(id: 0, url: img);
+      }
+      if (img is Map<String, dynamic>) {
+        return HotelImage.fromJson(img);
+      }
+      return HotelImage(id: 0, url: '');
+    }).where((img) => img.url.isNotEmpty).toList();
+
     return HotelModel(
       id: (j['id'] ?? j['ID'] ?? '').toString(),
       hotelNumericId: _toInt(j['ID']),
@@ -177,7 +208,7 @@ class HotelModel {
       location: (j['location'] ?? '') as String,
       email: (j['email'] ?? '') as String,
       star: _toInt(j['star']),
-      images: _parseList(j['images'], (e) => HotelImage.fromJson(Map<String, dynamic>.from(e))),
+      images: parsedImages,
       amenities: _parseList(j['amenities'], (e) => HotelAmenity.fromJson(Map<String, dynamic>.from(e))),
       rooms: _parseList(j['rooms'], (e) => HotelRoomType.fromJson(Map<String, dynamic>.from(e))),
       owner: j['owner'] != null ? HotelOwner.fromJson(Map<String, dynamic>.from(j['owner'])) : null,
@@ -185,12 +216,15 @@ class HotelModel {
   }
 
   static int _toInt(dynamic v) {
+    if (v == null) return 0;
     if (v is int) return v;
     if (v is num) return v.toInt();
-    return int.tryParse('$v') ?? 0;
+    final s = v.toString().trim();
+    if (s.isEmpty) return 0;
+    return int.tryParse(s) ?? double.tryParse(s)?.toInt() ?? 0;
   }
 
-  static List<T> _parseList<T>(dynamic raw, T Function(Map) mapper) {
+  static List<T> _parseList<T>(dynamic raw, T Function(dynamic) mapper) {
     if (raw is! List) return [];
     return raw.whereType<Map>().map(mapper).toList();
   }

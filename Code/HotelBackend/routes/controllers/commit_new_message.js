@@ -1,7 +1,6 @@
-const {db} = require('../config/firebase');
+const db = require('../../firebase');
 
-
-module.exports.commitNewMessage = async (req, res) => {
+module.exports.pushUpNewMessage = async (req, res) => {
   const {body: {text, title}, params: {entryId}} = req;
 
   try {

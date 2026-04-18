@@ -71,30 +71,32 @@ class _GuestInfoScreenState extends State<GuestInfoScreen> {
     super.dispose();
   }
 
-  // Tải thông tin đã lưu từ SharedPreferences
+  // Tải thông tin đã lưu từ SharedPreferences (theo userId)
   Future<void> _loadSavedInfo() async {
     try {
       final prefs = await SharedPreferences.getInstance();
+      final userId = prefs.getString('userId') ?? 'guest';
       setState(() {
-        _firstNameCtrl.text = prefs.getString('guest_firstName') ?? '';
-        _lastNameCtrl.text = prefs.getString('guest_lastName') ?? '';
-        _emailCtrl.text = prefs.getString('guest_email') ?? '';
-        _phoneCtrl.text = prefs.getString('guest_phone') ?? '';
+        _firstNameCtrl.text = prefs.getString('${userId}_guest_firstName') ?? '';
+        _lastNameCtrl.text = prefs.getString('${userId}_guest_lastName') ?? '';
+        _emailCtrl.text = prefs.getString('${userId}_guest_email') ?? '';
+        _phoneCtrl.text = prefs.getString('${userId}_guest_phone') ?? '';
         _selectedCountry =
-            prefs.getString('guest_country') ?? 'Việt Nam';
+            prefs.getString('${userId}_guest_country') ?? 'Việt Nam';
       });
     } catch (_) {}
   }
 
-  // Lưu thông tin mặc định
+  // Lưu thông tin mặc định (theo userId)
   Future<void> _saveDefaultInfo() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('guest_firstName', _firstNameCtrl.text.trim());
-      await prefs.setString('guest_lastName', _lastNameCtrl.text.trim());
-      await prefs.setString('guest_email', _emailCtrl.text.trim());
-      await prefs.setString('guest_phone', _phoneCtrl.text.trim());
-      await prefs.setString('guest_country', _selectedCountry);
+      final userId = prefs.getString('userId') ?? 'guest';
+      await prefs.setString('${userId}_guest_firstName', _firstNameCtrl.text.trim());
+      await prefs.setString('${userId}_guest_lastName', _lastNameCtrl.text.trim());
+      await prefs.setString('${userId}_guest_email', _emailCtrl.text.trim());
+      await prefs.setString('${userId}_guest_phone', _phoneCtrl.text.trim());
+      await prefs.setString('${userId}_guest_country', _selectedCountry);
     } catch (_) {}
   }
 

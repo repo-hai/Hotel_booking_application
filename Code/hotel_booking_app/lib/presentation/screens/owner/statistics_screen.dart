@@ -3,6 +3,10 @@ import 'package:provider/provider.dart';
 import '../../../providers/owner_provider.dart';
 import '../../../models/hotel/hotel_model.dart';
 import 'package:intl/intl.dart';
+import '../../widgets/network_image_with_placeholder.dart';
+import 'owner_account_screen.dart';
+import 'owner_home_screen.dart';
+import '../profile_view.dart';
 
 class StatisticsScreen extends StatefulWidget {
   final Hotel? hotel;
@@ -149,9 +153,14 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       currentIndex: 1,
       onTap: (index) {
         if (index == 0) {
-          Navigator.of(context).popUntil((route) => route.isFirst);
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (_) => const OwnerHomeScreen()),
+            (route) => false,
+          );
         } else if (index == 1 && _showResult) {
           setState(() => _showResult = false);
+        } else if (index == 3) {
+          Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileView(isOwner: true)));
         }
       },
       items: const [
@@ -173,12 +182,12 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       ),
       child: Row(
         children: [
-          ClipRRect(
+          NetworkImageWithPlaceholder(
+            url: hotel.images.isNotEmpty ? hotel.images[0].url : null,
+            width: 50,
+            height: 50,
             borderRadius: BorderRadius.circular(10),
-            child: Image.network(
-              hotel.images.isNotEmpty ? hotel.images[0].url : 'https://via.placeholder.com/50',
-              width: 50, height: 50, fit: BoxFit.cover,
-            ),
+            placeholderIcon: Icons.hotel,
           ),
           const SizedBox(width: 15),
           Column(
@@ -241,12 +250,13 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       children: [
         _buildStatCard("TỔNG DOANH THU", "${currencyFormat.format(stats['totalRevenue'] ?? 0)} VND", Icons.account_balance_wallet_outlined),
         _buildStatCard("TỔNG SỐ ĐƠN ĐẶT", "${currencyFormat.format(stats['totalBookings'] ?? 0)} đơn", Icons.confirmation_number_outlined),
-        _buildStatCard(
-          "LOẠI PHÒNG ĐẶT NHIỀU NHẤT", 
-          "${stats['mostPopularRoom'] ?? 'Phòng Standard'}", 
-          Icons.star_outline,
-          subValue: stats['mostPopularRoomCount'] != null ? "${stats['mostPopularRoomCount']} lượt đặt" : null
-        ),
+        if ((stats['totalBookings'] ?? 0) > 0)
+          _buildStatCard(
+            "LOẠI PHÒNG ĐẶT NHIỀU NHẤT", 
+            "${stats['mostPopularRoom'] ?? 'Phòng Standard'}", 
+            Icons.star_outline,
+            subValue: stats['mostPopularRoomCount'] != null ? "${stats['mostPopularRoomCount']} lượt đặt" : null
+          ),
         const SizedBox(height: 20),
         const Text("Dữ liệu được cập nhật từ hệ thống", style: TextStyle(fontSize: 11, color: Colors.grey)),
       ],

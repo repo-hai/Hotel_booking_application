@@ -13,6 +13,7 @@ class Step2BasicInfo extends StatefulWidget {
 }
 
 class _Step2BasicInfoState extends State<Step2BasicInfo> {
+  final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _descController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
@@ -39,6 +40,8 @@ class _Step2BasicInfoState extends State<Step2BasicInfo> {
   }
 
   void _onNext() {
+    if (!_formKey.currentState!.validate()) return;
+    
     final provider = Provider.of<OwnerProvider>(context, listen: false);
     if (provider.draftHotel != null) {
       provider.draftHotel = Hotel(
@@ -59,19 +62,35 @@ class _Step2BasicInfoState extends State<Step2BasicInfo> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildInput("Tên khách sạn *", _nameController),
-                _buildInput("Mô tả khách sạn *", _descController, maxLines: 3),
-                _buildInput("Số điện thoại *", _phoneController),
-                _buildInput("Địa chỉ email *", _emailController),
-                const Text("Tiện ích", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+    return Form(
+      key: _formKey,
+      child: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildInput("Tên khách sạn *", _nameController, 
+                    validator: (val) => (val == null || val.isEmpty) ? 'Vui lòng nhập tên khách sạn' : null),
+                  _buildInput("Mô tả khách sạn *", _descController, maxLines: 3, 
+                    validator: (val) => (val == null || val.isEmpty) ? 'Vui lòng nhập mô tả' : null),
+                  _buildInput("Số điện thoại *", _phoneController, 
+                    keyboardType: TextInputType.phone,
+                    validator: (val) {
+                      if (val == null || val.isEmpty) return 'Vui lòng nhập số điện thoại';
+                      if (!RegExp(r'^[0-9]{10,11}$').hasMatch(val)) return 'Số điện thoại không hợp lệ (10-11 số)';
+                      return null;
+                    }),
+                  _buildInput("Địa chỉ email *", _emailController, 
+                    keyboardType: TextInputType.emailAddress,
+                    validator: (val) {
+                      if (val == null || val.isEmpty) return 'Vui lòng nhập email';
+                      if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(val)) return 'Email không đúng định dạng';
+                      return null;
+                    }),
+                  const Text("Tiện ích", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                 _buildCheckItem("Wifi miễn phí"),
                 _buildCheckItem("Phòng gym"),
                 _buildCheckItem("Hồ bơi"),
@@ -80,13 +99,15 @@ class _Step2BasicInfoState extends State<Step2BasicInfo> {
               ],
             ),
           ),
-        ),
-        _buildBottomButton(_onNext),
-      ],
+          ),
+          _buildBottomButton(_onNext),
+        ],
+      ),
     );
   }
 
-  Widget _buildInput(String label, TextEditingController controller, {int maxLines = 1}) {
+  Widget _buildInput(String label, TextEditingController controller, 
+      {int maxLines = 1, TextInputType? keyboardType, String? Function(String?)? validator}) {
     bool isRequired = label.contains('*');
     String cleanLabel = label.replaceAll('*', '').trim();
 
@@ -103,9 +124,11 @@ class _Step2BasicInfoState extends State<Step2BasicInfo> {
           ),
         ),
         const SizedBox(height: 8),
-        TextField(
+        TextFormField(
           controller: controller,
           maxLines: maxLines,
+          keyboardType: keyboardType,
+          validator: validator,
           decoration: InputDecoration(
             filled: true,
             fillColor: Colors.grey.shade100,

@@ -1,6 +1,7 @@
 ﻿import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/api_constants.dart';
 import '../../data/models/hotel_model.dart';
@@ -8,6 +9,7 @@ import '../../data/models/booking_customer_info.dart';
 import '../../data/models/voucher_model.dart';
 import '../../data/services/hotel_service.dart';
 import 'booking_history_screen.dart';
+import 'booking_home_screen.dart';
 
 class BookingDetailScreen extends StatefulWidget {
   final HotelModel hotel;
@@ -104,7 +106,12 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
         };
       }).toList();
 
+      // Lấy userId từ SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      final userId = prefs.getString('userId');
+
       final body = {
+        if (userId != null && userId.isNotEmpty) 'userId': userId,
         'hotelId': widget.hotel.id,
         'hotelName': widget.hotel.name,
         'customerInfo': widget.customerInfo.toJson(),
@@ -128,7 +135,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
       if (response.statusCode == 201) {
         final data = jsonDecode(response.body);
         final bookingId = data['bookingId'] ?? 'N/A';
-        _showSuccessDialog(bookingId);
+        _showPaymentDialog(bookingId);
       } else {
         _showErrorSnackbar('Đặt phòng thất bại. Vui lòng thử lại!');
       }
@@ -139,69 +146,166 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     }
   }
 
-  void _showSuccessDialog(String bookingId) {
+  void _showPaymentDialog(String bookingId) {
+    String _selectedMethod = 'Ví điện tử (MoMo)';
+    final methods = [
+      {'label': 'Ví điện tử (MoMo)', 'icon': Icons.account_balance_wallet},
+      {'label': 'Thẻ tín dụng / Ghi nợ', 'icon': Icons.credit_card},
+      {'label': 'Chuyển khoản ngân hàng', 'icon': Icons.account_balance},
+      {'label': 'Thanh toán tại khách sạn', 'icon': Icons.payments_outlined},
+    ];
+
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.check_circle, color: Colors.green, size: 64),
-            const SizedBox(height: 16),
-            const Text(
-              'Đặt phòng thành công!',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Mã đặt phòng: $bookingId',
-              style: const TextStyle(
-                fontSize: 13,
-                color: AppColors.textSecondary,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              widget.hotel.name,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: AppColors.primaryLight,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-        actions: [
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () {
-                // Chuyển sang lịch sử đặt phòng, tab "Đang hoạt động"
-                Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(
-                    builder: (_) => const BookingHistoryScreen(initialTab: 0),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryLight.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.payment, color: AppColors.primaryLight, size: 22),
+                    ),
+                    const SizedBox(width: 12),
+                    const Expanded(
+                      child: Text(
+                        'Thanh toán',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                // Tổng tiền
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFF3F3),
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  (route) => route.isFirst,
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryLight,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)),
-              ),
-              child: const Text('Xem đặt phòng của tôi'),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Tổng thanh toán',
+                          style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${_formatPrice(_finalPrice)} VND',
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFFCC0000),
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Mã đặt phòng: $bookingId',
+                        style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Chọn phương thức
+                const Text('Phương thức thanh toán',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 10),
+                ...methods.map((m) {
+                  final isSelected = _selectedMethod == m['label'];
+                  return GestureDetector(
+                    onTap: () => setDialogState(() => _selectedMethod = m['label'] as String),
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: isSelected ? AppColors.primaryLight : AppColors.border,
+                          width: isSelected ? 1.5 : 1,
+                        ),
+                        borderRadius: BorderRadius.circular(10),
+                        color: isSelected
+                            ? AppColors.primaryLight.withValues(alpha: 0.05)
+                            : Colors.white,
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(m['icon'] as IconData,
+                              size: 20,
+                              color: isSelected ? AppColors.primaryLight : AppColors.textSecondary),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              m['label'] as String,
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                                color: isSelected ? AppColors.primaryLight : AppColors.textPrimary,
+                              ),
+                            ),
+                          ),
+                          if (isSelected)
+                            const Icon(Icons.check_circle, color: AppColors.primaryLight, size: 18),
+                        ],
+                      ),
+                    ),
+                  );
+                }),
+
+                const SizedBox(height: 16),
+
+                // Nút thanh toán
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(ctx).pop();
+                      // Xây lại stack: BookingHomeScreen → BookingHistoryScreen
+                      // để bấm icon kính lúp quay về đúng trang chủ tìm kiếm
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(
+                          builder: (_) => const BookingHomeScreen(),
+                        ),
+                        (route) => route.isFirst,
+                      );
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const BookingHistoryScreen(initialTab: 0),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primaryLight,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      elevation: 0,
+                    ),
+                    child: const Text(
+                      'Thanh toán',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }

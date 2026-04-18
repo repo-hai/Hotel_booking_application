@@ -1,8 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:hotel_booking_app/presentation/screens/admin/admin_main_screen.dart';
+import 'package:provider/provider.dart';
+import 'package:hotel_booking_app/presentation/screens/owner/owner_home_screen.dart';
+import 'package:hotel_booking_app/providers/owner_provider.dart';
+import 'package:hotel_booking_app/presentation/screens/login.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => OwnerProvider(),
+        ),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -10,8 +22,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: AdminMainScreen(),
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Login(),
     );
   }
 }

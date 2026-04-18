@@ -4,10 +4,10 @@ import 'package:provider/provider.dart';
 import '../../../providers/owner_provider.dart';
 import '../../../models/room/room_type_model.dart';
 import '../../../models/room/room_amenity_model.dart';
+import '../../widgets/network_image_with_placeholder.dart';
 import 'add_room_step1_screen.dart';
 import 'edit_room_step1_screen.dart';
 import 'room_list_screen.dart';
-import '../../../models/hotel/hotel_model.dart';
 
 class AllRoomTypesScreen extends StatefulWidget {
   final String? hotelId;
@@ -114,7 +114,12 @@ class _AllRoomTypesScreenState extends State<AllRoomTypesScreen> {
             ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: const Color(0xFF2E5AAC),
-        onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AddRoomStep1Screen())),
+        onPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => AddRoomStep1Screen(hotelId: widget.hotelId),
+          ),
+        ),
         child: const Icon(Icons.add, color: Colors.white, size: 30),
       ),
     );
@@ -179,13 +184,11 @@ class _AllRoomTypesScreenState extends State<AllRoomTypesScreen> {
               const SizedBox(width: 10),
               Expanded(
                 flex: 2,
-                child: ClipRRect(
+                child: NetworkImageWithPlaceholder(
+                  url: rt.images.isNotEmpty ? rt.images[0].url : null,
+                  height: 100,
                   borderRadius: BorderRadius.circular(15),
-                  child: Image.network(
-                    rt.images.isNotEmpty ? rt.images[0].url : 'https://via.placeholder.com/150',
-                    height: 100, fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Container(color: Colors.grey[200], child: const Icon(Icons.hotel, size: 40)),
-                  ),
+                  placeholderIcon: Icons.bed,
                 ),
               ),
             ],

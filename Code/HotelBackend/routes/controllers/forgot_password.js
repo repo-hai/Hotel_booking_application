@@ -1,4 +1,4 @@
-const {db} = require('../config/firebase');
+const db = require('../../firebase');
 let nodemailer = require('nodemailer');
 const crypto = require("crypto");
 
@@ -6,7 +6,7 @@ function generatePassword(){
   return crypto.randomInt(100000, 999999).toString();
 }
 
-module.exports.register = async (req, res) => {
+module.exports.forgotPassword = async (req, res) => {
   try {
     const body = req.body;
     console.log(`Quen mat khau. Thong tin: email: ${body.email}.`)
@@ -15,7 +15,7 @@ module.exports.register = async (req, res) => {
     
     if(querySnapshot.empty){
       console.log("Sai email");
-      return res.status(500).send("Sai email");
+      return res.status(400).send("Sai email");
     } else {
       let transporter = nodemailer.createTransport({
         service: 'gmail',
@@ -59,7 +59,7 @@ module.exports.register = async (req, res) => {
       });
     }
   } catch (error) {
-    console.log("Đã có lỗi khi thực thi hàm login");
+    console.log("Forgot password - Đã có lỗi khi thực thi hàm");
     return res.status(500).json(error.message).send();
   }
 };

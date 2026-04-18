@@ -12,31 +12,57 @@ class Step4ManualLocation extends StatefulWidget {
 }
 
 class _Step4ManualLocationState extends State<Step4ManualLocation> {
-  final TextEditingController _cityController = TextEditingController();
-  final TextEditingController _districtController = TextEditingController();
-  final TextEditingController _wardController = TextEditingController();
-  final TextEditingController _addressController = TextEditingController();
+  // Danh sách tỉnh/thành phố có trong DB
+  static const List<String> _locations = [
+    'Hà Nội',
+    'Hồ Chí Minh',
+    'Đà Nẵng',
+    'Kiên Giang (Phú Quốc)',
+    'Lào Cai (Sapa)',
+    'Lâm Đồng (Đà Lạt)',
+    'Khánh Hòa (Nha Trang)',
+    'Bà Rịa - Vũng Tàu',
+    'Quảng Ninh (Hạ Long)',
+    'Thừa Thiên Huế',
+    'Cần Thơ',
+    'Quảng Nam (Hội An)',
+    'Bình Định (Quy Nhơn)',
+    'Thanh Hóa',
+    'Phú Thọ',
+    'Lạng Sơn',
+    'Hòa Bình',
+    'Bắc Ninh',
+    'Nam Định',
+    'Ninh Bình',
+    'Sơn La (Mộc Châu)',
+    'Vĩnh Phúc',
+    'Ninh Thuận',
+    'Quảng Trị',
+    'Tiền Giang',
+  ];
 
-  @override
-  void dispose() {
-    _cityController.dispose();
-    _districtController.dispose();
-    _wardController.dispose();
-    _addressController.dispose();
-    super.dispose();
-  }
+  String? _selectedLocation;
 
   void _onNext() {
+    if (_selectedLocation == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Vui lòng chọn tỉnh/thành phố'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     final provider = Provider.of<OwnerProvider>(context, listen: false);
     if (provider.draftHotel != null) {
-      final loc = "${_addressController.text}, ${_wardController.text}, ${_districtController.text}, ${_cityController.text}";
       provider.draftHotel = Hotel(
         id: provider.draftHotel!.id,
         type: provider.draftHotel!.type,
         name: provider.draftHotel!.name,
         description: provider.draftHotel!.description,
         telephone: provider.draftHotel!.telephone,
-        location: loc,
+        location: _selectedLocation!,
         email: provider.draftHotel!.email,
         star: provider.draftHotel!.star,
         images: provider.draftHotel!.images,
@@ -57,72 +83,80 @@ class _Step4ManualLocationState extends State<Step4ManualLocation> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  "Thông tin vị trí",
+                  "Vị trí khách sạn",
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
-                const SizedBox(height: 20),
-                _buildLocationField("Tỉnh/Thành phố *", _cityController),
-                _buildLocationField("Quận/Huyện *", _districtController),
-                _buildLocationField("Phường/Xã *", _wardController),
-                _buildLocationField("Địa chỉ cụ thể *", _addressController),
+                const SizedBox(height: 8),
+                const Text(
+                  "Chọn tỉnh/thành phố nơi khách sạn tọa lạc",
+                  style: TextStyle(color: Colors.grey, fontSize: 14),
+                ),
+                const SizedBox(height: 24),
+
+                const Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: 'Tỉnh/Thành phố',
+                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+                      ),
+                      TextSpan(
+                        text: ' *',
+                        style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value: _selectedLocation,
+                      isExpanded: true,
+                      hint: const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 14),
+                        child: Text(
+                          'Chọn tỉnh/thành phố',
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                      borderRadius: BorderRadius.circular(10),
+                      items: _locations
+                          .map((loc) => DropdownMenuItem(
+                                value: loc,
+                                child: Text(loc),
+                              ))
+                          .toList(),
+                      onChanged: (val) => setState(() => _selectedLocation = val),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
         ),
-        _buildBottomButton(_onNext),
-      ],
-    );
-  }
-
-  Widget _buildLocationField(String label, TextEditingController controller) {
-    bool isRequired = label.contains('*');
-    String cleanLabel = label.replaceAll('*', '').trim();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text.rich(
-          TextSpan(
-            children: [
-              TextSpan(text: cleanLabel, style: const TextStyle(fontWeight: FontWeight.w500)),
-              if (isRequired)
-                const TextSpan(text: ' *', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
-            ],
-          ),
-        ),
-        const SizedBox(height: 8),
-        TextField(
-          controller: controller,
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: Colors.grey.shade100,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide: const BorderSide(color: Colors.grey),
+        Padding(
+          padding: const EdgeInsets.all(20),
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF2E5AAC),
+              minimumSize: const Size(double.infinity, 50),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide(color: Colors.grey.shade300),
+            onPressed: _onNext,
+            child: const Text(
+              "Tiếp",
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
             ),
           ),
         ),
-        const SizedBox(height: 15),
       ],
-    );
-  }
-
-  Widget _buildBottomButton(VoidCallback onPressed) {
-    return Padding(
-      padding: const EdgeInsets.all(20),
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF2E5AAC),
-          minimumSize: const Size(double.infinity, 50),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        ),
-        onPressed: onPressed,
-        child: const Text("Tiếp", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-      ),
     );
   }
 }

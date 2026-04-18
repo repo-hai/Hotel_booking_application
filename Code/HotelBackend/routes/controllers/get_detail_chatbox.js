@@ -1,4 +1,4 @@
-const {db} = require('../config/firebase');
+const db = require('../../firebase');
 
 module.exports.getDetailChatbox = async (req, res) => {
   try {

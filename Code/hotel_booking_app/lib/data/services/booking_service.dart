@@ -1,15 +1,24 @@
 ﻿import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/booking_history_model.dart';
 import '../../core/constants/api_constants.dart';
 
 class BookingService {
-  static const String _userId = 'user_1'; // TODO: lấy từ Auth
+  /// Lấy userId từ SharedPreferences
+  static Future<String?> _getUserId() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('userId');
+  }
 
-  /// Lấy danh sách đặt phòng của user (lọc theo status)
+  /// Lấy danh sách đặt phòng của user (lọc theo userId + status)
   static Future<List<BookingHistoryModel>> getBookings({String? status}) async {
     try {
-      var url = '${ApiConstants.baseUrl}${ApiConstants.bookings}?limit=50';
+      final userId = await _getUserId();
+      if (userId == null || userId.isEmpty) return [];
+
+      // Lọc theo userId để chỉ lấy booking của user hiện tại
+      var url = '${ApiConstants.baseUrl}${ApiConstants.bookings}?userId=$userId&limit=50';
       if (status != null) url += '&status=$status';
 
       final response = await http.get(Uri.parse(url));

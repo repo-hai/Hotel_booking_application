@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../services/admin_api_service.dart';
 import '../../../theme/app_theme.dart';
+import '../login.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -34,6 +36,46 @@ class _DashboardScreenState extends State<DashboardScreen> {
     await _future;
   }
 
+  void _confirmLogout(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        title: const Text('Đăng xuất', style: TextStyle(fontWeight: FontWeight.bold)),
+        content: const Text('Bạn có chắc muốn đăng xuất không?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Hủy', style: TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.remove('userId');
+              await prefs.remove('role');
+              await prefs.remove('password');
+              if (!context.mounted) return;
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(
+                  builder: (_) => const MyLoginPage(title: 'Đăng nhập'),
+                ),
+                (route) => false,
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              elevation: 0,
+            ),
+            child: const Text('Đăng xuất'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,6 +87,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Đăng xuất',
+            onPressed: () => _confirmLogout(context),
+          ),
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _refresh,
