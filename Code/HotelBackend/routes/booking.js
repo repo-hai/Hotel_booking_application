@@ -1,7 +1,7 @@
 // File: routes/booking.js
 const express = require('express');
 const router = express.Router();
-const db = require('../firebase');
+const {db} = require('../firebase');
 const { sendNotificationToOwner } = require('../utils/notifications');
 
 // ==========================================

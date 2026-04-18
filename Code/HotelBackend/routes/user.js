@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const admin = require('firebase-admin');
-const db = require('../firebase');
+const {db} = require('../firebase');
 
 // ==========================================
 // 1. API: THÊM LỊCH SỬ TÌM KIẾM MỚI

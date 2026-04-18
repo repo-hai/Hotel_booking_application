@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:hotel_booking_app/presentation/screens/login.dart';
 import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 double containerHeight = 600;
 double containerWidth = 450;
@@ -27,9 +30,13 @@ class MyAuthenticateEmail extends StatefulWidget {
 }
 
 class _MyAuthenticateEmail extends State<MyAuthenticateEmail> {
-  final String loginState = "not login";
+  String code = "";
 
-  void _onLogin(){}
+  @override
+  void initState() {
+    // TODO: implement initState
+    code = "";
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -89,8 +96,10 @@ class _MyAuthenticateEmail extends State<MyAuthenticateEmail> {
                       Text("Vui lòng nhập mã OTP được gửi tới email của bạn"),
                       OtpTextField(
                         numberOfFields: 4,
-                        onSubmit: (String code){
-                          print(code);
+                        onSubmit: (String s){
+                          setState(() {
+                            code = s;
+                          });
                         },
                         fieldWidth: 60,
                         textStyle: TextStyle(
@@ -109,7 +118,7 @@ class _MyAuthenticateEmail extends State<MyAuthenticateEmail> {
                         spacing: 30,
                         children: [
                           ElevatedButton(
-                            onPressed: _onLogin,
+                            onPressed: (){},
                             style: ElevatedButton.styleFrom(
                               fixedSize: Size(160, 35),
                               backgroundColor: Color.fromRGBO(40, 83, 175, 1),
@@ -122,12 +131,45 @@ class _MyAuthenticateEmail extends State<MyAuthenticateEmail> {
                             ),
                           ),
                           ElevatedButton(
-                              onPressed: (){
-                                Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (context) => Login(),
-                                    )
+                              onPressed: () async {
+                                final SharedPreferences prefs = await SharedPreferences.getInstance();
+                                final response = await http.post(
+                                  Uri.parse('http://localhost:3000/confirm-create-account'),
+                                  headers: <String, String>{
+                                    'Content-Type': 'application/json; charset=UTF-8',
+                                  },
+                                  body: jsonEncode(<String, String>{'email': prefs.getString("email")!, 'confirmCode': code}),
                                 );
+                                print("gui request thanh cong");
+                                if(response.statusCode == 200){
+                                  showDialog(context: context, builder: (ctx) {
+                                    return AlertDialog(
+                                      title: Text("Tạo tài khoản thành công, vui lòng đăng nhập"),
+                                      actions: [
+                                        TextButton(onPressed: () {
+                                          Navigator.pop(ctx);
+                                          Navigator.of(context).push(
+                                            MaterialPageRoute(builder: (context) {
+                                              return Login();
+                                            },));
+                                          },
+                                          child: Text("Ok")
+                                        ),
+                                      ],
+                                    );
+                                  },);
+                                } else {
+                                  showDialog(context: context, builder: (ctx) {
+                                    return AlertDialog(
+                                      title: Text("Mã OTP không đúng, vui lòng thử lại"),
+                                      actions: [
+                                        TextButton(onPressed: () {
+                                          Navigator.pop(ctx);
+                                        }, child: Text("Ok")),
+                                      ],
+                                    );
+                                  },);
+                                }
                               },
                               style: ElevatedButton.styleFrom(
                                 fixedSize: Size(160, 35),
