@@ -1,0 +1,649 @@
+[
+  {
+    "ID": 1,
+    "userId": 2,
+    "type": "Khách sạn",
+    "name": "Sofitel Legend Metropole",
+    "description": "Khách sạn sang trọng mang kiến trúc Pháp cổ điển giữa lòng thủ đô.",
+    "telephone": "02438266919",
+    "location": "Hà Nội",
+    "email": "h1555@sofitel.com",
+    "star": 5,
+    "images": [
+      {
+        "ID": 1,
+        "url": "https://pistachiohotel.com/UploadFile/Gallery/Overview/a2.jpg"
+      }
+    ],
+    "amenities": [
+      { "ID": 1, "name": "wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 3, "name": "spa", "icon": "fa-spa" },
+      { "ID": 4, "name": "quầy bar", "icon": "fa-glass-martini-alt" }
+    ]
+  },
+  {
+    "ID": 2,
+    "userId": 2,
+    "type": "Resort",
+    "name": "InterContinental Danang Sun Peninsula Resort",
+    "description": "Khu nghỉ dưỡng sang trọng bậc nhất thế giới trên bán đảo Sơn Trà.",
+    "telephone": "02363938888",
+    "location": "Đà Nẵng",
+    "email": "reservations.icdanang@ihg.com",
+    "star": 5,
+    "images": [
+      {
+        "ID": 2,
+        "url": "https://images.trvl-media.com/lodging/33000000/32140000/32133100/32133009/db37dc1f.jpg?impolicy=fcrop&w=900&h=675&p=1&q=medium"
+      }
+    ],
+    "amenities": [
+      { "ID": 1, "name": "wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 2, "name": "hồ bơi", "icon": "fa-swimming-pool" },
+      { "ID": 3, "name": "spa", "icon": "fa-spa" },
+      { "ID": 4, "name": "quầy bar", "icon": "fa-glass-martini-alt" },
+      { "ID": 5, "name": "phòng gym", "icon": "fa-dumbbell" }
+    ]
+  },
+  {
+    "ID": 3,
+    "userId": 3,
+    "type": "Khách sạn",
+    "name": "The Reverie Saigon",
+    "description": "Khách sạn lộng lẫy và đắt đỏ với thiết kế hoàng gia Ý.",
+    "telephone": "02838236688",
+    "location": "Hồ Chí Minh",
+    "email": "info@thereveriesaigon.com",
+    "star": 5,
+    "images": [
+      {
+        "ID": 3,
+        "url": "https://image.vietgoing.com/hotel/01/62/vietgoing_sdo2202244107.webp"
+      }
+    ],
+    "amenities": [
+      { "ID": 1, "name": "wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 5, "name": "phòng gym", "icon": "fa-dumbbell" }
+    ]
+  },
+  {
+    "ID": 4,
+    "userId": 3,
+    "type": "Resort",
+    "name": "JW Marriott Phu Quoc Emerald Bay",
+    "description": "Kiệt tác kiến trúc của Bill Bensley trên đảo ngọc Phú Quốc.",
+    "telephone": "02973779999",
+    "location": "Kiên Giang (Phú Quốc)",
+    "email": "mhrs.pqcjw.reservations@marriott.com",
+    "star": 5,
+    "images": [
+      {
+        "ID": 4,
+        "url": "https://dulichsaigon.edu.vn/wp-content/uploads/2024/04/khach-san-la-gi-cach-phan-loai-khach-san.jpg"
+      }
+    ],
+    "amenities": [
+      { "ID": 1, "name": "wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 2, "name": "hồ bơi", "icon": "fa-swimming-pool" },
+      { "ID": 3, "name": "spa", "icon": "fa-spa" },
+      { "ID": 5, "name": "phòng gym", "icon": "fa-dumbbell" }
+    ]
+  },
+  {
+    "ID": 5,
+    "userId": 4,
+    "type": "Khách sạn",
+    "name": "Hotel de la Coupole - MGallery",
+    "description": "Cung điện Pháp thu nhỏ giữa biển mây sương mù Sapa.",
+    "telephone": "02143629999",
+    "location": "Lào Cai (Sapa)",
+    "email": "ha5v2-re@accor.com",
+    "star": 5,
+    "images": [
+      {
+        "ID": 5,
+        "url": "https://kconceptvn.com/wp-content/uploads/2020/04/hotel-photography-chup-anh-khach-san-khach-san-bamboo-sapa-hotel-18-1024x683.jpg"
+      }
+    ],
+    "amenities": [{ "ID": 1, "name": "wifi miễn phí", "icon": "fa-wifi" }]
+  },
+  {
+    "ID": 6,
+    "userId": 4,
+    "type": "Khách sạn",
+    "name": "Dalat Palace Heritage Hotel",
+    "description": "Di sản kiến trúc Pháp mang đậm dấu ấn lịch sử tại Đà Lạt.",
+    "telephone": "02633825444",
+    "location": "Lâm Đồng (Đà Lạt)",
+    "email": "info@dalatpalacehotel.com",
+    "star": 5,
+    "images": [
+      {
+        "ID": 6,
+        "url": "https://pistachiohotel.com/UploadFile/Gallery/Overview/a2.jpg"
+      }
+    ],
+    "amenities": [
+      { "ID": 1, "name": "wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 4, "name": "quầy bar", "icon": "fa-glass-martini-alt" },
+      { "ID": 5, "name": "phòng gym", "icon": "fa-dumbbell" }
+    ]
+  },
+  {
+    "ID": 7,
+    "userId": 3,
+    "type": "Resort",
+    "name": "Vinpearl Resort Nha Trang",
+    "description": "Biểu tượng nghỉ dưỡng với công viên giải trí tuyệt đỉnh trên đảo Hòn Tre.",
+    "telephone": "02583598188",
+    "location": "Khánh Hòa (Nha Trang)",
+    "email": "info@vinpearl.com",
+    "star": 5,
+    "images": [
+      {
+        "ID": 7,
+        "url": "https://image.vietgoing.com/hotel/01/62/vietgoing_sdo2202244107.webp"
+      }
+    ],
+    "amenities": [
+      { "ID": 1, "name": "wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 2, "name": "hồ bơi", "icon": "fa-swimming-pool" }
+    ]
+  },
+  {
+    "ID": 8,
+    "userId": 2,
+    "type": "Khách sạn",
+    "name": "The Imperial Hotel Vung Tau",
+    "description": "Khách sạn mang phong cách cổ điển phương Tây duy nhất tại Bãi Sau.",
+    "telephone": "02543628888",
+    "location": "Bà Rịa - Vũng Tàu",
+    "email": "info@imperialhotel.vn",
+    "star": 5,
+    "images": [
+      {
+        "ID": 8,
+        "url": "https://kconceptvn.com/wp-content/uploads/2020/04/hotel-photography-chup-anh-khach-san-khach-san-bamboo-sapa-hotel-18-1024x683.jpg"
+      }
+    ],
+    "amenities": [
+      { "ID": 1, "name": "wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 2, "name": "hồ bơi", "icon": "fa-swimming-pool" },
+      { "ID": 3, "name": "spa", "icon": "fa-spa" },
+      { "ID": 4, "name": "quầy bar", "icon": "fa-glass-martini-alt" }
+    ]
+  },
+  {
+    "ID": 9,
+    "userId": 4,
+    "type": "Resort",
+    "name": "FLC Halong Bay Golf Club & Luxury Resort",
+    "description": "Khu nghỉ dưỡng tọa lạc trên đồi với tầm nhìn bao quát kỳ quan vịnh Hạ Long.",
+    "telephone": "02033628989",
+    "location": "Quảng Ninh (Hạ Long)",
+    "email": "booking@flchotels.com",
+    "star": 5,
+    "images": [
+      {
+        "ID": 9,
+        "url": "https://dulichsaigon.edu.vn/wp-content/uploads/2024/04/khach-san-la-gi-cach-phan-loai-khach-san.jpg"
+      }
+    ],
+    "amenities": [
+      { "ID": 1, "name": "wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 2, "name": "hồ bơi", "icon": "fa-swimming-pool" },
+      { "ID": 5, "name": "phòng gym", "icon": "fa-dumbbell" }
+    ]
+  },
+  {
+    "ID": 10,
+    "userId": 2,
+    "type": "Villa",
+    "name": "Azerai La Residence",
+    "description": "Khu dinh thự cổ kính ven bờ sông Hương thơ mộng.",
+    "telephone": "02343837475",
+    "location": "Thừa Thiên Huế",
+    "email": "info.laresidence.hue@azerai.com",
+    "star": 5,
+    "images": [
+      {
+        "ID": 10,
+        "url": "https://images.trvl-media.com/lodging/33000000/32140000/32133100/32133009/db37dc1f.jpg?impolicy=fcrop&w=900&h=675&p=1&q=medium"
+      }
+    ],
+    "amenities": [
+      { "ID": 1, "name": "wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 3, "name": "spa", "icon": "fa-spa" }
+    ]
+  },
+  {
+    "ID": 11,
+    "userId": 3,
+    "type": "Resort",
+    "name": "Victoria Can Tho Resort",
+    "description": "Khu nghỉ dưỡng đậm chất Đông Dương bên bờ sông Hậu.",
+    "telephone": "02923810111",
+    "location": "Cần Thơ",
+    "email": "resa.cantho@victoriahotels.asia",
+    "star": 4,
+    "images": [
+      {
+        "ID": 11,
+        "url": "https://pistachiohotel.com/UploadFile/Gallery/Overview/a2.jpg"
+      }
+    ],
+    "amenities": [
+      { "ID": 1, "name": "wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 2, "name": "hồ bơi", "icon": "fa-swimming-pool" },
+      { "ID": 4, "name": "quầy bar", "icon": "fa-glass-martini-alt" },
+      { "ID": 5, "name": "phòng gym", "icon": "fa-dumbbell" }
+    ]
+  },
+  {
+    "ID": 12,
+    "userId": 2,
+    "type": "Khách sạn",
+    "name": "Hotel Royal Hoi An - MGallery",
+    "description": "Khách sạn Boutique lấy cảm hứng từ chuyện tình lãng mạn Nhật Bản - Việt Nam.",
+    "telephone": "02353950777",
+    "location": "Quảng Nam (Hội An)",
+    "email": "reservation@hotelroyalhoian.vn",
+    "star": 5,
+    "images": [
+      {
+        "ID": 12,
+        "url": "https://dulichsaigon.edu.vn/wp-content/uploads/2024/04/khach-san-la-gi-cach-phan-loai-khach-san.jpg"
+      }
+    ],
+    "amenities": [{ "ID": 1, "name": "wifi miễn phí", "icon": "fa-wifi" }]
+  },
+  {
+    "ID": 13,
+    "userId": 4,
+    "type": "Resort",
+    "name": "Avani Quy Nhon Resort",
+    "description": "Khu nghỉ dưỡng yên bình nép mình bên bãi biển cát trắng Ghềnh Ráng.",
+    "telephone": "02563840132",
+    "location": "Bình Định (Quy Nhơn)",
+    "email": "quynhon@avanihotels.com",
+    "star": 4,
+    "images": [
+      {
+        "ID": 13,
+        "url": "https://image.vietgoing.com/hotel/01/62/vietgoing_sdo2202244107.webp"
+      }
+    ],
+    "amenities": [
+      { "ID": 1, "name": "wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 2, "name": "hồ bơi", "icon": "fa-swimming-pool" },
+      { "ID": 3, "name": "spa", "icon": "fa-spa" },
+      { "ID": 4, "name": "quầy bar", "icon": "fa-glass-martini-alt" },
+      { "ID": 5, "name": "phòng gym", "icon": "fa-dumbbell" }
+    ]
+  },
+  {
+    "ID": 14,
+    "userId": 3,
+    "type": "Villa",
+    "name": "Six Senses Ninh Van Bay Villas",
+    "description": "Biệt thự thân thiện môi trường ẩn mình giữa thiên nhiên hoang sơ.",
+    "telephone": "02583524268",
+    "location": "Khánh Hòa (Nha Trang)",
+    "email": "reservations-ninhvan@sixsenses.com",
+    "star": 5,
+    "images": [
+      {
+        "ID": 14,
+        "url": "https://kconceptvn.com/wp-content/uploads/2020/04/hotel-photography-chup-anh-khach-san-khach-san-bamboo-sapa-hotel-18-1024x683.jpg"
+      }
+    ],
+    "amenities": [
+      { "ID": 1, "name": "wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 3, "name": "spa", "icon": "fa-spa" }
+    ]
+  },
+  {
+    "ID": 15,
+    "userId": 3,
+    "type": "Khách sạn",
+    "name": "Meliá Vinpearl Thanh Hóa",
+    "description": "Tòa tháp khách sạn cao nhất thành phố, biểu tượng mới của sự phồn vinh.",
+    "telephone": "02373906666",
+    "location": "Thanh Hóa",
+    "email": "info.vcth@melia.com",
+    "star": 5,
+    "images": [
+      {
+        "ID": 15,
+        "url": "https://images.trvl-media.com/lodging/33000000/32140000/32133100/32133009/db37dc1f.jpg?impolicy=fcrop&w=900&h=675&p=1&q=medium"
+      }
+    ],
+    "amenities": [
+      { "ID": 1, "name": "wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 2, "name": "hồ bơi", "icon": "fa-swimming-pool" },
+      { "ID": 5, "name": "phòng gym", "icon": "fa-dumbbell" }
+    ]
+  },
+  {
+    "ID": 16,
+    "userId": 2,
+    "type": "Khách sạn",
+    "name": "Muong Thanh Luxury Phu Tho",
+    "description": "Khách sạn tiêu chuẩn 5 sao nổi bật tại vùng Đất Tổ.",
+    "telephone": "02103616666",
+    "location": "Phú Thọ",
+    "email": "info@phutho.muongthanh.vn",
+    "star": 5,
+    "images": [
+      {
+        "ID": 16,
+        "url": "https://image.vietgoing.com/hotel/01/62/vietgoing_sdo2202244107.webp"
+      }
+    ],
+    "amenities": [
+      { "ID": 1, "name": "wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 4, "name": "quầy bar", "icon": "fa-glass-martini-alt" },
+      { "ID": 5, "name": "phòng gym", "icon": "fa-dumbbell" }
+    ]
+  },
+  {
+    "ID": 17,
+    "userId": 3,
+    "type": "Khách sạn",
+    "name": "Vinpearl Hotel Lạng Sơn",
+    "description": "Trung tâm lưu trú hiện đại bậc nhất khu vực biên giới phía Bắc.",
+    "telephone": "02053898888",
+    "location": "Lạng Sơn",
+    "email": "info.vhls@vinpearl.com",
+    "star": 5,
+    "images": [
+      {
+        "ID": 17,
+        "url": "https://dulichsaigon.edu.vn/wp-content/uploads/2024/04/khach-san-la-gi-cach-phan-loai-khach-san.jpg"
+      }
+    ],
+    "amenities": [
+      { "ID": 1, "name": "wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 2, "name": "hồ bơi", "icon": "fa-swimming-pool" },
+      { "ID": 3, "name": "spa", "icon": "fa-spa" },
+      { "ID": 4, "name": "quầy bar", "icon": "fa-glass-martini-alt" }
+    ]
+  },
+  {
+    "ID": 18,
+    "userId": 4,
+    "type": "Resort",
+    "name": "Serena Resort Kim Bôi",
+    "description": "Khu nghỉ dưỡng tắm khoáng nóng hòa mình vào thiên nhiên Tây Bắc.",
+    "telephone": "0981346868",
+    "location": "Hòa Bình",
+    "email": "info@serena.com.vn",
+    "star": 4,
+    "images": [
+      {
+        "ID": 18,
+        "url": "https://pistachiohotel.com/UploadFile/Gallery/Overview/a2.jpg"
+      }
+    ],
+    "amenities": [{ "ID": 1, "name": "wifi miễn phí", "icon": "fa-wifi" }]
+  },
+  {
+    "ID": 19,
+    "userId": 2,
+    "type": "Khách sạn",
+    "name": "Central Hotel Thanh Hóa",
+    "description": "Khách sạn hiện đại nằm ngay vị trí trung tâm thành phố Thanh Hóa.",
+    "telephone": "02373686868",
+    "location": "Thanh Hóa",
+    "email": "info@centralhotel.vn",
+    "star": 4,
+    "images": [
+      {
+        "ID": 19,
+        "url": "https://dulichsaigon.edu.vn/wp-content/uploads/2024/04/khach-san-la-gi-cach-phan-loai-khach-san.jpg"
+      }
+    ],
+    "amenities": [
+      { "ID": 1, "name": "wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 4, "name": "quầy bar", "icon": "fa-glass-martini-alt" }
+    ]
+  },
+  {
+    "ID": 20,
+    "userId": 4,
+    "type": "Homestay",
+    "name": "Tombo Homestay Bắc Ninh",
+    "description": "Homestay sinh thái mang nét yên bình của đồng quê.",
+    "telephone": "02223888999",
+    "location": "Bắc Ninh",
+    "email": "booking@tombo.vn",
+    "star": 3,
+    "images": [
+      {
+        "ID": 20,
+        "url": "https://kconceptvn.com/wp-content/uploads/2020/04/hotel-photography-chup-anh-khach-san-khach-san-bamboo-sapa-hotel-18-1024x683.jpg"
+      }
+    ],
+    "amenities": [
+      { "ID": 1, "name": "wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 2, "name": "hồ bơi", "icon": "fa-swimming-pool" }
+    ]
+  },
+  {
+    "ID": 21,
+    "userId": 2,
+    "type": "Khách sạn",
+    "name": "Nam Cường Nam Định Hotel",
+    "description": "Một trong những khách sạn cao cấp lớn nhất tại trung tâm Nam Định.",
+    "telephone": "02273888666",
+    "location": "Nam Định",
+    "email": "info@namcuonghotel.com",
+    "star": 4,
+    "images": [
+      {
+        "ID": 21,
+        "url": "https://image.vietgoing.com/hotel/01/62/vietgoing_sdo2202244107.webp"
+      }
+    ],
+    "amenities": [
+      { "ID": 1, "name": "wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 2, "name": "hồ bơi", "icon": "fa-swimming-pool" },
+      { "ID": 3, "name": "spa", "icon": "fa-spa" },
+      { "ID": 4, "name": "quầy bar", "icon": "fa-glass-martini-alt" },
+      { "ID": 5, "name": "phòng gym", "icon": "fa-dumbbell" }
+    ]
+  },
+  {
+    "ID": 22,
+    "userId": 2,
+    "type": "Khách sạn",
+    "name": "Pullman Vung Tau",
+    "description": "Không gian nghỉ dưỡng hiện đại mang tiêu chuẩn quốc tế gần biển.",
+    "telephone": "02543551777",
+    "location": "Bà Rịa - Vũng Tàu",
+    "email": "h7080@accor.com",
+    "star": 5,
+    "images": [
+      {
+        "ID": 22,
+        "url": "https://images.trvl-media.com/lodging/33000000/32140000/32133100/32133009/db37dc1f.jpg?impolicy=fcrop&w=900&h=675&p=1&q=medium"
+      }
+    ],
+    "amenities": [
+      { "ID": 1, "name": "wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 2, "name": "hồ bơi", "icon": "fa-swimming-pool" },
+      { "ID": 4, "name": "quầy bar", "icon": "fa-glass-martini-alt" }
+    ]
+  },
+  {
+    "ID": 23,
+    "userId": 3,
+    "type": "Căn hộ dịch vụ",
+    "name": "Lotte Serviced Apartments Hanoi",
+    "description": "Căn hộ dịch vụ sang trọng đỉnh cao tại tòa tháp Lotte.",
+    "telephone": "02433331000",
+    "location": "Hà Nội",
+    "email": "apartment.hanoi@lotte.net",
+    "star": 5,
+    "images": [
+      {
+        "ID": 23,
+        "url": "https://kconceptvn.com/wp-content/uploads/2020/04/hotel-photography-chup-anh-khach-san-khach-san-bamboo-sapa-hotel-18-1024x683.jpg"
+      }
+    ],
+    "amenities": [
+      { "ID": 1, "name": "wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 5, "name": "phòng gym", "icon": "fa-dumbbell" }
+    ]
+  },
+  {
+    "ID": 24,
+    "userId": 4,
+    "type": "Resort",
+    "name": "Emeralda Resort Ninh Binh",
+    "description": "Khu nghỉ dưỡng mang phong cách cung đình Bắc Bộ xưa.",
+    "telephone": "02293658333",
+    "location": "Ninh Bình",
+    "email": "info@emeraldaresort.com",
+    "star": 4,
+    "images": [
+      {
+        "ID": 24,
+        "url": "https://image.vietgoing.com/hotel/01/62/vietgoing_sdo2202244107.webp"
+      }
+    ],
+    "amenities": [
+      { "ID": 1, "name": "wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 2, "name": "hồ bơi", "icon": "fa-swimming-pool" },
+      { "ID": 3, "name": "spa", "icon": "fa-spa" },
+      { "ID": 5, "name": "phòng gym", "icon": "fa-dumbbell" }
+    ]
+  },
+  {
+    "ID": 25,
+    "userId": 2,
+    "type": "Khách sạn",
+    "name": "Muong Thanh Holiday Moc Chau",
+    "description": "Điểm dừng chân lý tưởng giữa thảo nguyên Mộc Châu xanh ngát.",
+    "telephone": "02122258886",
+    "location": "Sơn La (Mộc Châu)",
+    "email": "info@mocchau.muongthanh.vn",
+    "star": 4,
+    "images": [
+      {
+        "ID": 25,
+        "url": "https://images.trvl-media.com/lodging/33000000/32140000/32133100/32133009/db37dc1f.jpg?impolicy=fcrop&w=900&h=675&p=1&q=medium"
+      }
+    ],
+    "amenities": [
+      { "ID": 1, "name": "wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 4, "name": "quầy bar", "icon": "fa-glass-martini-alt" }
+    ]
+  },
+  {
+    "ID": 26,
+    "userId": 4,
+    "type": "Villa",
+    "name": "Flamingo Dai Lai Villas",
+    "description": "Quần thể biệt thự xanh độc đáo hòa mình cùng hồ Đại Lải.",
+    "telephone": "02116266666",
+    "location": "Vĩnh Phúc",
+    "email": "sales@flamingogroup.vn",
+    "star": 5,
+    "images": [
+      {
+        "ID": 26,
+        "url": "https://kconceptvn.com/wp-content/uploads/2020/04/hotel-photography-chup-anh-khach-san-khach-san-bamboo-sapa-hotel-18-1024x683.jpg"
+      }
+    ],
+    "amenities": [
+      { "ID": 1, "name": "wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 2, "name": "hồ bơi", "icon": "fa-swimming-pool" },
+      { "ID": 3, "name": "spa", "icon": "fa-spa" }
+    ]
+  },
+  {
+    "ID": 27,
+    "userId": 2,
+    "type": "Căn hộ dịch vụ",
+    "name": "Novotel Danang Premier Apartments",
+    "description": "Căn hộ dịch vụ cao cấp nằm ngay bờ Tây sông Hàn.",
+    "telephone": "02363929999",
+    "location": "Đà Nẵng",
+    "email": "H8287@accor.com",
+    "star": 4,
+    "images": [
+      {
+        "ID": 27,
+        "url": "https://pistachiohotel.com/UploadFile/Gallery/Overview/a2.jpg"
+      }
+    ],
+    "amenities": [
+      { "ID": 1, "name": "wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 5, "name": "phòng gym", "icon": "fa-dumbbell" }
+    ]
+  },
+  {
+    "ID": 28,
+    "userId": 3,
+    "type": "Villa",
+    "name": "Amanoi Resort Villas",
+    "description": "Biệt thự nghỉ dưỡng riêng tư bậc nhất ẩn mình tại Vườn Quốc gia Núi Chúa.",
+    "telephone": "02593770777",
+    "location": "Ninh Thuận",
+    "email": "amanoi@aman.com",
+    "star": 5,
+    "images": [
+      {
+        "ID": 28,
+        "url": "https://dulichsaigon.edu.vn/wp-content/uploads/2024/04/khach-san-la-gi-cach-phan-loai-khach-san.jpg"
+      }
+    ],
+    "amenities": [
+      { "ID": 1, "name": "wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 2, "name": "hồ bơi", "icon": "fa-swimming-pool" },
+      { "ID": 3, "name": "spa", "icon": "fa-spa" },
+      { "ID": 4, "name": "quầy bar", "icon": "fa-glass-martini-alt" },
+      { "ID": 5, "name": "phòng gym", "icon": "fa-dumbbell" }
+    ]
+  },
+  {
+    "ID": 29,
+    "userId": 4,
+    "type": "Khách sạn",
+    "name": "Sai Gon Dong Ha Hotel",
+    "description": "Điểm lưu trú tiêu chuẩn cao ngay tại trung tâm thành phố Đông Hà.",
+    "telephone": "02333898888",
+    "location": "Quảng Trị",
+    "email": "info@saigondonghahotel.com",
+    "star": 4,
+    "images": [
+      {
+        "ID": 29,
+        "url": "https://image.vietgoing.com/hotel/01/62/vietgoing_sdo2202244107.webp"
+      }
+    ],
+    "amenities": [
+      { "ID": 1, "name": "wifi miễn phí", "icon": "fa-wifi" },
+      { "ID": 4, "name": "quầy bar", "icon": "fa-glass-martini-alt" }
+    ]
+  },
+  {
+    "ID": 30,
+    "userId": 3,
+    "type": "Homestay",
+    "name": "Mekong Rustic Cai Be Homestay",
+    "description": "Trải nghiệm hòa mình vào đời sống dân dã của miền Tây sông nước.",
+    "telephone": "0978581143",
+    "location": "Tiền Giang",
+    "email": "info@mekongrustic.com",
+    "star": 3,
+    "images": [
+      {
+        "ID": 30,
+        "url": "https://images.trvl-media.com/lodging/33000000/32140000/32133100/32133009/db37dc1f.jpg?impolicy=fcrop&w=900&h=675&p=1&q=medium"
+      }
+    ],
+    "amenities": [{ "ID": 1, "name": "wifi miễn phí", "icon": "fa-wifi" }]
+  }
+]
