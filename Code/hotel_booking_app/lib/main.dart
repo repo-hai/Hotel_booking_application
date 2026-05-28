@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:hotel_booking_app/models/payment/payment_model.dart';
+import 'package:hotel_booking_app/presentation/screens/payment_view.dart';
+import 'package:hotel_booking_app/presentation/screens/view_comment_rating.dart';
 import 'package:provider/provider.dart';
-import 'package:hotel_booking_app/presentation/screens/owner/owner_home_screen.dart';
 import 'package:hotel_booking_app/providers/owner_provider.dart';
 import 'package:hotel_booking_app/presentation/screens/login.dart';
 
@@ -22,9 +24,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: Login(),
+      showSemanticsDebugger: false,
+      debugShowMaterialGrid: false,
+      home: Material(
+        child: PaymentView(),
+      ),
     );
   }
 }

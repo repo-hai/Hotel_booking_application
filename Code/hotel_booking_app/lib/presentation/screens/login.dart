@@ -2,16 +2,15 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:hotel_booking_app/presentation/screens/privacy_view.dart';
+import 'package:hotel_booking_app/presentation/screens/profile_view2.dart';
 import 'package:hotel_booking_app/presentation/screens/register.dart';
 import 'package:hotel_booking_app/presentation/screens/forgot_password.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:hotel_booking_app/presentation/screens/admin/admin_main_screen.dart';
 import 'package:hotel_booking_app/presentation/screens/owner/owner_home_screen.dart';
 import 'package:hotel_booking_app/presentation/screens/booking_home_screen.dart';
-import 'package:hotel_booking_app/presentation/screens/profile_view.dart';
 
 class Login extends StatelessWidget {
   const Login({super.key});
@@ -23,6 +22,7 @@ class Login extends StatelessWidget {
         colorScheme: .fromSeed(seedColor: Colors.deepPurple),
       ),
       home: const MyLoginPage(title: 'Đăng nhập'),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
@@ -54,6 +54,7 @@ class _MyLoginPageState extends State<MyLoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Ban dau la Material
     return Material(
       child: Container(
         decoration: const BoxDecoration(
@@ -71,7 +72,7 @@ class _MyLoginPageState extends State<MyLoginPage> {
             Row(
               children: [
                 Padding(
-                  padding: EdgeInsetsGeometry.fromLTRB(25, 40, 10, 30),
+                  padding: EdgeInsetsGeometry.fromLTRB(25, 130, 10, 30),
                   child: Text(
                     "Đăng nhập",
                     selectionColor: Colors.white,
@@ -87,24 +88,26 @@ class _MyLoginPageState extends State<MyLoginPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  height: 600,
-                  width: 450,
+                  height: 640,
+                  width: 380,
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.all(Radius.circular(80)),
+                    borderRadius: BorderRadius.all(Radius.circular(60)),
                   ),
-                  padding: EdgeInsetsGeometry.fromLTRB(30, 50, 30, 0),
+                  padding: EdgeInsetsGeometry.fromLTRB(25, 50, 25, 0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       ListTile(
                         leading: Icon(Icons.email_outlined, color: Colors.blue,),
                         title: Text("Email"),
+                        contentPadding: EdgeInsets.fromLTRB(0, 0, 0, 0),
                       ),
                       Align(
                         alignment: AlignmentGeometry.center,
                         child: SizedBox(
                           width: 360,
+                          height: 40,
                           child: TextField(
                             onChanged: (String s){
                               username = s;
@@ -115,11 +118,13 @@ class _MyLoginPageState extends State<MyLoginPage> {
                       ListTile(
                         leading: Icon(Icons.lock, color: Colors.blue,),
                         title: Text("Mật khẩu"),
+                        contentPadding: EdgeInsets.fromLTRB(0, 0, 0, 0),
                       ),
                       Align(
                         alignment: AlignmentGeometry.center,
                         child: SizedBox(
                           width: 360,
+                          height: 40,
                           child: TextField(
                             obscureText: !passwordVisible,
                             onChanged: (String s){
@@ -145,7 +150,7 @@ class _MyLoginPageState extends State<MyLoginPage> {
                         child: Column(
                           children: [
                             Padding(
-                              padding: EdgeInsetsGeometry.fromLTRB(0, 15, 0, 8),
+                              padding: EdgeInsetsGeometry.fromLTRB(0, 10, 0, 0),
                               child: TextButton(
                                   onPressed: (){
                                     Navigator.of(context).push(
@@ -161,10 +166,10 @@ class _MyLoginPageState extends State<MyLoginPage> {
                               ),
                             ),
                             Padding(
-                              padding: EdgeInsetsGeometry.fromLTRB(0, 0, 0, 0),
+                              padding: EdgeInsetsGeometry.fromLTRB(0, 0, 0, 35),
                               child: Container(
                                 decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.all(Radius.circular(20)),
+                                    borderRadius: BorderRadius.all(Radius.circular(30)),
                                     gradient: LinearGradient(
                                       colors: [
                                         Color.fromRGBO(40, 83, 175, 1),
@@ -223,9 +228,10 @@ class _MyLoginPageState extends State<MyLoginPage> {
                                     }
                                   },
                                   style: ElevatedButton.styleFrom(
+                                    fixedSize: Size(220, 50),
                                     backgroundColor: Colors.transparent,
                                     shadowColor: Colors.transparent,
-                                    padding: EdgeInsetsGeometry.fromLTRB(60, 17, 60, 17),
+                                    padding: EdgeInsetsGeometry.fromLTRB(0, 0, 0, 0),
                                   ),
                                   child: Text(
                                     "Đăng nhập",
@@ -246,7 +252,7 @@ class _MyLoginPageState extends State<MyLoginPage> {
                       ),
                       Center(
                         child: Padding(
-                          padding: EdgeInsetsGeometry.fromLTRB(0, 5, 0, 5),
+                          padding: EdgeInsetsGeometry.fromLTRB(0, 0, 0, 0),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             spacing: 30,
@@ -254,7 +260,7 @@ class _MyLoginPageState extends State<MyLoginPage> {
                               ElevatedButton(
                                 onPressed: _onFaceBookLogin,
                                 style: ButtonStyle(
-                                  fixedSize: WidgetStatePropertyAll<Size>(Size(120, 35)),
+                                  fixedSize: WidgetStatePropertyAll<Size>(Size(150, 35)),
                                   backgroundColor: WidgetStatePropertyAll<Color>(Color.fromRGBO(38, 106, 209, 1)),
                                 ),
                                 child: Text(
@@ -267,7 +273,7 @@ class _MyLoginPageState extends State<MyLoginPage> {
                               ElevatedButton(
                                 onPressed: _onGoogleLogin,
                                 style: ButtonStyle(
-                                  fixedSize: WidgetStatePropertyAll<Size>(Size(120, 35)),
+                                  fixedSize: WidgetStatePropertyAll<Size>(Size(150, 35)),
                                   backgroundColor: WidgetStatePropertyAll<Color>(Color.fromRGBO(209, 68, 38, 1)),
                                 ),
                                 child: Text(
@@ -287,12 +293,17 @@ class _MyLoginPageState extends State<MyLoginPage> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text("Khi tạo tài khoản mới, bạn đã đồng ý với "),
+                                Text(
+                                    "Khi tạo tài khoản mới, bạn đã đồng ý với ",
+                                  style: TextStyle(
+                                    fontSize: 13.5
+                                  ),
+                                ),
                                 TextButton(
                                     onPressed: () {
                                       Navigator.of(context).push(
                                         MaterialPageRoute(
-                                          builder: (context) => PrivacyView(),
+                                          builder: (context) => ProfileView(),
                                         ),
                                       );
                                     },
@@ -303,13 +314,14 @@ class _MyLoginPageState extends State<MyLoginPage> {
                                       "điều khoản",
                                       style: TextStyle(
                                         color: Color.fromRGBO(40, 83, 175, 1),
+                                        fontSize: 13.5
                                       ),
                                     )
                                 ),
                               ],
                             ),
                             Padding(
-                              padding: EdgeInsetsGeometry.fromLTRB(0, 70, 0, 10),
+                              padding: EdgeInsetsGeometry.fromLTRB(0, 25, 0, 10),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [

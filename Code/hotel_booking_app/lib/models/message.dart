@@ -1,6 +1,8 @@
 class Message {
-  String content;
-  String messageType;
+  String message;
+  String senderID;
+  String receiverID;
+  String time;
 
-  Message(this.content, this.messageType);
+  Message({required this.message, required this.senderID, required this.time, required this.receiverID});
 }

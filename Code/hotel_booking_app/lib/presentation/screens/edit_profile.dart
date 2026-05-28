@@ -50,7 +50,7 @@ class _EditProfileState extends State<EditProfileView> {
       ),
       backgroundColor: Colors.white,
       body: Padding(
-        padding: EdgeInsetsGeometry.fromLTRB(paddingLeft, paddingTop, paddingRight, paddingBottom),
+        padding: EdgeInsetsGeometry.fromLTRB(30, paddingTop, 30, paddingBottom),
         child: Column(
           children: [
             Row(
@@ -84,6 +84,7 @@ class _EditProfileState extends State<EditProfileView> {
               child: ListTile(
                 leading: Icon(Icons.person, color: Colors.blue,),
                 title: Text("Tên đầy đủ"),
+                contentPadding: EdgeInsetsGeometry.fromLTRB(0, 0, 0, 0),
               ),
             ),
             SizedBox(
@@ -102,6 +103,7 @@ class _EditProfileState extends State<EditProfileView> {
               child: ListTile(
                 leading: Icon(Icons.email_outlined, color: Colors.blue,),
                 title: Text("Email"),
+                contentPadding: EdgeInsetsGeometry.fromLTRB(0, 0, 0, 0),
               ),
             ),
             SizedBox(
@@ -120,6 +122,7 @@ class _EditProfileState extends State<EditProfileView> {
               child: ListTile(
                 leading: Icon(Icons.phone, color: Colors.blue,),
                 title: Text("Điện thoại"),
+                contentPadding: EdgeInsetsGeometry.fromLTRB(0, 0, 0, 0),
               ),
             ),
             SizedBox(

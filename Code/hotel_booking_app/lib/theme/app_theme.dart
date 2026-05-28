@@ -25,23 +25,23 @@ class AppColors {
 
 class AppTheme {
   static ThemeData get theme => ThemeData(
-        fontFamily: 'Roboto',
-        scaffoldBackgroundColor: AppColors.background,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: AppColors.primary,
-          primary: AppColors.primary,
-        ),
-        appBarTheme: const AppBarTheme(
-          backgroundColor: AppColors.primaryDark,
-          foregroundColor: AppColors.white,
-          elevation: 0,
-          centerTitle: false,
-        ),
-        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-          backgroundColor: AppColors.white,
-          selectedItemColor: AppColors.primary,
-          unselectedItemColor: AppColors.textSecondary,
-          type: BottomNavigationBarType.fixed,
-        ),
-      );
+    fontFamily: 'Roboto',
+    scaffoldBackgroundColor: AppColors.background,
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: AppColors.primary,
+      primary: AppColors.primary,
+    ),
+    appBarTheme: const AppBarTheme(
+      backgroundColor: AppColors.primaryDark,
+      foregroundColor: AppColors.white,
+      elevation: 0,
+      centerTitle: false,
+    ),
+    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+      backgroundColor: AppColors.white,
+      selectedItemColor: AppColors.primary,
+      unselectedItemColor: AppColors.textSecondary,
+      type: BottomNavigationBarType.fixed,
+    ),
+  );
 }

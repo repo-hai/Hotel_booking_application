@@ -5,8 +5,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-double containerHeight = 600;
-double containerWidth = 450;
+double containerHeight = 640;
+double containerWidth = 380;
 
 class AuthenticateEmail extends StatelessWidget {
   const AuthenticateEmail({super.key});
@@ -40,8 +40,9 @@ class _MyAuthenticateEmail extends State<MyAuthenticateEmail> {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      child: Container(
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
@@ -57,7 +58,7 @@ class _MyAuthenticateEmail extends State<MyAuthenticateEmail> {
             Row(
               children: [
                 Padding(
-                  padding: EdgeInsetsGeometry.fromLTRB(25, 40, 10, 30),
+                  padding: EdgeInsetsGeometry.fromLTRB(25, 150, 10, 30),
                   child: Text(
                     "Xác thực tài khoản",
                     selectionColor: Colors.white,
@@ -73,8 +74,8 @@ class _MyAuthenticateEmail extends State<MyAuthenticateEmail> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  height: containerHeight,
-                  width: containerWidth,
+                  height: 600,
+                  width: 380,
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.all(Radius.circular(80)),
@@ -84,7 +85,7 @@ class _MyAuthenticateEmail extends State<MyAuthenticateEmail> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Padding(
-                        padding: EdgeInsetsGeometry.fromLTRB(0, 0, 0, 10),
+                        padding: EdgeInsetsGeometry.fromLTRB(0, 0, 0, 20),
                         child: Text(
                           "Xác thực Email",
                           style: TextStyle(
@@ -120,7 +121,7 @@ class _MyAuthenticateEmail extends State<MyAuthenticateEmail> {
                           ElevatedButton(
                             onPressed: (){},
                             style: ElevatedButton.styleFrom(
-                              fixedSize: Size(160, 35),
+                              fixedSize: Size(145, 35),
                               backgroundColor: Color.fromRGBO(40, 83, 175, 1),
                             ),
                             child: Text(
@@ -172,7 +173,7 @@ class _MyAuthenticateEmail extends State<MyAuthenticateEmail> {
                                 }
                               },
                               style: ElevatedButton.styleFrom(
-                                fixedSize: Size(160, 35),
+                                fixedSize: Size(145, 35),
                                 backgroundColor: Color.fromRGBO(0, 144, 255, 1),
                               ),
                               child: Text(

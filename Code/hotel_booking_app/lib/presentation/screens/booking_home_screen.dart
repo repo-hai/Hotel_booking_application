@@ -13,7 +13,7 @@ import 'booking_history_screen.dart';
 import 'hotel_detail_screen.dart';
 import '../screens/client/chatbot_screen.dart';
 import 'account_screen.dart';
-import 'profile_view.dart';
+import 'profile_view2.dart';
 
 class BookingHomeScreen extends StatefulWidget {
   const BookingHomeScreen({super.key});

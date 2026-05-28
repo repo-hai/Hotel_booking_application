@@ -47,7 +47,7 @@ class _ChangePasswordView extends State<ChangePasswordView> {
         ),
         backgroundColor: Colors.white,
         body: Padding(
-          padding: EdgeInsetsGeometry.fromLTRB(15, 30, 15, 0),
+          padding: EdgeInsetsGeometry.fromLTRB(25, 30, 25, 0),
           child: Column(
             children: [
               Padding(
@@ -55,6 +55,7 @@ class _ChangePasswordView extends State<ChangePasswordView> {
                 child: ListTile(
                   leading: Icon(Icons.lock_outline, color: Colors.blue,),
                   title: Text("Nhập mật khẩu cũ"),
+                  contentPadding: EdgeInsetsGeometry.fromLTRB(0, 0, 0, 0),
                 ),
               ),
               SizedBox(
@@ -86,6 +87,7 @@ class _ChangePasswordView extends State<ChangePasswordView> {
                 child: ListTile(
                   leading: Icon(Icons.lock_outline, color: Colors.blue,),
                   title: Text("Nhập mật khẩu mới"),
+                  contentPadding: EdgeInsetsGeometry.fromLTRB(0, 0, 0, 0),
                 ),
               ),
               SizedBox(
@@ -117,6 +119,7 @@ class _ChangePasswordView extends State<ChangePasswordView> {
                 child: ListTile(
                   leading: Icon(Icons.lock_outline, color: Colors.blue,),
                   title: Text("Nhập lại mật khẩu"),
+                  contentPadding: EdgeInsetsGeometry.fromLTRB(0, 0, 0, 0),
                 ),
               ),
               SizedBox(

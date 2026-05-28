@@ -1,6 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:hotel_booking_app/models/chatUsersModel.dart';
 import 'package:hotel_booking_app/presentation/screens/chat_detail_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 
 class ListChatboxView extends StatefulWidget {
   @override
@@ -9,77 +13,119 @@ class ListChatboxView extends StatefulWidget {
 
 class _ChatPageState extends State<ListChatboxView> {
   List<ChatUsers> chatUsers = [
-    ChatUsers(name: "Jane Russel",
-        messageText: "Awesome Setup",
-        imageURL: "https://m.media-amazon.com/images/I/71-OTwKLziL._AC_SL1500_.jpg",
-        time: "Now"),
-    ChatUsers(name: "Glady's Murphy",
-        messageText: "That's Great",
-        imageURL: "https://m.media-amazon.com/images/I/71-OTwKLziL._AC_SL1500_.jpg",
-        time: "Yesterday"),
-    ChatUsers(name: "Jorge Henry",
-        messageText: "Hey where are you?",
-        imageURL: "https://m.media-amazon.com/images/I/71-OTwKLziL._AC_SL1500_.jpg",
-        time: "31 Mar"),
-    ChatUsers(name: "Philip Fox",
-        messageText: "Busy! Call me in 20 mins",
-        imageURL: "https://m.media-amazon.com/images/I/71-OTwKLziL._AC_SL1500_.jpg",
-        time: "28 Mar"),
-    ChatUsers(name: "Debra Hawkins",
-        messageText: "Thankyou, It's awesome",
-        imageURL: "https://m.media-amazon.com/images/I/71-OTwKLziL._AC_SL1500_.jpg",
-        time: "23 Mar"),
-    ChatUsers(name: "Jacob Pena",
-        messageText: "will update you in evening",
-        imageURL: "https://m.media-amazon.com/images/I/71-OTwKLziL._AC_SL1500_.jpg",
-        time: "17 Mar"),
-    ChatUsers(name: "Andrey Jones",
-        messageText: "Can you please share the file?",
-        imageURL: "https://m.media-amazon.com/images/I/71-OTwKLziL._AC_SL1500_.jpg",
-        time: "24 Feb"),
-    ChatUsers(name: "John Wick",
-        messageText: "How are you?",
-        imageURL: "https://m.media-amazon.com/images/I/71-OTwKLziL._AC_SL1500_.jpg",
-        time: "18 Feb"),
+    // ChatUsers(name: "Jane Russel",
+    //     messageText: "Awesome Setup",
+    //     imageURL: "https://m.media-amazon.com/images/I/71-OTwKLziL._AC_SL1500_.jpg",
+    //     time: "Now"),
+    // ChatUsers(name: "Glady's Murphy",
+    //     messageText: "That's Great",
+    //     imageURL: "https://m.media-amazon.com/images/I/71-OTwKLziL._AC_SL1500_.jpg",
+    //     time: "Yesterday"),
+    // ChatUsers(name: "Jorge Henry",
+    //     messageText: "Hey where are you?",
+    //     imageURL: "https://m.media-amazon.com/images/I/71-OTwKLziL._AC_SL1500_.jpg",
+    //     time: "31 Mar"),
+    // ChatUsers(name: "Philip Fox",
+    //     messageText: "Busy! Call me in 20 mins",
+    //     imageURL: "https://m.media-amazon.com/images/I/71-OTwKLziL._AC_SL1500_.jpg",
+    //     time: "28 Mar"),
+    // ChatUsers(name: "Debra Hawkins",
+    //     messageText: "Thankyou, It's awesome",
+    //     imageURL: "https://m.media-amazon.com/images/I/71-OTwKLziL._AC_SL1500_.jpg",
+    //     time: "23 Mar"),
+    // ChatUsers(name: "Jacob Pena",
+    //     messageText: "will update you in evening",
+    //     imageURL: "https://m.media-amazon.com/images/I/71-OTwKLziL._AC_SL1500_.jpg",
+    //     time: "17 Mar"),
+    // ChatUsers(name: "Andrey Jones",
+    //     messageText: "Can you please share the file?",
+    //     imageURL: "https://m.media-amazon.com/images/I/71-OTwKLziL._AC_SL1500_.jpg",
+    //     time: "24 Feb"),
+    // ChatUsers(name: "John Wick",
+    //     messageText: "How are you?",
+    //     imageURL: "https://m.media-amazon.com/images/I/71-OTwKLziL._AC_SL1500_.jpg",
+    //     time: "18 Feb"),
   ];
+
+  Future<void> fetchUserChatbox() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getString('userId')!;
+    final response = await http.get(
+      Uri.parse('http://localhost:3000/chatbox-controller/get-list-chatbox/$userId'),
+    );
+    final jsonData = jsonDecode(response.body);
+    print(jsonData);
+    if(response.statusCode == 200){
+      for(var jsonObject in jsonData){
+        print(jsonObject);
+        var date = DateTime.fromMillisecondsSinceEpoch(int.parse(jsonObject["time"]));
+        print(date);
+        var now = DateTime.now();
+        var time="";
+        if(now.year == date.year && now.month == date.month && now.day == date.day){
+          time = date.hour.toString() + ":" + date.minute.toString();
+        } else {
+          time = date.day.toString() + "/" + date.month.toString() + " " + date.hour.toString() + ":" + date.minute.toString();
+        }
+        var user = ChatUsers(chatboxID: jsonObject["chatboxID"], userID: jsonObject["collaborativeID"], isRead: jsonObject["isRead"], name: jsonObject["collaborative_name"], messageText: jsonObject["lastMessage"], imageURL: jsonObject["user_url"], time: time);
+        setState(() {
+          chatUsers.add(user);
+        });
+      }
+    } else {
+      print("Mã lỗi khi lấy danh sách hội thoại: " );
+      print(response.statusCode);
+    }
+  }
+
+  @override
+  void activate() {
+    // TODO: implement activate
+    setState(() {
+      fetchUserChatbox();
+    });
+  }
 
   @override
   void initState() {
     super.initState();
-    chatUsers = [
-      ChatUsers(name: "Jane Russel",
-          messageText: "Awesome Setup",
-          imageURL: "https://m.media-amazon.com/images/I/71-OTwKLziL._AC_SL1500_.jpg",
-          time: "Now"),
-      ChatUsers(name: "Glady's Murphy",
-          messageText: "That's Great",
-          imageURL: "https://m.media-amazon.com/images/I/71-OTwKLziL._AC_SL1500_.jpg",
-          time: "Yesterday"),
-      ChatUsers(name: "Jorge Henry",
-          messageText: "Hey where are you?",
-          imageURL: "https://m.media-amazon.com/images/I/71-OTwKLziL._AC_SL1500_.jpg",
-          time: "31 Mar"),
-      ChatUsers(name: "Philip Fox",
-          messageText: "Busy! Call me in 20 mins",
-          imageURL: "https://m.media-amazon.com/images/I/71-OTwKLziL._AC_SL1500_.jpg",
-          time: "28 Mar"),
-      ChatUsers(name: "Debra Hawkins",
-          messageText: "Thankyou, It's awesome",
-          imageURL: "https://m.media-amazon.com/images/I/71-OTwKLziL._AC_SL1500_.jpg",
-          time: "23 Mar"),
-      ChatUsers(name: "Jacob Pena",
-          messageText: "will update you in evening",
-          imageURL: "https://m.media-amazon.com/images/I/71-OTwKLziL._AC_SL1500_.jpg",
-          time: "17 Mar"),
-      ChatUsers(name: "Andrey Jones",
-          messageText: "Can you please share the file?",
-          imageURL: "https://m.media-amazon.com/images/I/71-OTwKLziL._AC_SL1500_.jpg",
-          time: "24 Feb"),
-      ChatUsers(name: "John Wick",
-          messageText: "How are you?",
-          imageURL: "https://m.media-amazon.com/images/I/71-OTwKLziL._AC_SL1500_.jpg",
-          time: "18 Feb"),
-    ];
+    // chatUsers = [
+    //   ChatUsers(name: "Jane Russel",
+    //       messageText: "Awesome Setup",
+    //       imageURL: "https://m.media-amazon.com/images/I/71-OTwKLziL._AC_SL1500_.jpg",
+    //       time: "Now"),
+    //   ChatUsers(name: "Glady's Murphy",
+    //       messageText: "That's Great",
+    //       imageURL: "https://m.media-amazon.com/images/I/71-OTwKLziL._AC_SL1500_.jpg",
+    //       time: "Yesterday"),
+    //   ChatUsers(name: "Jorge Henry",
+    //       messageText: "Hey where are you?",
+    //       imageURL: "https://m.media-amazon.com/images/I/71-OTwKLziL._AC_SL1500_.jpg",
+    //       time: "31 Mar"),
+    //   ChatUsers(name: "Philip Fox",
+    //       messageText: "Busy! Call me in 20 mins",
+    //       imageURL: "https://m.media-amazon.com/images/I/71-OTwKLziL._AC_SL1500_.jpg",
+    //       time: "28 Mar"),
+    //   ChatUsers(name: "Debra Hawkins",
+    //       messageText: "Thankyou, It's awesome",
+    //       imageURL: "https://m.media-amazon.com/images/I/71-OTwKLziL._AC_SL1500_.jpg",
+    //       time: "23 Mar"),
+    //   ChatUsers(name: "Jacob Pena",
+    //       messageText: "will update you in evening",
+    //       imageURL: "https://m.media-amazon.com/images/I/71-OTwKLziL._AC_SL1500_.jpg",
+    //       time: "17 Mar"),
+    //   ChatUsers(name: "Andrey Jones",
+    //       messageText: "Can you please share the file?",
+    //       imageURL: "https://m.media-amazon.com/images/I/71-OTwKLziL._AC_SL1500_.jpg",
+    //       time: "24 Feb"),
+    //   ChatUsers(name: "John Wick",
+    //       messageText: "How are you?",
+    //       imageURL: "https://m.media-amazon.com/images/I/71-OTwKLziL._AC_SL1500_.jpg",
+    //       time: "18 Feb"),
+    // ];
+    setState(() {
+      fetchUserChatbox();
+    });
   }
 
   @override
@@ -128,9 +174,12 @@ class _ChatPageState extends State<ListChatboxView> {
                 return ConversationList(
                   name: chatUsers[index].name,
                   messageText: chatUsers[index].messageText,
-                  imageUrl: chatUsers[index].imageURL,
                   time: chatUsers[index].time,
-                  isMessageRead: (index == 0 || index == 3) ? true : false,
+                  isMessageRead: chatUsers[index].isRead,
+                  chatboxId: chatUsers[index].chatboxID,
+                  collaborative_name: chatUsers[index].name,
+                  collaborative_url: chatUsers[index].imageURL,
+                  collaborativeID: chatUsers[index].userID,
                 );
               },
             ),
@@ -162,22 +211,34 @@ class _ChatPageState extends State<ListChatboxView> {
 class ConversationList extends StatefulWidget{
   String name;
   String messageText;
-  String imageUrl;
+  String collaborative_url;
+  String collaborative_name;
   String time;
   bool isMessageRead;
-  ConversationList({required this.name,required this.messageText,required this.imageUrl,required this.time,required this.isMessageRead});
+  String chatboxId;
+  String collaborativeID;
+  ConversationList({ required this.collaborativeID, required this.collaborative_name, required this.collaborative_url, required this.chatboxId, required this.name,required this.messageText,required this.time,required this.isMessageRead});
+
   @override
   _ConversationListState createState() => _ConversationListState();
 }
 
 class _ConversationListState extends State<ConversationList> {
+
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: (){
+      onTap:  () async {
+        final pref = await SharedPreferences.getInstance();
+
+        await pref.setString("chatboxId", widget.chatboxId);
+        await pref.setString("collaborative_name", widget.collaborative_name);
+        await pref.setString("collaborative_url", widget.collaborative_url);
+        await pref.setString("collaborativeID", widget.collaborativeID);
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context){
+          MaterialPageRoute(builder: (context) {
             return ChatDetailPage();
           }),
         );
@@ -190,7 +251,7 @@ class _ConversationListState extends State<ConversationList> {
               child: Row(
                 children: [
                   CircleAvatar(
-                    backgroundImage: NetworkImage(widget.imageUrl),
+                    backgroundImage: NetworkImage(widget.collaborative_url),
                     maxRadius: 30,
                   ),
                   SizedBox(width: 16,),
