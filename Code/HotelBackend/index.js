@@ -22,36 +22,27 @@ const adminRoutes = require('./routes/admin');
 // Owner (Partner)
 const ownerRoutes = require('./routes/owner');
 
+const UserController = require('./routes/controllers/User-controller');
+const ChatboxController = require('./routes/controllers/Chatbox-controller');
+const CommentRatingController = require('./routes/controllers/Comment-rating-controlller');
+const PaymentController = require('./routes/controllers/Payment-controller');
 
-const { login } = require('./routes/controllers/login');
-const { register } = require('./routes/controllers/register');
-const { confirmCode } = require('./routes/controllers/confirm_code');
-const { forgotPassword } = require('./routes/controllers/forgot_password');
-const { changePassword } = require('./routes/controllers/change_password');
-const { editProfile } = require('./routes/controllers/edit_profile');
-const { getAvgRating } = require('./routes/controllers/get_avg_rating');
-const { getCommentRating } = require('./routes/controllers/get_comment_rating');
-const { commentRating } = require('./routes/controllers/comment_rating');
-const { getListChatbox } = require('./routes/controllers/get_list_chatbox');
-const { getDetailChatbox } = require('./routes/controllers/get_detail_chatbox');
-const { pushUpNewMessage } = require('./routes/controllers/commit_new_message');
-const { getUser } = require('./routes/controllers/get_user');
+app.post('/login', UserController.login);
+app.post('/register', UserController.register);
+app.post('/confirm-create-account', UserController.confirmCode);
+app.post('/forgot-password', UserController.forgotPassword);
+app.post('/change-password', UserController.changePassword);
+app.post('/edit-profile', UserController.editProfile);
 
+app.post('/comment-rating-controller/create-new-comment-rating', CommentRatingController.create_new_comment_rating);
+app.post('/chatbox-controller/push-up-new-message', ChatboxController.pushUpNewMessage);
+app.post('/booking-controller/create-new-booking', PaymentController.create_new_booking);
 
-app.post('/login', login);
-app.post('/register', register);
-app.post('/confirm-create-account', confirmCode);
-app.post('/forgot-password', forgotPassword);
-app.post('/change-password', changePassword);
-app.post('/edit-profile', editProfile);
-app.post('/comment-rating', commentRating);
-app.post('/push-up-new-message', pushUpNewMessage);
-
-app.get('/get-user/:email', getUser);
-app.get('/get-avg-rating', getAvgRating);
-app.get('/get-comment-rating', getCommentRating);
-app.get('/get-list-chatbox', getListChatbox);
-app.get('/get-detail-chatbox', getDetailChatbox);
+app.get('/get-user/:email', UserController.getUser);
+app.get('/comment-rating-controller/get-avg-rating/:hotelID', CommentRatingController.getAvgRating);
+app.get('/comment-rating-controller/get-list-comment-rating/:hotelID', CommentRatingController.get_list_comment_rating);
+app.get('/chatbox-controller/get-list-chatbox/:userid', ChatboxController.getListChatbox);
+app.get('/chatbox-controller/get-detail-chatbox/:chatboxid', ChatboxController.getDetailChatbox);
 
 // 2. Giao việc cho các Trưởng phòng
 // Sơn Hải

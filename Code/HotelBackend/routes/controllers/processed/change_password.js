@@ -4,7 +4,6 @@ module.exports.changePassword = async (req, res) => {
   try {
     const body = await req.body;
     console.log(`Đổi mật khẩu. Thông tin: `);
-    await console.log(body);
     const myCollection = db.collection('Users');
     const querySnapshot = await myCollection.where('Email', '==', body.email).where('Password', '==', body.oldPassword).get();
     
