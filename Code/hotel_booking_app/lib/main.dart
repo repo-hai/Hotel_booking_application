@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:hotel_booking_app/models/payment/payment_model.dart';
-import 'package:hotel_booking_app/presentation/screens/payment_view.dart';
-import 'package:hotel_booking_app/presentation/screens/view_comment_rating.dart';
 import 'package:provider/provider.dart';
 import 'package:hotel_booking_app/providers/owner_provider.dart';
 import 'package:hotel_booking_app/presentation/screens/login.dart';
 
+// Định nghĩa hàm main cho ứng dụng
 void main() {
   runApp(
     MultiProvider(
@@ -19,6 +17,7 @@ void main() {
   );
 }
 
+// Giao diện chính khi khởi động ứng dụng - gọi tới giao diện login
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -29,7 +28,7 @@ class MyApp extends StatelessWidget {
       showSemanticsDebugger: false,
       debugShowMaterialGrid: false,
       home: Material(
-        child: PaymentView(),
+        child: Login(),
       ),
     );
   }

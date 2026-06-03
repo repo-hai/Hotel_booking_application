@@ -1,21 +1,24 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:hotel_booking_app/models/commentRatingdart.dart';
+import 'package:hotel_booking_app/models/commentRating.dart';
 import 'package:http/http.dart' as http;
 import 'package:rating_summary/rating_summary.dart';
 import 'package:hotel_booking_app/presentation/screens/comment_rating.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+// Khai báo một StatefulWidget cho giao diện xem bình luận đánh giá
 class ViewCommentRating extends StatefulWidget {
   const ViewCommentRating({super.key});
 
+  // Định nghĩa lại phương thức createState()
   @override
   State<StatefulWidget> createState() {
     return _MyRatingCommentSection();
   }
 }
 
+// Khai báo State cho giao diện xem bình luận, đánh giá
 class _MyRatingCommentSection extends State<ViewCommentRating> {
   late int numberOfRating = 10;
   late int ratingOneStar = 0;
@@ -26,6 +29,7 @@ class _MyRatingCommentSection extends State<ViewCommentRating> {
   late double avgRating = 0.0;
   List<commentRating> listCommentRating = [];
 
+  // Lấy dữ liệu bình luận, đánh giá từ server để hiển thị
   Future<void> fetchCommentRating() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     //var hotelId = prefs.getString('hotelId')!;
@@ -105,12 +109,14 @@ class _MyRatingCommentSection extends State<ViewCommentRating> {
     }
   }
 
+  // Định nghĩa lại hàm initState() - khởi gán giá trị ban đầu cho các biến
   @override
   void initState() {
     super.initState();
     fetchCommentRating();
   }
 
+  // Ghi đè phương thức build - tự định nghĩa lại phương thức build
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -203,10 +209,12 @@ class _MyRatingCommentSection extends State<ViewCommentRating> {
   }
 }
 
+// Định nghĩa một đối tượng bình luận - mỗi đối tượng là một dòng bình luận của người dùng
 class CommentList extends StatelessWidget {
   String userName, comment, userURL;
   int rating;
 
+  // Khai báo phương thức khởi tạo
   CommentList({
     required this.userURL,
     required this.userName,
@@ -214,6 +222,7 @@ class CommentList extends StatelessWidget {
     required this.rating,
   });
 
+  // Ghi đè phương thức build - tự định nghĩa lại phương thức build
   @override
   Widget build(BuildContext context) {
     return Padding(

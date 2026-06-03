@@ -22,6 +22,8 @@ const adminRoutes = require('./routes/admin');
 // Owner (Partner)
 const ownerRoutes = require('./routes/owner');
 
+// Phần của Đinh Hoàng Hải
+// Khai báo các endpoint cho server
 const UserController = require('./routes/controllers/User-controller');
 const ChatboxController = require('./routes/controllers/Chatbox-controller');
 const CommentRatingController = require('./routes/controllers/Comment-rating-controlller');
@@ -33,16 +35,16 @@ app.post('/confirm-create-account', UserController.confirmCode);
 app.post('/forgot-password', UserController.forgotPassword);
 app.post('/change-password', UserController.changePassword);
 app.post('/edit-profile', UserController.editProfile);
-
 app.post('/comment-rating-controller/create-new-comment-rating', CommentRatingController.create_new_comment_rating);
 app.post('/chatbox-controller/push-up-new-message', ChatboxController.pushUpNewMessage);
 app.post('/booking-controller/create-new-booking', PaymentController.create_new_booking);
-
 app.get('/get-user/:email', UserController.getUser);
 app.get('/comment-rating-controller/get-avg-rating/:hotelID', CommentRatingController.getAvgRating);
 app.get('/comment-rating-controller/get-list-comment-rating/:hotelID', CommentRatingController.get_list_comment_rating);
 app.get('/chatbox-controller/get-list-chatbox/:userid', ChatboxController.getListChatbox);
 app.get('/chatbox-controller/get-detail-chatbox/:chatboxid', ChatboxController.getDetailChatbox);
+// Hết phần của Đinh Hoàng Hải
+
 
 // 2. Giao việc cho các Trưởng phòng
 // Sơn Hải

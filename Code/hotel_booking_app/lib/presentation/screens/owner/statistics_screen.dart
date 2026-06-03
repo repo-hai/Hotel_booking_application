@@ -6,7 +6,7 @@ import 'package:intl/intl.dart';
 import '../../widgets/network_image_with_placeholder.dart';
 import 'owner_account_screen.dart';
 import 'owner_home_screen.dart';
-import '../profile_view.dart';
+import '../profile_view3.dart';
 
 class StatisticsScreen extends StatefulWidget {
   final Hotel? hotel;

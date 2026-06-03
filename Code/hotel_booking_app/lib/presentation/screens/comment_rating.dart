@@ -6,21 +6,25 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:star_rating/star_rating.dart';
 
+// Khai báo một StatefulWidget cho giao diện viết bình luận, đánh giá
 class CommentRatingView extends StatefulWidget {
+
+  // Định nghĩa lại phương thức createState()
   @override
   State<StatefulWidget> createState() {
     return _MyCommentRatingState();
   }
 }
 
+// Khai báo State cho giao diện viết bình luận, đánh giá
 class _MyCommentRatingState extends State<CommentRatingView> {
   TextEditingController? controller = TextEditingController();
   late double rating = 1;
   String comment = "";
 
+  // Định nghĩa lại hàm initState() - khởi gán giá trị ban đầu cho các biến
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     setState(() {
       rating=1;
@@ -28,6 +32,7 @@ class _MyCommentRatingState extends State<CommentRatingView> {
     });
   }
 
+  // Ghi đè phương thức build - tự định nghĩa lại phương thức build
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -91,12 +96,11 @@ class _MyCommentRatingState extends State<CommentRatingView> {
             Padding(
               padding: EdgeInsetsGeometry.fromLTRB(30, 50, 30, 50),
               child: ElevatedButton(
+                // Thực thi thêm bình luận, đánh giá mới
                 onPressed: () async {
                   final SharedPreferences prefs = await SharedPreferences.getInstance();
-                  // String userID = prefs.getString("userID")!;
-                  // String hotelId = prefs.getString("hotelId")!;
-                  // print(userID);
-                  // print(hotelId);
+                  String userID = prefs.getString("userID")!;
+                  String hotelId = prefs.getString("hotelId")!;
                   print(comment);
                   print(rating);
 
@@ -106,8 +110,8 @@ class _MyCommentRatingState extends State<CommentRatingView> {
                       'Content-Type': 'application/json; charset=UTF-8',
                     },
                     body: jsonEncode(<String, dynamic>{
-                      'hotelId': "1",
-                      'userId': "11",
+                      'hotelId': userID,
+                      'userId': hotelId,
                       'comment': comment,
                       'rating': rating as int,
                     }),

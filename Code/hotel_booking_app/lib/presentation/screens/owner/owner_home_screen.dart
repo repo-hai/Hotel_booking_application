@@ -8,7 +8,7 @@ import 'add_hotel/add_hotel_master.dart';
 import 'hotel_detail_screen_giang.dart';
 import 'statistics_home_screen.dart';
 import 'owner_account_screen.dart';
-import '../profile_view.dart';
+import '../profile_view3.dart';
 
 class OwnerHomeScreen extends StatefulWidget {
   const OwnerHomeScreen({super.key});

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:hotel_booking_app/presentation/screens/login.dart';
 
+// Định nghĩa một stateless widget cho giao diện quên mật khẩu
 class ForgotPasswordView extends StatelessWidget {
   const ForgotPasswordView({super.key});
 
+  // Ghi đè phương thức build - tự định nghĩa lại phương thức build
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -14,23 +15,26 @@ class ForgotPasswordView extends StatelessWidget {
   }
 }
 
+// Khai báo một StatefulWidget cho giao diện quên mật khẩu
 class MyForgotPasswordPage extends StatefulWidget {
   const MyForgotPasswordPage({super.key});
 
-  // Fields in a Widget subclass are
-  // always marked "final".
-
+  // Định nghĩa lại phương thức createState()
   @override
   State<MyForgotPasswordPage> createState() => _MyForgotPasswordPage();
 }
 
+// Khai báo State cho giao diện đổi mật khẩu
 class _MyForgotPasswordPage extends State<MyForgotPasswordPage> {
   String email = "";
+
+  // Định nghĩa lại hàm initState() - khởi gán giá trị ban đầu cho các biến
   @override
   void initState() {
     email = "";
   }
 
+  // Ghi đè phương thức build - tự định nghĩa lại phương thức build
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -98,6 +102,7 @@ class _MyForgotPasswordPage extends State<MyForgotPasswordPage> {
                       padding: EdgeInsetsGeometry.fromLTRB(10, 50, 10, 50),
                       child: Container(
                         child: ElevatedButton(
+                          // Thực thi chức năng quên mật khẩu
                           onPressed: () async {
                             final response = await http.post(
                               Uri.parse('http://localhost:3000/forgot-password'),
@@ -166,8 +171,5 @@ class _MyForgotPasswordPage extends State<MyForgotPasswordPage> {
         ),
       ),
     );
-    // appBar: AppBar(
-    //   title: Text(widget.title),
-    // ),
   }
 }

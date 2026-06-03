@@ -1,28 +1,12 @@
 const db = require('../../firebase');
 
-// input: id hội thoại, id chính chủ
-// output: danh sách hội thoại xếp theo thứ tự thời gian
-
-// các bước
-// b1: lấy danh sách tin nhắn
-// - lấy id hội thoại 
+// Hàm lấy danh sách cuộc hội thoại của một người dùng
 module.exports.getListChatbox = async (req, res) => {
 
   const params = await req.params;
   console.log(params);
 
   try {
-
-    /*
-    chatboxObject={
-      chatboxID,
-      lastMessage,
-      time,
-      isRead,
-      userid1,
-      userid2,
-    }
-    */
 
     const allEntries = [];
     console.log("Lấy ds hội thoại cho người dùng");
@@ -74,19 +58,10 @@ module.exports.getListChatbox = async (req, res) => {
   }
 };
 
+// Hàm lấy tin nhắn chi tiết trong cuộc hội thoại
 module.exports.getDetailChatbox = async (req, res) => {
   const params = await req.params;
   try {
-
-    /*
-    messageObject={
-      chatboxID,
-      message,
-      time,
-      sender,
-      receiver,
-    }
-    */
 
     const ChatboxID = params.chatboxid;
     const allMessage = [];
@@ -111,6 +86,7 @@ module.exports.getDetailChatbox = async (req, res) => {
   }
 };
 
+// Hàm gửi tin nhắn mới
 module.exports.pushUpNewMessage = async (req, res) => {
   try {
     const body = req.body;

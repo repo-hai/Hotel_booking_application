@@ -8,9 +8,11 @@ import 'dart:convert';
 double containerHeight = 640;
 double containerWidth = 380;
 
+// Stateless Widget cho trang xác thực email khi đăng ký
 class AuthenticateEmail extends StatelessWidget {
   const AuthenticateEmail({super.key});
 
+  // Ghi đè phương thức build - tự định nghĩa lại phương thức build
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -19,30 +21,30 @@ class AuthenticateEmail extends StatelessWidget {
   }
 }
 
+// Khai báo một StatefulWidget cho giao diện xác thực email
 class MyAuthenticateEmail extends StatefulWidget {
   const MyAuthenticateEmail({super.key});
 
-  // Fields in a Widget subclass are
-  // always marked "final".
-
+  // Định nghĩa lại phương thức createState()
   @override
   State<MyAuthenticateEmail> createState() => _MyAuthenticateEmail();
 }
 
+// Khai báo State cho giao diện xác thực email
 class _MyAuthenticateEmail extends State<MyAuthenticateEmail> {
-  String code = "";
+  late String code;
 
+  // Định nghĩa lại hàm initState() - khởi gán giá trị ban đầu cho các biến
   @override
   void initState() {
-    // TODO: implement initState
     code = "";
   }
 
+  // Ghi đè phương thức build - tự định nghĩa lại phương thức build
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Container(
+    return Material(
+      child: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
@@ -132,6 +134,7 @@ class _MyAuthenticateEmail extends State<MyAuthenticateEmail> {
                             ),
                           ),
                           ElevatedButton(
+                              // Hàm thực thi xác thực email
                               onPressed: () async {
                                 final SharedPreferences prefs = await SharedPreferences.getInstance();
                                 final response = await http.post(

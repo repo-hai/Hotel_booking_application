@@ -5,15 +5,18 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 double width_of_input_field = 430;
 
+// Khai báo một StatefulWidget cho giao diện đổi mật khẩu
 class ChangePasswordView extends StatefulWidget {
+
+  // Định nghĩa lại phương thức createState()
   @override
   State<StatefulWidget> createState() {
     return _ChangePasswordView();
   }
 }
 
+// Khai báo State cho giao diện đổi mật khẩu
 class _ChangePasswordView extends State<ChangePasswordView> {
-  // List of items in our dropdown menu
   bool oldPasswordVisible = false;
   bool newPasswordVisible = false;
   bool confirmPasswordVisible = false;
@@ -21,6 +24,7 @@ class _ChangePasswordView extends State<ChangePasswordView> {
   String newPassword = "";
   String confirmPassword = "";
 
+  // Định nghĩa lại hàm initState() - khởi gán giá trị ban đầu cho các biến
   @override
   void initState(){
     super.initState();
@@ -32,6 +36,7 @@ class _ChangePasswordView extends State<ChangePasswordView> {
     confirmPassword = "";
   }
 
+  // Ghi đè phương thức build - tự định nghĩa lại phương thức build
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -149,6 +154,7 @@ class _ChangePasswordView extends State<ChangePasswordView> {
               Padding(
                 padding: EdgeInsetsGeometry.fromLTRB(10, 50, 10, 50),
                 child: ElevatedButton(
+                  // Hàm thực thi đổi mật khẩu
                   onPressed: () async {
                     if(confirmPassword != newPassword){
                       showDialog(context: context, builder: (ctx) => AlertDialog(

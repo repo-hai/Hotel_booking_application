@@ -2,14 +2,17 @@ const db = require('../../firebase');
 let nodemailer = require('nodemailer');
 const crypto = require("crypto");
 
+// Hàm tạo mã xác nhận khi đăng ký tài khoản mới
 function generateConfirmCode() {
   return crypto.randomInt(1000, 9999).toString();
 }
 
+// Hàm tạo mật khẩu mới khi thực hiện chức năng quên mật khẩu
 function generatePassword(){
   return crypto.randomInt(100000, 999999).toString();
 }
 
+// Hàm xử lý đăng ký
 module.exports.register = async (req, res) => {
   try {
     const body = req.body;
@@ -85,6 +88,7 @@ module.exports.register = async (req, res) => {
   }
 };
 
+// Hàm xử lý xác nhận email khi đăng ký
 module.exports.confirmCode = async (req, res) => {
   try {
     const body = req.body;
@@ -147,6 +151,7 @@ module.exports.confirmCode = async (req, res) => {
   }
 };
 
+// Hàm xử lý đăng nhập
 module.exports.login = async (req, res) => {
     try {
         const body = req.body;
@@ -183,6 +188,7 @@ module.exports.login = async (req, res) => {
     }
 };
 
+// Hàm xử lý quên mật khẩu
 module.exports.forgotPassword = async (req, res) => {
   try {
     const body = req.body;
@@ -241,6 +247,7 @@ module.exports.forgotPassword = async (req, res) => {
   }
 };
 
+// Hàm xử lý chức năng đổi mật khẩu
 module.exports.changePassword = async (req, res) => {
   try {
     const body = await req.body;
@@ -275,6 +282,7 @@ module.exports.changePassword = async (req, res) => {
   }
 };
 
+// Hàm lấy thông tin người dùng
 module.exports.getUser = async (req, res) => {
   try {
     const body = await req.body;
@@ -301,6 +309,7 @@ module.exports.getUser = async (req, res) => {
   }
 };
 
+// Hàm xử lý chức năng chỉnh sửa thông tin cá nhân
 module.exports.editProfile = async (req, res) => {
   try {
     const body = await req.body;

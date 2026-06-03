@@ -6,7 +6,7 @@ import '../../widgets/network_image_with_placeholder.dart';
 import 'statistics_screen.dart';
 import 'owner_account_screen.dart';
 import 'owner_home_screen.dart';
-import '../profile_view.dart';
+import '../profile_view3.dart';
 
 class StatisticsHomeScreen extends StatefulWidget {
   const StatisticsHomeScreen({super.key});

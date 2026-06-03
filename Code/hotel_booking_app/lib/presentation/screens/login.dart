@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:hotel_booking_app/presentation/screens/privacy_view.dart';
-import 'package:hotel_booking_app/presentation/screens/profile_view2.dart';
+import 'package:hotel_booking_app/presentation/screens/profile_view.dart';
 import 'package:hotel_booking_app/presentation/screens/register.dart';
 import 'package:hotel_booking_app/presentation/screens/forgot_password.dart';
 import 'package:http/http.dart' as http;
@@ -12,9 +12,11 @@ import 'package:hotel_booking_app/presentation/screens/admin/admin_main_screen.d
 import 'package:hotel_booking_app/presentation/screens/owner/owner_home_screen.dart';
 import 'package:hotel_booking_app/presentation/screens/booking_home_screen.dart';
 
+// Định nghĩa một widget cho trang đăng nhập
 class Login extends StatelessWidget {
   const Login({super.key});
 
+  // Ghi đè phương thức build - tự định nghĩa lại phương thức build
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -27,20 +29,24 @@ class Login extends StatelessWidget {
   }
 }
 
+// Định nghĩa một stateful widget cho trang đăng nhập
 class MyLoginPage extends StatefulWidget {
   const MyLoginPage({super.key, required this.title});
   final String title;
 
+  // Định nghĩa lại phương thức createState()
   @override
   State<MyLoginPage> createState() => _MyLoginPageState();
 }
 
+// Định nghĩa State cho trang đăng nhập
 class _MyLoginPageState extends State<MyLoginPage> {
   final String loginState = "not login";
   String username = "";
   String password = "";
   bool passwordVisible = false;
 
+  // Định nghĩa lại hàm initState() - khởi gán giá trị ban đầu cho các state
   @override
   void initState(){
     super.initState();
@@ -48,13 +54,10 @@ class _MyLoginPageState extends State<MyLoginPage> {
     username = "";
     password = "";
   }
-  void _onFaceBookLogin(){}
 
-  void _onGoogleLogin(){}
-
+  // Ghi đè phương thức build - tự định nghĩa lại phương thức build
   @override
   Widget build(BuildContext context) {
-    // Ban dau la Material
     return Material(
       child: Container(
         decoration: const BoxDecoration(
@@ -180,6 +183,7 @@ class _MyLoginPageState extends State<MyLoginPage> {
                                     )
                                 ),
                                 child: ElevatedButton(
+                                  // Thực thi kiểm tra đăng nhập
                                   onPressed:  () async {
                                     final response = await http.post(
                                       Uri.parse('http://localhost:3000/login'),
@@ -258,7 +262,7 @@ class _MyLoginPageState extends State<MyLoginPage> {
                             spacing: 30,
                             children: [
                               ElevatedButton(
-                                onPressed: _onFaceBookLogin,
+                                onPressed: (){},
                                 style: ButtonStyle(
                                   fixedSize: WidgetStatePropertyAll<Size>(Size(150, 35)),
                                   backgroundColor: WidgetStatePropertyAll<Color>(Color.fromRGBO(38, 106, 209, 1)),
@@ -271,7 +275,7 @@ class _MyLoginPageState extends State<MyLoginPage> {
                                 ),
                               ),
                               ElevatedButton(
-                                onPressed: _onGoogleLogin,
+                                onPressed: (){},
                                 style: ButtonStyle(
                                   fixedSize: WidgetStatePropertyAll<Size>(Size(150, 35)),
                                   backgroundColor: WidgetStatePropertyAll<Color>(Color.fromRGBO(209, 68, 38, 1)),
@@ -332,6 +336,7 @@ class _MyLoginPageState extends State<MyLoginPage> {
                                     ),
                                   ),
                                   TextButton(
+                                      // Xử lý khi click đăng ký
                                       onPressed: () {
                                         showDialog(context: context, builder: (ctx) => AlertDialog(
                                           title: Text("Chọn loại tài khoản"),
@@ -386,8 +391,5 @@ class _MyLoginPageState extends State<MyLoginPage> {
         ),
       ),
     );
-    // appBar: AppBar(
-    //   title: Text(widget.title),
-    // ),
   }
 }

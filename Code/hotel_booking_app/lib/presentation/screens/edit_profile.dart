@@ -10,18 +10,23 @@ double paddingTop = 30;
 double paddingRight = 15;
 double paddingBottom = 0;
 
+// Khai báo một StatefulWidget cho giao diện chỉnh sửa thông tin cá nhân
 class EditProfileView extends StatefulWidget {
+
+  // Định nghĩa lại phương thức createState()
   @override
   State<StatefulWidget> createState() {
     return _EditProfileState();
   }
 }
 
+// Khai báo State cho giao diện chỉnh sửa thông tin cá nhân
 class _EditProfileState extends State<EditProfileView> {
   String email = "";
   String name = "";
   String phone = "";
 
+  // Lấy thông tin người dùng từ server để hiển thị
   Future<void> fetchUser() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -30,11 +35,14 @@ class _EditProfileState extends State<EditProfileView> {
       phone = prefs.getString('phone')!;
     });
   }
+
+  // Định nghĩa lại hàm initState() - khởi gán giá trị ban đầu cho các biến
   @override
   void initState() {
     fetchUser();
   }
 
+  // Ghi đè phương thức build - tự định nghĩa lại phương thức build
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -146,6 +154,7 @@ class _EditProfileState extends State<EditProfileView> {
             Padding(
               padding: EdgeInsetsGeometry.fromLTRB(10, 50, 10, 50),
               child: ElevatedButton(
+                // Thực thi chỉnh sửa thông tin cá nhân
                 onPressed: () async {
                   final SharedPreferences prefs = await SharedPreferences.getInstance();
                   final response = await http.post(

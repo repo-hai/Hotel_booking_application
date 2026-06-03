@@ -8,22 +8,27 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
+// Widget cho trang đăng ký
 class RegisterView extends StatelessWidget {
   const RegisterView({super.key});
 
+  // Ghi đè phương thức build - tự định nghĩa lại phương thức build
   @override
   Widget build(BuildContext context) {
     return MaterialApp(home: const MyRegisterPage());
   }
 }
 
+// Định nghĩa một stateful widget cho trang đăng ký
 class MyRegisterPage extends StatefulWidget {
   const MyRegisterPage({super.key});
 
+  // Định nghĩa lại phương thức createState()
   @override
   State<MyRegisterPage> createState() => _MyRegisterPage();
 }
 
+// Khai báo State cho giao diện đăng ký
 class _MyRegisterPage extends State<MyRegisterPage> {
   final String registerState = "not register";
   bool passwordVisible = false;
@@ -34,6 +39,7 @@ class _MyRegisterPage extends State<MyRegisterPage> {
   String name = "";
   bool confirmPasswordVisible = false;
 
+  // Định nghĩa lại hàm initState() - khởi gán giá trị ban đầu cho các biến
   @override
   void initState() {
     super.initState();
@@ -46,10 +52,7 @@ class _MyRegisterPage extends State<MyRegisterPage> {
     name = "";
   }
 
-  void _onFaceBookLogin() {}
-
-  void _onGoogleLogin() {}
-
+  // Ghi đè phương thức build - tự định nghĩa lại phương thức build
   @override
   Widget build(BuildContext context) {
     return Material(
@@ -283,6 +286,7 @@ class _MyRegisterPage extends State<MyRegisterPage> {
                                   ),
                                 ),
                                 child: ElevatedButton(
+                                  // Thực thi chức năng đăng kí
                                   onPressed: () async {
                                     if (rewritePassword != password) {
                                       showDialog(
@@ -302,8 +306,7 @@ class _MyRegisterPage extends State<MyRegisterPage> {
                                         ),
                                       );
                                     } else {
-                                      final SharedPreferences prefs =
-                                          await SharedPreferences.getInstance();
+                                      final SharedPreferences prefs = await SharedPreferences.getInstance();
                                       prefs.setString('email', username);
                                       final response = await http.post(
                                         Uri.parse(
@@ -419,7 +422,7 @@ class _MyRegisterPage extends State<MyRegisterPage> {
                             spacing: 30,
                             children: [
                               ElevatedButton(
-                                onPressed: _onFaceBookLogin,
+                                onPressed: (){},
                                 style: ButtonStyle(
                                   fixedSize: WidgetStatePropertyAll<Size>(
                                     Size(120, 35),
@@ -435,7 +438,7 @@ class _MyRegisterPage extends State<MyRegisterPage> {
                                 ),
                               ),
                               ElevatedButton(
-                                onPressed: _onGoogleLogin,
+                                onPressed: (){},
                                 style: ButtonStyle(
                                   fixedSize: WidgetStatePropertyAll<Size>(
                                     Size(120, 35),

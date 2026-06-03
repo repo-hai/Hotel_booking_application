@@ -1,34 +1,54 @@
 const db = require('../../firebase');
 
+// Hàm tạo đơn đặt phòng mới và lưu lịch sử thanh toán
 module.exports.create_new_booking = async (req, res) => {
   try {
     const body = req.body;
-    const hotelId = body.hotelId;
-    const comment = body.comment;
-    const rating = body.rating;
-    const userId = body.userId;
+    const checkin = body.checkin;
+    const checkout = body.checkout;
+    const customerEmail = body.customerEmail;
+    const customerName = body.customerName;
+    const customerCountry = body.customerCountry;
+    const customerPhone = body.customerPhone;
+    const room = body.room;
+    const quantity = body.quantity;
     const time = Date.now();
+    const total = body.total;
 
-    const CommentRatingObject = {
-      hotelID: hotelId,
-      comment: comment,
-      rating: rating,
-      time: time.toString(),
-      userID: userId
+    const BookingObject = {
+      checkin: checkin,
+      checkout: checkout,
+      room: room,
+      quantity: quantity,
+      total: total,
+      bookedAt: time,
+      customerEmail: customerEmail,
+      customerCountry: customerCountry,
+      customerName: customerName,
+      customerPhone: customerPhone,
+      status: "Đã thanh toán"
     };
-    console.log(CommentRatingObject);
+    const myBookingCollection = db.collection('Bookings');
+    const countBooking = (await myBookingCollection.get().size) + 1;
+    const bookingID = "Booking_" + toString(countBooking);
 
-    const myCollection = db.collection('Comment-rating');
+    const PaymentObject = {
+      total: total,
+      createdAt: time,
+      method: "chuyển khoản ZaloPay",
+      status: "Thành công",
+      bookingID: bookingID,
+    };
 
-    const count = myCollection.get().size + 1;
+    const myPaymentCollection = db.collection('Payment');
+    const countPayment = (await myPaymentCollection.get()).size + 1;
 
-    await myCollection.doc("comment-rating-" + toString(count)).set(CommentRatingObject);
-    console.log("Ghi vào bảng CommentRating thành công");
+    await myBookingCollection.doc(bookingID).set(BookingObject);
+    await myPaymentCollection.doc("Payment_" + toString(countPayment)).set(PaymentObject);
 
-    return res.status(200).send({
-      message: 'create comment rating successfully',});
+    return res.status(200).send();
   } catch (error) {
-    console.log("Register - Đã có lỗi khi thực thi hàm");
+    console.log("Đã có lỗi khi thực thi hàm");
     return res.status(500).json(error.message).send();
   }
 };

@@ -1,52 +1,23 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:hotel_booking_app/models/chatUsersModel.dart';
 import 'package:hotel_booking_app/presentation/screens/chat_detail_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
+// Khai báo một StatefulWidget cho giao diện xem danh sách cuộc hội thoại
 class ListChatboxView extends StatefulWidget {
+
+  // Định nghĩa lại phương thức createState()
   @override
   _ChatPageState createState() => _ChatPageState();
 }
 
+// Khai báo State cho giao diện xem danh sách cuộc hội thoại
 class _ChatPageState extends State<ListChatboxView> {
-  List<ChatUsers> chatUsers = [
-    // ChatUsers(name: "Jane Russel",
-    //     messageText: "Awesome Setup",
-    //     imageURL: "https://m.media-amazon.com/images/I/71-OTwKLziL._AC_SL1500_.jpg",
-    //     time: "Now"),
-    // ChatUsers(name: "Glady's Murphy",
-    //     messageText: "That's Great",
-    //     imageURL: "https://m.media-amazon.com/images/I/71-OTwKLziL._AC_SL1500_.jpg",
-    //     time: "Yesterday"),
-    // ChatUsers(name: "Jorge Henry",
-    //     messageText: "Hey where are you?",
-    //     imageURL: "https://m.media-amazon.com/images/I/71-OTwKLziL._AC_SL1500_.jpg",
-    //     time: "31 Mar"),
-    // ChatUsers(name: "Philip Fox",
-    //     messageText: "Busy! Call me in 20 mins",
-    //     imageURL: "https://m.media-amazon.com/images/I/71-OTwKLziL._AC_SL1500_.jpg",
-    //     time: "28 Mar"),
-    // ChatUsers(name: "Debra Hawkins",
-    //     messageText: "Thankyou, It's awesome",
-    //     imageURL: "https://m.media-amazon.com/images/I/71-OTwKLziL._AC_SL1500_.jpg",
-    //     time: "23 Mar"),
-    // ChatUsers(name: "Jacob Pena",
-    //     messageText: "will update you in evening",
-    //     imageURL: "https://m.media-amazon.com/images/I/71-OTwKLziL._AC_SL1500_.jpg",
-    //     time: "17 Mar"),
-    // ChatUsers(name: "Andrey Jones",
-    //     messageText: "Can you please share the file?",
-    //     imageURL: "https://m.media-amazon.com/images/I/71-OTwKLziL._AC_SL1500_.jpg",
-    //     time: "24 Feb"),
-    // ChatUsers(name: "John Wick",
-    //     messageText: "How are you?",
-    //     imageURL: "https://m.media-amazon.com/images/I/71-OTwKLziL._AC_SL1500_.jpg",
-    //     time: "18 Feb"),
-  ];
+  List<ChatUsers> chatUsers = [];
 
+  // Lấy danh sách cuộc hội thoại từ server để hiển thị
   Future<void> fetchUserChatbox() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final userId = prefs.getString('userId')!;
@@ -78,6 +49,7 @@ class _ChatPageState extends State<ListChatboxView> {
     }
   }
 
+  // Định nghĩa lại hàm activate() - lấy lại dữ liệu từ server khi giao diện được kích hoạt
   @override
   void activate() {
     // TODO: implement activate
@@ -86,48 +58,16 @@ class _ChatPageState extends State<ListChatboxView> {
     });
   }
 
+  // Định nghĩa lại hàm initState() - khởi gán giá trị ban đầu cho các biến
   @override
   void initState() {
     super.initState();
-    // chatUsers = [
-    //   ChatUsers(name: "Jane Russel",
-    //       messageText: "Awesome Setup",
-    //       imageURL: "https://m.media-amazon.com/images/I/71-OTwKLziL._AC_SL1500_.jpg",
-    //       time: "Now"),
-    //   ChatUsers(name: "Glady's Murphy",
-    //       messageText: "That's Great",
-    //       imageURL: "https://m.media-amazon.com/images/I/71-OTwKLziL._AC_SL1500_.jpg",
-    //       time: "Yesterday"),
-    //   ChatUsers(name: "Jorge Henry",
-    //       messageText: "Hey where are you?",
-    //       imageURL: "https://m.media-amazon.com/images/I/71-OTwKLziL._AC_SL1500_.jpg",
-    //       time: "31 Mar"),
-    //   ChatUsers(name: "Philip Fox",
-    //       messageText: "Busy! Call me in 20 mins",
-    //       imageURL: "https://m.media-amazon.com/images/I/71-OTwKLziL._AC_SL1500_.jpg",
-    //       time: "28 Mar"),
-    //   ChatUsers(name: "Debra Hawkins",
-    //       messageText: "Thankyou, It's awesome",
-    //       imageURL: "https://m.media-amazon.com/images/I/71-OTwKLziL._AC_SL1500_.jpg",
-    //       time: "23 Mar"),
-    //   ChatUsers(name: "Jacob Pena",
-    //       messageText: "will update you in evening",
-    //       imageURL: "https://m.media-amazon.com/images/I/71-OTwKLziL._AC_SL1500_.jpg",
-    //       time: "17 Mar"),
-    //   ChatUsers(name: "Andrey Jones",
-    //       messageText: "Can you please share the file?",
-    //       imageURL: "https://m.media-amazon.com/images/I/71-OTwKLziL._AC_SL1500_.jpg",
-    //       time: "24 Feb"),
-    //   ChatUsers(name: "John Wick",
-    //       messageText: "How are you?",
-    //       imageURL: "https://m.media-amazon.com/images/I/71-OTwKLziL._AC_SL1500_.jpg",
-    //       time: "18 Feb"),
-    // ];
     setState(() {
       fetchUserChatbox();
     });
   }
 
+  // Ghi đè phương thức build - tự định nghĩa lại phương thức build
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -192,15 +132,15 @@ class _ChatPageState extends State<ListChatboxView> {
           NavigationDestination(
             selectedIcon: Icon(Icons.home),
             icon: Icon(Icons.home_outlined),
-            label: 'Home',
+            label: 'Trang chủ',
           ),
           NavigationDestination(
             icon: Badge(child: Icon(Icons.notifications_sharp)),
-            label: 'Notifications',
+            label: 'Thông báo',
           ),
           NavigationDestination(
             icon: Badge(label: Text('2'), child: Icon(Icons.messenger_sharp)),
-            label: 'Messages',
+            label: 'Tin nhắn',
           ),
         ],
       ),
@@ -208,6 +148,8 @@ class _ChatPageState extends State<ListChatboxView> {
   }
 }
 
+
+// Định nghĩa một đối tượng hội thoại để hiển thị - mỗi đối tượng là một cuộc hội thoại
 class ConversationList extends StatefulWidget{
   String name;
   String messageText;
@@ -217,15 +159,19 @@ class ConversationList extends StatefulWidget{
   bool isMessageRead;
   String chatboxId;
   String collaborativeID;
+
+  // Định nghĩa phương thức khởi tạo
   ConversationList({ required this.collaborativeID, required this.collaborative_name, required this.collaborative_url, required this.chatboxId, required this.name,required this.messageText,required this.time,required this.isMessageRead});
 
+  // Định nghĩa lại phương thức createState()
   @override
   _ConversationListState createState() => _ConversationListState();
 }
 
+// Định nghĩa state cho đối tượng hội thoại
 class _ConversationListState extends State<ConversationList> {
 
-
+  // Ghi đè phương thức build - tự định nghĩa lại phương thức build
   @override
   Widget build(BuildContext context) {
     return GestureDetector(

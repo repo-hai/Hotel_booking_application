@@ -5,20 +5,18 @@ import 'package:hotel_booking_app/models/message.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
+// Khai báo một StatefulWidget cho giao diện xem trang tin nhắn chi tiết
 class ChatDetailPage extends StatefulWidget{
+
+  // Định nghĩa lại phương thức createState()
   @override
   _ChatDetailPageState createState() => _ChatDetailPageState();
 }
 
+// Khai báo State cho giao diện xem tin nhắn chi tiết
 class _ChatDetailPageState extends State<ChatDetailPage> {
   TextEditingController textController = TextEditingController();
-  List<Message> messages = [
-    // Message("Hello, Will", "receiver"),
-    // Message("How have you been?", "receiver"),
-    // Message("Hey Kriss, I am doing fine dude. wbu?", "sender"),
-    // Message("ehhhh, doing OK.", "receiver"),
-    // Message("Is there any thing wrong?", "sender"),
-  ];
+  List<Message> messages = [];
   String collaborative_name = "";
   String collaborative_url = "";
   String host_id = "";
@@ -26,6 +24,7 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
   String chatboxId="";
   String collaborativeID="";
 
+  // Lấy dữ liệu tin nhắn từ server để hiển thị
   Future<void> fetchUserChatbox() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     collaborative_name = prefs.getString('collaborative_name')!;
@@ -51,22 +50,17 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
     }
   }
 
+  // Định nghĩa lại hàm initState() - khởi gán giá trị ban đầu cho các biến
   @override
   void initState() {
     super.initState();
-    messages = [
-      // Message("Hello, Will", "receiver"),
-      // Message("How have you been?", "receiver"),
-      // Message("Hey Kriss, I am doing fine dude. wbu?", "sender"),
-      // Message("ehhhh, doing OK.", "receiver"),
-      // Message("Is there any thing wrong?", "sender"),
-    ];
+    messages = [];
     setState(() {
       fetchUserChatbox();
     });
-
   }
 
+  // Ghi đè phương thức build - tự định nghĩa lại phương thức build
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -165,6 +159,7 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
                     Padding(
                       padding: EdgeInsetsGeometry.fromLTRB(0, 0, 10, 0),
                       child: FloatingActionButton(
+                        // Thực thi gửi tin nhắn mới
                         onPressed: () async {
                           final response = await http.post(
                             Uri.parse('http://localhost:3000/chatbox-controller/push-up-new-message'),

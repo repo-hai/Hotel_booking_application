@@ -1,8 +1,6 @@
 const db = require('../../firebase');
 
-// cần lấy ra tất cả các đánh giá ứng với khách sạn được chọn
-// đầu tiên cần lấy được tất cả booking với hotel id là khách sạn được chọn
-// sau đó duyệt từng phần tử trong danh sách booking và lấy ra tất cả các đánh giá ứng với booking id
+// Hàm lấy thống kê đánh giá khách sạn
 module.exports.getAvgRating = async (req, res) => {
   try {
     const params = req.params;
@@ -64,6 +62,7 @@ module.exports.getAvgRating = async (req, res) => {
   }
 };
 
+// Hàm lấy danh sách các bình luận, đánh giá của một khách sạn
 module.exports.get_list_comment_rating = async (req, res) => {
   try {
     const params = await req.params;
@@ -104,6 +103,7 @@ module.exports.get_list_comment_rating = async (req, res) => {
   }
 };
 
+// Hàm tạo bình luận, đánh giá mới
 module.exports.create_new_comment_rating = async (req, res) => {
   try {
     const body = req.body;
